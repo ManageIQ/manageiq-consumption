@@ -15,11 +15,12 @@ See the section on pluggable providers in the [ManageIQ Developer Setup](http://
 
 # Configuration
 
+1. `cd manageiq`
 1. `mkdir plugins`
 1. `git clone git@github.com:miq-consumption/manageiq-consumption.git plugins/manageiq-consumption`
-1. `echo "gem 'manageiq-consumption', :path => File.expand_path('plugins/manageiq-consumption', __dir__)
-" >> bundler.d/miq-consumption.rb`
-1. `bin/update` 
+1. `echo "gem 'manageiq-consumption', :path => File.expand_path('../plugins/manageiq-consumption', __dir__)
+" >> bundler.d/manageiq-consumption.rb`
+1. `bin/update`
 
 
 
