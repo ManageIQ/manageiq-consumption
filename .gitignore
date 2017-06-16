@@ -2,11 +2,26 @@
 /.yardoc
 /Gemfile.lock
 /_yardoc/
-/coverage/
 /doc/
 /pkg/
 /spec/reports/
+
+
+# Ignore all logfiles and tempfiles.
+/log/*
 /tmp/
+!/log/.keep
+!/tmp/.keep
 
 # rspec failure tracking
 .rspec_status
+
+# Ignore Byebug command history file.
+.byebug_history
+
+# Ignore coverage files
+coverage/
+
+# Ignore other configuration for IDE
+/.vscode/
+/.idea/

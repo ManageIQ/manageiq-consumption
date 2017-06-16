@@ -1,4 +1,5 @@
 require 'rails/engine'
+require 'money-rails'
 
 module ManageIQ
   module Consumption
