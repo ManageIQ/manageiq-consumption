@@ -1,5 +1,5 @@
-require 'rails_helper'
-
+require 'spec_helper'
+require 'money-rails/test_helpers'
 
 
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do

@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/miq-consumption/manageiq-consumption"
   spec.license       = "Apache-2.0"
 
-  spec.files = Dir["{app,lib}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
+  spec.files = Dir["{app,lib,spec}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
 
 
   spec.add_dependency "money-rails", "~>1"
