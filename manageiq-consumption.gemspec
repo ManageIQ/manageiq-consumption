@@ -1,6 +1,8 @@
 # coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+
+$:.push File.expand_path("../lib", __FILE__)
+
+# Maintain your gem's version:
 require 'manageiq/consumption/version'
 
 Gem::Specification.new do |spec|
@@ -13,14 +15,12 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/miq-consumption/manageiq-consumption"
   spec.license       = "Apache-2.0"
 
-  spec.files = Dir["{app,lib}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
+  spec.files = Dir["{app,lib,spec}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
 
-  spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler"
-  spec.add_development_dependency "rake"
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "minitest"
+  spec.add_dependency "money-rails", "~>1"
+
   spec.add_development_dependency "simplecov"
+  spec.add_development_dependency "factory_girl_rails"
   spec.add_development_dependency "codeclimate-test-reporter", "~> 1.0.0"
 end
