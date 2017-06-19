@@ -9,8 +9,13 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     expect(charge).to be_valid
   end
 
-  it 'monetized cost' do
+  it 'monetizes cost' do
     expect(ManageIQ::Consumption::ShowbackCharge).to monetize(:cost)
     expect(charge).to monetize(:cost)
   end
+
+  pending 'calculates cost'
+  pending 'return costs'
+
+
 end
