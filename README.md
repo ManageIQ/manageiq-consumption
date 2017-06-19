@@ -2,6 +2,7 @@
 [![Gem Version](https://badge.fury.io/rb/manageiq-consumption.svg)](https://badge.fury.io/rb/manageiq-consumption)
 [![Build Status](https://travis-ci.org/miq-consumption/manageiq-consumption.svg)](https://travis-ci.org/miq-consumption/manageiq-consumption)
 [![Code Climate](https://codeclimate.com/github/miq-consumption/manageiq-consumption.svg)](https://codeclimate.com/github/miq-consumption/manageiq-consumption)
+[![Coverage Status](https://coveralls.io/repos/github/miq-consumption/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/miq-consumption/manageiq-consumption?branch=master)
 [![Dependency Status](https://gemnasium.com/badges/github.com/miq-consumption/manageiq-consumption.svg)](https://gemnasium.com/github.com/miq-consumption/manageiq-consumption)
 [![security](https://hakiri.io/github/miq-consumption/manageiq-consumption/master.svg)](https://hakiri.io/github/miq-consumption/manageiq-consumption/master)
 [![Gitter](https://badges.gitter.im/miq-consumption/manageiq-consumption.svg)](https://gitter.im/miq-consumption/manageiq-consumption?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
