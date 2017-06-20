@@ -1,7 +1,6 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
   let(:charge) { FactoryGirl.build(:showback_charge) }
 
@@ -16,6 +15,4 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
 
   pending 'calculates cost'
   pending 'return costs'
-
-
 end
