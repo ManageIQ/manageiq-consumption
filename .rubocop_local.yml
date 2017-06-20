@@ -1,0 +1,13 @@
+#
+# Special Exclusions
+#
+AllCops:
+  TargetRubyVersion: 2.2
+  Exclude:
+    - db/fixtures/*.rb
+Metrics/LineLength:
+  Exclude:
+    - Gemfile
+Style/ExtraSpacing:
+  Exclude:
+    - Gemfile
