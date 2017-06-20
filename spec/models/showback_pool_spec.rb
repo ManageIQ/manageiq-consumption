@@ -102,13 +102,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   end
 
   describe '#state:open' do
+=begin
     it 'new events can be associated to the pool' do
       pool.save
       event.save
       expect { pool.showback_events << event }.to change(pool.showback_events, :count).by(1)
       expect(pool.showback_events.last).to eq(event)
     end
+=end
 
+=begin
     it 'events can be associated to costs' do
       pool.save
       event.save
@@ -117,6 +120,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(charge.showback_event).to eq(event)
       expect { charge.cost = Money.new(3) }.to change(charge, :cost).from(0).to(Money.new(3))
     end
+=end
 
     it 'monetized cost' do
       expect(ManageIQ::Consumption::ShowbackCharge).to monetize(:cost)

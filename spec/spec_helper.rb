@@ -3,9 +3,5 @@ if ENV['CI']
   SimpleCov.start
 end
 
-require 'manageiq-consumption'
-
-
-
-Dir[ManageIQ::Consumption::Engine.root.join("spec/support/**/*.rb")].each { |f| require f }
+FactoryGirl.definition_file_paths << ManageIQ::Consumption::Engine.root.join('spec', 'factories')
 
