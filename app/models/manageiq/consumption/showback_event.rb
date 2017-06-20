@@ -2,7 +2,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   belongs_to :resource, :polymorphic => true
 
   has_many :showback_charges, :dependent => :destroy
-  has_many :showback_buckets, :through   => :showback_charges
+  has_many :showback_pools, :through   => :showback_charges
 
   validates :start_time, :end_time, :resource, :presence => true
   validate :start_time_before_end_time

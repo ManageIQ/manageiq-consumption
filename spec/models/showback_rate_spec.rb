@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackRate do
-=begin
   context "validations" do
     let(:showback_rate) { FactoryGirl.build(:showback_rate) }
 
@@ -11,13 +10,13 @@ describe ManageIQ::Consumption::ShowbackRate do
     end
 
     it "is not valid with a nil fixed_rate" do
-      showback_rate.fixed_rate_cents = nil
+      showback_rate.fixed_rate_subunits = nil
       showback_rate.valid?
       expect(showback_rate.errors.details[:fixed_rate]).to include(:error => :not_a_number, :value => '')
     end
 
     it "is not valid with a nil variable_rate" do
-      showback_rate.variable_rate_cents = nil
+      showback_rate.variable_rate_subunits = nil
       showback_rate.valid?
       expect(showback_rate.errors.details[:variable_rate]).to include(:error => :not_a_number, :value => '')
     end
@@ -53,13 +52,12 @@ describe ManageIQ::Consumption::ShowbackRate do
     end
     it "fixed_rate expected to be Money" do
       expect(FactoryGirl.create(:showback_rate, :fixed_rate => Money.new("2.5634525342534"))).to be_valid
-      expect(ShowbackRate).to monetize(:fixed_rate)
+      expect(described_class).to monetize(:fixed_rate)
     end
 
     it "variable_rate expected to be Money" do
       expect(FactoryGirl.create(:showback_rate, :variable_rate => Money.new("67.4525342534"))).to be_valid
-      expect(ShowbackRate).to monetize(:variable_rate)
+      expect(described_class).to monetize(:variable_rate)
     end
   end
-=end
 end
