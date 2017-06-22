@@ -1,11 +1,12 @@
 class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
+  self.table_name = "showback_price_plans"
+
   has_many :showback_rates, :dependent => :destroy, :inverse_of => :showback_price_plan
   belongs_to :resource, :polymorphic => true
   validates :name, :presence => true
   validates :description, :presence => true
   validates :resource, :presence => true
 
-  self.table_name = "showback_price_plans"
   #
   # Seeding one global price plan in the system that will be used as a fallback
   #
