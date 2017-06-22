@@ -5,7 +5,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   let(:pool) { FactoryGirl.build(:showback_pool) }
   let(:event) { FactoryGirl.build(:showback_event) }
 
-=begin
   describe '#basic lifecycle' do
     it 'has a valid factory' do
       pool.valid?
@@ -34,7 +33,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       FactoryGirl.create(:showback_charge, :showback_pool => pool)
       FactoryGirl.create(:showback_charge, :showback_pool => pool)
       expect(pool.showback_charges.count).to be(2)
-      expect { pool.destroy }.to change(ShowbackCharge, :count).from(2).to(0)
+      expect { pool.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(0)
     end
 
     it 'deletes costs associated when deleting the event' do
@@ -42,7 +41,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       FactoryGirl.create(:showback_charge, :showback_pool => pool)
       expect(pool.showback_charges.count).to be(2)
       event = pool.showback_charges.first.showback_event
-      expect { event.destroy }.to change(ShowbackCharge, :count).from(2).to(1)
+      expect { event.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(1)
     end
 
     it 'it can  be on states open, processing, close' do
@@ -69,7 +68,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       it 'a new pool is created automatically when transitioning from open to processing if not exists' do
         @pool_lifecycle.state = "PROCESSING"
         @pool_lifecycle.save
-        expect(ShowbackPool.count).to eq(1)
+        expect(ManageIQ::Consumption::ShowbackPool.count).to eq(1)
       end
 
       it 'it can not transition from open to closed' do
@@ -120,7 +119,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
 
     it 'monetized cost' do
-      expect(ShowbackCharge).to monetize(:cost)
+      expect(ManageIQ::Consumption::ShowbackCharge).to monetize(:cost)
     end
 
     pending 'charges can be updated for an event'
@@ -132,7 +131,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     pending 'sum of charges can be calculated for the pool'
     pending 'sum of charges can be calculated for an event type'
   end
-=end
 
   describe '#state:processing' do
     pending 'new events are associated to a new or open pool'

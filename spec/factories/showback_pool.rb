@@ -8,11 +8,11 @@ FactoryGirl.define do
     association :resource, :factory => :miq_enterprise, :strategy => :build_stubbed
   end
 
-  factory :showback_bucket_processing, :parent => :showback_bucket do
+  factory :showback_pool_processing, :parent => :showback_pool do
     state "PROCESSING"
   end
 
-  factory :showback_bucket_close, :parent => :showback_bucket do
+  factory :showback_pool_close, :parent => :showback_pool do
     state "CLOSE"
   end
 end

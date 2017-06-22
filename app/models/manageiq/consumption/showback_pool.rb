@@ -1,9 +1,12 @@
 class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
+  self.table_name = "showback_pools"
+
   belongs_to :resource, :polymorphic => true
   before_save :check_pool_state, if: :state_changed?
+  # monetize :accumulated_cost_subunits
 
-  has_many :showback_charges, :dependent => :destroy, :inverse_of => :ShowbackPool
-  has_many :showback_events, :through => :showback_charges, :inverse_of => :showback_buckets
+  has_many :showback_charges, :dependent => :destroy, :inverse_of => :showback_pool
+  has_many :showback_events, :through => :showback_charges, :inverse_of => :showback_pools
 
   validates :name,                  :presence => true
   validates :description,           :presence => true
@@ -13,8 +16,6 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
 
   #End_time should be after start_time.
   validate  :start_time_before_end_time
-
-  self.table_name = "showback_pools"
 
   def start_time_before_end_time
     errors.add(:start_time, _("Start time should be before end time")) unless end_time.to_i > start_time.to_i
@@ -32,13 +33,13 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
           s_time = (self.start_time + 1.month).beginning_of_month
         end
         e_time = s_time.end_of_month
-        ShowbackPool.create(:name        => self.name,
+        ManageIQ::Consumption::ShowbackPool.create(:name        => self.name,
                             :description => self.description,
                             :resource    => self.resource,
                             :start_time  => s_time,
                             :end_time    => e_time,
                             :state       => "OPEN"
-        ) unless ShowbackPool.exists?(:resource => self.resource, :start_time  => s_time)
+        ) unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => self.resource, :start_time  => s_time)
       when "CLOSE"      then  raise _("Bucket can't change its state when it's CLOSE")
     end
   end

@@ -1,12 +1,13 @@
 class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   self.table_name = "showback_charges"
   monetize :cost_subunits
+  default_value_for :cost, 0
 
- belongs_to :showback_event
- belongs_to :showback_pool
+  belongs_to :showback_event
+  belongs_to :showback_pool
 
- validates :showback_pool, :presence => true, :allow_nil => false
- validates :showback_event, :presence => true, :allow_nil => false
+  validates :showback_pool, :presence => true, :allow_nil => false
+  validates :showback_event, :presence => true, :allow_nil => false
 
   def clean_costs
     self.cost = nil

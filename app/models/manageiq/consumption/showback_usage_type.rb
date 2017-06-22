@@ -1,9 +1,9 @@
 class ManageIQ::Consumption::ShowbackUsageType < ApplicationRecord
+  self.table_name = "showback_usage_types"
+
   validates :description, :category, :measure, :dimensions, :presence => true
 
   serialize :dimensions, Array
-
-  self.table_name = "showback_usage_types"
 
   def self.seed
     seed_data.each do |usage_type_attributtes|

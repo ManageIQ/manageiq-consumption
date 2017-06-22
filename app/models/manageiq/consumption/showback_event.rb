@@ -1,8 +1,9 @@
 class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
+  self.table_name = "showback_events"
   belongs_to :resource, :polymorphic => true
 
   has_many :showback_charges, :dependent => :destroy
-  has_many :showback_buckets, :through   => :showback_charges
+  has_many :showback_pools, :through     => :showback_charges
 
   validates :start_time, :end_time, :resource, :presence => true
   validate :start_time_before_end_time
@@ -11,8 +12,6 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   serialize :data, JSON # Implement data column as a JSON
 
   after_create :generate_data
-
-  self.table_name = "showback_events"
 
   def start_time_before_end_time
     errors.add(:start_time, "Start time should be before end time") unless end_time.to_i >= start_time.to_i
