@@ -1,7 +1,7 @@
 FactoryGirl.define do
-  factory :showback_bucket, :class => ManageIQ::Consumption::ShowbackBucket do
-    sequence(:name)           { |n| "factory_bucket_#{seq_padded_for_sorting(n)}" }
-    sequence(:description)    { |n| "bucket_description_#{seq_padded_for_sorting(n)}" }
+  factory :showback_pool, :class => ManageIQ::Consumption::ShowbackPool do
+    sequence(:name)           { |n| "factory_pool_#{seq_padded_for_sorting(n)}" }
+    sequence(:description)    { |n| "pool_description_#{seq_padded_for_sorting(n)}" }
     start_time                4.hours.ago
     end_time                  1.hour.ago
     state                     "OPEN"
