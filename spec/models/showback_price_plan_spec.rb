@@ -28,7 +28,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
     expect(plan.errors.details[:resource]). to include(:error => :blank)
   end
 
-=begin
   it 'is possible to add new rates to the price plan' do
     plan.save
     rate = FactoryGirl.build(:showback_rate, :showback_price_plan => plan)
@@ -39,10 +38,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
     FactoryGirl.create(:showback_rate, :showback_price_plan => plan)
     FactoryGirl.create(:showback_rate, :showback_price_plan => plan)
     expect(plan.showback_rates.count).to be(2)
-    expect { plan.destroy }.to change(ShowbackRate, :count).from(2).to(0)
+    expect { plan.destroy }.to change(ManageIQ::Consumption::ShowbackRate, :count).from(2).to(0)
   end
-=end
-
 
   context ".seed" do
     before(:all) do

@@ -9,7 +9,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
   end
 
   it 'monetizes cost' do
-    expect(ManageIQ::Consumption::ShowbackCharge).to monetize(:cost)
+    expect(described_class).to monetize(:cost)
     expect(charge).to monetize(:cost)
   end
 
