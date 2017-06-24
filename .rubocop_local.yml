@@ -2,7 +2,7 @@
 # Special Exclusions
 #
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.3
   Exclude:
     - db/fixtures/*.rb
 Metrics/LineLength:
