@@ -13,9 +13,10 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   after_create :generate_data
 
   extend ActiveSupport::Concern
-  
+
   include_concern 'CPU'
   include_concern 'MEM'
+
 
   self.table_name = "showback_events"
 

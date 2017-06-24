@@ -46,7 +46,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   end
 
   def add_event(event)
-    if event.kind_of? ManageIQ::Consumption::ShowbackPool
+    if event.kind_of? ManageIQ::Consumption::ShowbackEvent
       # verify that the event is not already there
       if showback_events.include?(event)
         errors.add(:showback_events, "duplicate")
@@ -55,6 +55,8 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
                                       :showback_pool => self)
         charge.save
       end
+    else
+      errors.add(:showback_events, "Error Type #{event.type} is not ManageIQ::Consumption::ShowbackEvent")
     end
   end
 
@@ -62,9 +64,13 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
 
   def remove_event(event)
     if event.kind_of? ManageIQ::Consumption::ShowbackEvent
-      showback_events.delete event
+      if showback_events.include?(event)
+        showback_events.delete event
+      else
+        errors.add(:showback_events, "not found")
+      end
     else
-      errors.add(:showback_events, "not found")
+      errors.add(:showback_events, "Error Type #{event.type} is not ManageIQ::Consumption::ShowbackEvent")
     end
   end
 
