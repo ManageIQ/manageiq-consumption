@@ -294,7 +294,6 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(event.get_parent(vm, "H3dt")).to be_nil
       end
 
-=begin
       it "Assign resource to pool" do
         vm = FactoryGirl.create(:vm)
         pool = FactoryGirl.create(:showback_pool, :resource => vm)
@@ -302,6 +301,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
                                    :start_time => DateTime.now.utc.beginning_of_month,
                                    :end_time => DateTime.now.utc.beginning_of_month + 2.days,
                                    :resource => vm)
+
         expect(pool.showback_events.count).to eq(0)
         event.assign_resource
         expect(pool.showback_events.count).to eq(1)
@@ -341,7 +341,6 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(pool_ent.showback_events.include?(event)).to be_truthy
         expect(pool_cat.showback_events.include?(event)).to be_truthy
       end
-=end
     end
 
     context 'collect tags' do

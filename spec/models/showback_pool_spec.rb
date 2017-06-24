@@ -101,6 +101,48 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     pending 'it can not exists 2 pools opened from one resource'
   end
 
+  describe "Methods events" do
+    it 'Add event to a Pool' do
+      count = pool.showback_events.count
+      pool.add_event(event)
+      expect(pool.showback_events.count).to eq(count + 1)
+      expect(pool.showback_events).to include(event)
+    end
+
+    it 'Throw error in Add event to a Pool if duplicate' do
+      pool.add_event(event)
+      pool.add_event(event)
+      expect(pool.errors.details[:showback_events]). to include(:error => "duplicate")
+    end
+
+    it 'Throw error in Add event is not type' do
+      obj = FactoryGirl.create(:vm)
+      pool.add_event(obj)
+      expect(pool.errors.details[:showback_events]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::ShowbackEvent")
+    end
+
+    it 'Remove event to a Pool' do
+      pool.add_event(event)
+      count = pool.showback_events.count
+      pool.remove_event(event)
+      expect(pool.showback_events.count).to eq(count - 1)
+      expect(pool.showback_events).not_to include(event)
+    end
+
+    it 'Throw error in Remove event to a Pool if not found' do
+      pool.add_event(event)
+      pool.remove_event(event)
+      pool.remove_event(event)
+      expect(pool.errors.details[:showback_events]). to include(:error => "not found")
+    end
+
+    it 'Throw error in Remove event is not type' do
+      obj = FactoryGirl.create(:vm)
+      pool.remove_event(obj)
+      expect(pool.errors.details[:showback_events]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::ShowbackEvent")
+    end
+  end
+
   describe '#state:open' do
     it 'new events can be associated to the pool' do
       pool.save

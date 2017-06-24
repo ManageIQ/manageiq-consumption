@@ -65,28 +65,27 @@ describe ManageIQ::Consumption::ShowbackRate do
     let(:showback_rate)     { FactoryGirl.build(:showback_rate) }
     let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month) }
 
-=begin
     context 'empty #context' do
       it 'should charge an event by occurrence' do
-        showback_rate.calculation = 'occurrence'
-        showback_rate.fixed_rate_subunits = Money.new(11)
-        showback_rate.variable_rate_subunits = Money.new(7)
+        showback_rate.calculation   = 'occurrence'
+        showback_rate.fixed_rate    = Money.new(11)
+        showback_rate.variable_rate = Money.new(7)
         expect(showback_rate.rate(3, showback_event_fm)[0]).to eq(Money.new(11))
         expect(showback_rate.rate(3, showback_event_fm)[1]).to eq(Money.new(7))
       end
 
       it 'should charge an event by duration' do
         showback_rate.calculation = 'duration'
-        showback_rate.fixed_rate_subunits = Money.new(11)
-        showback_rate.variable_rate_subunits = Money.new(7)
+        showback_rate.fixed_rate = Money.new(11)
+        showback_rate.variable_rate = Money.new(7)
         expect(showback_rate.rate(3, showback_event_fm)[0]).to eq(Money.new(11))
         expect(showback_rate.rate(3, showback_event_fm)[1]).to eq(Money.new(21))
       end
 
       it 'should charge an event by quantity' do
         showback_rate.calculation = 'quantity'
-        showback_rate.fixed_rate_subunits = Money.new(11)
-        showback_rate.variable_rate_subunits = Money.new(7)
+        showback_rate.fixed_rate = Money.new(11)
+        showback_rate.variable_rate = Money.new(7)
         expect(showback_rate.rate(3, showback_event_fm)[0]).to eq(Money.new(11))
         expect(showback_rate.rate(3, showback_event_fm)[1]).to eq(Money.new(21))
       end
@@ -97,40 +96,38 @@ describe ManageIQ::Consumption::ShowbackRate do
       pending 'it should charge an event by duration'
       pending 'it should charge an event by quantity'
     end
-=end
   end
 
   describe 'event lasts the first 15 days' do
-    let(:showback_rate)     { FactoryGirl.build(:consumption_showback_rate) }
-    let(:showback_event_hm) { FactoryGirl.build(:consumption_showback_event, :first_half_month) }
+    let(:showback_rate)     { FactoryGirl.build(:showback_rate) }
+    let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month) }
     let(:proration)         { showback_event_hm.time_span / showback_event_hm.month_duration }
-=begin
+
     context 'empty #context' do
       it 'should charge an event by occurrence' do
-        showback_rate.calculation = 'occurrence'
-        showback_rate.fixed_rate_subunits = Money.new(11)
-        showback_rate.variable_rate_subunits = Money.new(7)
+        showback_rate.calculation   = 'occurrence'
+        showback_rate.fixed_rate    = Money.new(11)
+        showback_rate.variable_rate = Money.new(7)
         expect(showback_rate.rate(3, showback_event_hm)[0]).to eq(Money.new(11))
         expect(showback_rate.rate(3, showback_event_hm)[1]).to eq(Money.new(7 * proration))
       end
 
       it 'should charge an event by duration' do
         showback_rate.calculation = 'duration'
-        showback_rate.fixed_rate_subunits = Money.new(11)
-        showback_rate.variable_rate_subunits = Money.new(7)
+        showback_rate.fixed_rate = Money.new(11)
+        showback_rate.variable_rate = Money.new(7)
         expect(showback_rate.rate(3, showback_event_hm)[0]).to eq(Money.new(11 * proration))
         expect(showback_rate.rate(3, showback_event_hm)[1]).to eq(Money.new(21 * proration))
       end
 
       it 'should charge an event by quantity' do
         showback_rate.calculation = 'quantity'
-        showback_rate.fixed_rate_subunits = Money.new(11)
-        showback_rate.variable_rate_subunits = Money.new(7)
+        showback_rate.fixed_rate = Money.new(11)
+        showback_rate.variable_rate = Money.new(7)
         expect(showback_rate.rate(3, showback_event_hm)[0]).to eq(Money.new(11 * proration))
         expect(showback_rate.rate(3, showback_event_hm)[1]).to eq(Money.new(21))
       end
     end
-=end
 
     context 'complex #context' do
       pending 'it should charge an event by occurrence'
