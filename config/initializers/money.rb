@@ -28,7 +28,7 @@ MoneyRails.configure do |config|
   config.amount_column = {  prefix: '',              # column name prefix
                             postfix: '_subunits',    # column name  postfix
                             column_name: nil,        # full column name (overrides prefix, postfix and accessor name)
-                            type: :bigint,           # column type
+                            type: :integer,           # column type
                             present: true,           # column will be created
                             null: false,             # other options will be treated as column options
                             default: 0
