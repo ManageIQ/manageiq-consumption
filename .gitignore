@@ -5,6 +5,7 @@
 /doc/
 /pkg/
 /spec/reports/
+/spec/manageiq/
 
 
 # Ignore all logfiles and tempfiles.
@@ -25,3 +26,4 @@ coverage/
 # Ignore other configuration for IDE
 /.vscode/
 /.idea/
+/.rubocop-https---raw-githubusercontent-com-ManageIQ-guides-master--rubocop-base-yml
