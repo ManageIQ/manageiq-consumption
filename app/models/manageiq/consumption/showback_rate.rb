@@ -1,17 +1,18 @@
 class ManageIQ::Consumption::ShowbackRate < ApplicationRecord
+  self.table_name = 'showback_rates'
+  default_value_for :screener, "{}"
   belongs_to :showback_price_plan, :inverse_of => :showback_rates
 
-  monetize :fixed_rate_subunits
-  monetize :variable_rate_subunits
+  monetize :fixed_rate_subunits,    :with_model_currency => :currency
+  monetize :variable_rate_subunits, :with_model_currency => :currency
 
   validates :fixed_rate_subunits,    :allow_nil => true, :default => nil
   validates :variable_rate_subunits, :allow_nil => true, :default => nil
-  validates :calculation,:presence => true
-  validates :category,   :presence => true
-  validates :dimension,  :presence => true
-  validates :screener,   :presence => true, :allow_blank => true
-
-  self.table_name = "showback_rates"
+  validates :calculation, :presence => true, :inclusion => { :in => %w(occurrence duration quantity) }
+  validates :category,    :presence => true
+  validates :dimension,   :presence => true
+  validates :screener,    :presence => true, :allow_blank => true
+  # validates :screener, :is_json
 
   def name
     "#{category}:#{dimension}"

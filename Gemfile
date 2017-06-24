@@ -11,3 +11,8 @@ else
   puts "  Clone it from GitHub or symlink it from local source."
   exit 1
 end
+
+group :development, :test do
+  # Load other additional Gemfiles
+  Dir.glob(File.join(__dir__, 'bundler.d/*.rb')).each { |f| eval_gemfile(File.expand_path(f, __dir__)) }
+end
