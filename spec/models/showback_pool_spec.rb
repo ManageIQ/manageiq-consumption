@@ -109,9 +109,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect { pool.showback_events << event }.to change(pool.showback_events, :count).by(1)
       expect(pool.showback_events.last).to eq(event)
     end
-=end
-
-=begin
     it 'events can be associated to costs' do
       pool.save
       event.save

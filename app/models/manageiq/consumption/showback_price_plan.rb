@@ -6,6 +6,36 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   validates :resource, :presence => true
 
   self.table_name = "showback_price_plans"
+
+  def calculate_cost(event)
+    # Accumulators
+    fc, vc = 0, 0
+    # For each rate in the price_plan, try to find a measure, and if that exists, add rate
+    # Get all rates for the price plan
+    # Group them in category + dimension
+    rates_hash = Hash.new {|h,k| h[k] = Array.new }
+    showback_rates.find_each do |x|
+      rates_hash[x.name].push(x)
+    end
+    # For each group, select the one applying
+    rates_hash.each do |_,xvalue|
+      xvalue.each do |value|
+        # delete one hash from the other, so if it is empty
+        result_hash = value.screener
+        result_hash.extract!(event.context || Hash.new())
+        if result_hash == {}
+          # Find the tier (can be more than one)
+          # Calculate the measure applicable to each tier
+          measure = event.get_measure(value.category, value.dimension)
+          i, j = value.rate(measure, event)
+          fc += i
+          vc += j
+        end
+      end
+    end
+    [fc, vc]
+  end
+
   #
   # Seeding one global price plan in the system that will be used as a fallback
   #
