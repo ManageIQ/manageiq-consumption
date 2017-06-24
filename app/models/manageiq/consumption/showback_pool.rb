@@ -1,6 +1,9 @@
 class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
+  self.table_name = "showback_pools"
+
   belongs_to :resource, :polymorphic => true
-  before_save :check_bucket_state, if: :state_changed?
+  before_save :check_pool_state, :if => :state_changed?
+
 
   has_many :showback_charges, :dependent => :destroy, :inverse_of => :showback_pool
   has_many :showback_events, :through => :showback_charges, :inverse_of => :showback_pools
@@ -14,13 +17,12 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   #End_time should be after start_time.
   validate  :start_time_before_end_time
 
-  self.table_name = "showback_pools"
 
   def start_time_before_end_time
     errors.add(:start_time, _("Start time should be before end time")) unless end_time.to_i > start_time.to_i
   end
 
-  def check_bucket_state
+  def check_pool_state
     case state_was
       when "OPEN"  then raise _("Pool can't change its state to CLOSE from OPEN")      unless state != "CLOSE"
       when "PROCESSING"
@@ -56,7 +58,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     end
   end
 
-  # Remove events from a bucket, no error is thrown
+  # Remove events from a pool, no error is thrown
 
   def remove_event(event)
     if event.kind_of? ManageIQ::Consumption::ShowbackEvent

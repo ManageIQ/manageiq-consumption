@@ -1,6 +1,7 @@
 class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   self.table_name = "showback_charges"
   monetize :cost_subunits
+  default_value_for :cost, 0
 
   belongs_to :showback_event, :inverse_of => :showback_charges
   belongs_to :showback_pool,  :inverse_of => :showback_charges
@@ -9,7 +10,7 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   validates :showback_event, :presence => true, :allow_nil => false
 
   def clean_costs
-    self.cost    = nil
+    self.cost = nil
     save
   end
 
