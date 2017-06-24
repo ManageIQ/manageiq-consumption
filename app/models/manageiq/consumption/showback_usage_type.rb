@@ -5,6 +5,10 @@ class ManageIQ::Consumption::ShowbackUsageType < ApplicationRecord
 
   self.table_name = "showback_usage_types"
 
+  def name
+    "#{category}::#{measure}"
+  end
+
   def self.seed
     seed_data.each do |usage_type_attributtes|
       usage_type_name = usage_type_attributtes[:category]

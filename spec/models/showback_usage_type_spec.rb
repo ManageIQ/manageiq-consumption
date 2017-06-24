@@ -8,6 +8,7 @@ describe ManageIQ::Consumption::ShowbackUsageType do
 
   context "validations" do
     let(:showback_usage) { FactoryGirl.build(:showback_usage_type) }
+    let(:event) { FactoryGirl.build(:showback_event) }
 
     it "has a valid factory" do
       expect(showback_usage).to be_valid
@@ -47,6 +48,19 @@ describe ManageIQ::Consumption::ShowbackUsageType do
     it "should ensure presence of dimensions included in VALID_TYPES" do
       showback_usage.dimensions = %w(average number)
       expect(showback_usage).to be_valid
+    end
+
+    it 'should return category::measure' do
+      expect(showback_usage.name).to eq("Vm::CPU")
+    end
+
+    it 'should be a function to calculate this usage' do
+      described_class.seed
+      described_class.all.each do |usage|
+        usage.dimensions.each do |dim|
+          expect(event).to respond_to("#{usage.measure}_#{dim}")
+        end
+      end
     end
   end
 
