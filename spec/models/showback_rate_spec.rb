@@ -59,6 +59,12 @@ describe ManageIQ::Consumption::ShowbackRate do
       expect(showback_rate.errors.details[:dimension]).to include(:error=>:blank)
     end
 
+    it 'returns name as category + dimension' do
+      category = showback_rate.category
+      dimension = showback_rate.dimension
+      expect(showback_rate.name).to eq("#{category}:#{dimension}")
+    end
+
     pending 'has a JSON screener'
     pending 'is not valid with a nil screener' do
       showback_rate.screener = nil
