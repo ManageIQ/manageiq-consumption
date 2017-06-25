@@ -17,8 +17,13 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   def calculate_costs(price_plan = nil)
     # Find the price plan, there should always be one as it is seeded(Enterprise)
     price_plan ||= showback_pool.find_price_plan
-    cost = price_plan.calculate_cost(showback_event)
-    save
-    cost
+    if price_plan
+      cost = price_plan.calculate_cost(showback_event)
+      save
+      cost
+    else
+      errors.add(:showback_price_plan, 'ShowbackPricePlan not found')
+      nil
+    end
   end
 end
