@@ -79,15 +79,15 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     if ch.nil?
       [nil, nil]
     else
-      ch.costs
+      ch.cost
     end
   end
 
   def update_charge(input, fixed_cost, variable_cost)
     ch = find_charge(input)
     unless ch.nil?
-      ch.fixed_rate_subunits = Money.new(fixed_cost)
-      ch.variable_rate_subunits = Money.new(variable_cost)
+      ch.fixed_rate = Money.new(fixed_cost)
+      ch.variable_rate = Money.new(variable_cost)
       ch
     end
   end
@@ -96,13 +96,13 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     ch = find_charge(input)
     # updates an existing charge
     if ch
-      ch.fixed_rate_subunits = Money.new(fixed_cost)
-      ch.variable_rate_subunits = Money.new(variable_cost)
+      ch.fixed_rate = Money.new(fixed_cost)
+      ch.variable_rate = Money.new(variable_cost)
       ch
     else # Or create a new one
       ch = showback_charges.new(:showback_event => input,
-                                :fixed_rate_subunits     => fixed_cost,
-                                :variable_rate_subunits  => variable_cost)
+                                :fixed_rate     => fixed_cost,
+                                :variable_rate  => variable_cost)
     end
     ch.save
   end
@@ -119,8 +119,8 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   def sum_of_charges
     a, b = 0.to_d, 0.to_d
     showback_charges.each do |x|
-      a += x.fixed_rate_subunits if x.fixed_rate_subunits
-      b += x.variable_rate_subunits if x.variable_rate_subunits
+      a += x.fixed_rate if x.fixed_rate
+      b += x.variable_rate if x.variable_rate
     end
     [a, b]
   end
@@ -165,6 +165,8 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
       showback_charges.find_by :showback_event => input
     elsif input.kind_of? ManageIQ::Consumption::ShowbackCharge
       input
+    else
+      nil
     end
   end
 end

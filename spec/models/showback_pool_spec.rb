@@ -143,6 +143,54 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
   end
 
+  describe "methods charge" do
+=begin
+    it 'Add charge of a charge' do
+      charge = FactoryGirl.create(:showback_charge)
+      pool.add_charge(charge,2, 3)
+      expect(charge.fixed_rate). to eq(Money.new(2))
+      expect(charge.variable_rate). to eq(Money.new(3))
+    end
+
+    it 'Add charge of a event' do
+      event  = FactoryGirl.create(:showback_event)
+      charge = FactoryGirl.create(:showback_charge, :showback_event => event)
+    end
+=end
+    it 'get_charge' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => Money.new(10))
+      expect(pool.get_charge(charge)).to eq(Money.new(10))
+    end
+
+    it 'get_charge with nil' do
+      expect(pool.get_charge(nil)).to eq([nil, nil])
+    end
+
+    it 'calculate_charge with an error' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => 10)
+      pool.calculate_charge(charge)
+      expect(charge.errors.details[:showback_price_plan]). to include(:error => "ShowbackPricePlan not found")
+      expect(pool.calculate_charge(charge)). to be_nil
+    end
+
+    it 'calculate_charge fail with no charge' do
+      pool.calculate_charge(nil)
+      expect(pool.errors.details[:showback_charges]). to include(:error => "not found")
+      expect(pool.calculate_charge(nil)). to be_nil
+    end
+
+    it 'Frind a price plan' do
+      ManageIQ::Consumption::ShowbackPricePlan.seed
+      expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
+    end
+
+    pending "Calculate charge"
+    pending "Add charge"
+    pending "Update charge"
+    pending "nullify_charge"
+    pending "sum_of_charges"
+  end
+
   describe '#state:open' do
     it 'new events can be associated to the pool' do
       pool.save

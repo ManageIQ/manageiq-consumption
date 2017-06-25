@@ -308,6 +308,21 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(pool.showback_events.include?(event)).to be_truthy
       end
 
+      it "Assign container resource to pool" do
+        con = FactoryGirl.create(:container)
+        con.type = "Container"
+        pool = FactoryGirl.create(:showback_pool, :resource => con)
+        event = FactoryGirl.create(:showback_event,
+                                   :start_time => DateTime.now.utc.beginning_of_month,
+                                   :end_time => DateTime.now.utc.beginning_of_month + 2.days,
+                                   :resource => con)
+
+        expect(pool.showback_events.count).to eq(0)
+        event.assign_resource
+        expect(pool.showback_events.count).to eq(1)
+        expect(pool.showback_events.include?(event)).to be_truthy
+      end
+
       it "Assign resource to all relational pool" do
         host = FactoryGirl.create(:host)
         vm = FactoryGirl.create(:vm, :host => host)
