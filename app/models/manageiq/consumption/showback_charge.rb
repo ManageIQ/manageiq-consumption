@@ -9,12 +9,12 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   validates :showback_pool,  :presence => true, :allow_nil => false
   validates :showback_event, :presence => true, :allow_nil => false
 
-  def clean_costs
-    self.cost = nil
+  def clean_cost
+    self.cost = 0
     save
   end
 
-  def calculate_costs(price_plan = nil)
+  def calculate_cost(price_plan = nil)
     # Find the price plan, there should always be one as it is seeded(Enterprise)
     price_plan ||= showback_pool.find_price_plan
     if price_plan
