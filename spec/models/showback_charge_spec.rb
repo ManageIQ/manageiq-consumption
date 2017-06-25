@@ -43,14 +43,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
   end
 
   context '#calculate_cost' do
-    let!(:plan)          { FactoryGirl.create(:showback_price_plan) }
+    let!(:plan)          { FactoryGirl.create(:showback_price_plan) } # By default is :enterprise
+    let(:plan2)          { FactoryGirl.create(:showback_price_plan) }
     let(:fixed_rate1)    { Money.new(3) }
     let(:fixed_rate2)    { Money.new(5) }
     let(:variable_rate1) { Money.new(7) }
     let(:variable_rate2) { Money.new(7) }
-    let(:cost1)          { Money.new(32) }
-    let(:cost2)          { Money.new(35) }
+    let(:cost)           { Money.new(32) }
     let(:pool) { FactoryGirl.create(:showback_pool) }
+
     let(:rate1) do
       FactoryGirl.create(:showback_rate,
                          :showback_price_plan => plan,
@@ -59,42 +60,57 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
                          :fixed_rate          => fixed_rate1,
                          :variable_rate       => variable_rate1)
     end
-    let(:event1) do
-      FactoryGirl.create(:showback_event,
-                         :with_vm_data,
-                         :full_month)
-    end
-    let(:event2) do
-      FactoryGirl.create(:showback_event,
-                         :with_vm_data,
-                         :full_month)
-    end
-    let(:charge1) do
-      FactoryGirl.create(:showback_charge,
-                         :showback_pool  => pool,
-                         :cost           => cost1,
-                         :showback_event => event1)
-    end
-    let(:charge2) do
-      FactoryGirl.create(:showback_charge,
-                         :showback_pool  => pool,
-                         :cost     => cost2,
-                         :showback_event => event2)
+
+    let(:rate2) do
+      FactoryGirl.create(:showback_rate,
+                         :showback_price_plan => plan2,
+                         :category            => 'CPU',
+                         :dimension           => 'average',
+                         :fixed_rate          => fixed_rate2,
+                         :variable_rate       => variable_rate2)
     end
 
-    context 'with price_plan' do
-      pending 'calculates cost using price plan' do
-        plan
+    let(:event) do
+      FactoryGirl.build(:showback_event,
+                        :with_vm_data,
+                        :full_month)
+    end
+
+    let(:charge) do
+      FactoryGirl.build(:showback_charge,
+                        :showback_pool  => pool,
+                        :cost           => cost,
+                        :showback_event => event)
+    end
+
+    context 'without price_plan' do
+      it 'calculates cost using price plan' do
         rate1
-        expect(event1.data).not_to be_nil
+        event.save
+        event.reload
+        charge.save
+        expect(event.data).not_to be_nil
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
-        expect(charge1.showback_event).to eq(event1)
-        expect(charge1.calculate_cost).to eq(fixed_rate1 + fixed_rate2 + variable_rate1 + variable_rate2)
-
+        expect(charge.showback_event).to eq(event)
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
       end
     end
-    context 'without price_plan' do
-      pending 'calculates cost finding price plan for the resource'
+    context 'with price_plan' do
+      it 'calculates cost using price plan' do
+        rate1
+        rate2
+        event.save
+        event.reload
+        charge.save
+        expect(event.data).not_to be_nil
+        plan2
+        expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
+        expect(charge.showback_event).to eq(event)
+        # Test that it works without a plan
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        # Test that it changes if you provide a plan
+        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.data['CPU']['average'])
+      end
     end
   end
 end
