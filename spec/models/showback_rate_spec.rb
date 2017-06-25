@@ -97,20 +97,17 @@ describe ManageIQ::Consumption::ShowbackRate do
     context 'empty #context' do
       it 'should charge an event by occurrence' do
         showback_rate.calculation = 'occurrence'
-        expect(showback_rate.rate(3, showback_event_fm)[0]).to eq(Money.new(11))
-        expect(showback_rate.rate(3, showback_event_fm)[1]).to eq(Money.new(7))
+        expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(11 + 7))
       end
 
       it 'should charge an event by duration' do
         showback_rate.calculation = 'duration'
-        expect(showback_rate.rate(3, showback_event_fm)[0]).to eq(Money.new(11))
-        expect(showback_rate.rate(3, showback_event_fm)[1]).to eq(Money.new(21))
+        expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(11 + 21))
       end
 
       it 'should charge an event by quantity' do
         showback_rate.calculation = 'quantity'
-        expect(showback_rate.rate(3, showback_event_fm)[0]).to eq(Money.new(11))
-        expect(showback_rate.rate(3, showback_event_fm)[1]).to eq(Money.new(21))
+        expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(11 + 21))
       end
     end
 
@@ -137,20 +134,17 @@ describe ManageIQ::Consumption::ShowbackRate do
     context 'empty #context' do
       it 'should charge an event by occurrence' do
         showback_rate.calculation = 'occurrence'
-        expect(showback_rate.rate(3, showback_event_hm)[0]).to eq(Money.new(11))
-        expect(showback_rate.rate(3, showback_event_hm)[1]).to eq(Money.new(7 * proration))
+        expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(11) + Money.new(7 * proration))
       end
 
       it 'should charge an event by duration' do
         showback_rate.calculation = 'duration'
-        expect(showback_rate.rate(3, showback_event_hm)[0]).to eq(Money.new(11 * proration))
-        expect(showback_rate.rate(3, showback_event_hm)[1]).to eq(Money.new(21 * proration))
+        expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(21 * proration))
       end
 
       it 'should charge an event by quantity' do
         showback_rate.calculation = 'quantity'
-        expect(showback_rate.rate(3, showback_event_hm)[0]).to eq(Money.new(11 * proration))
-        expect(showback_rate.rate(3, showback_event_hm)[1]).to eq(Money.new(21))
+        expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(21))
       end
     end
 
