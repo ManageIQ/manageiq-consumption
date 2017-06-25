@@ -4,7 +4,7 @@ require 'money-rails/test_helpers'
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   let(:pool) { FactoryGirl.build(:showback_pool) }
   let(:event) { FactoryGirl.build(:showback_event) }
-  
+
   describe '#basic lifecycle' do
     it 'has a valid factory' do
       pool.valid?
@@ -30,15 +30,17 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
 
     it 'deletes costs associated when deleting the pool' do
-      FactoryGirl.create(:showback_charge, :showback_pool => pool)
-      FactoryGirl.create(:showback_charge, :showback_pool => pool)
+      2.times do
+        FactoryGirl.create(:showback_charge, :showback_pool => pool)
+      end
       expect(pool.showback_charges.count).to be(2)
       expect { pool.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(0)
     end
 
     it 'deletes costs associated when deleting the event' do
-      FactoryGirl.create(:showback_charge, :showback_pool => pool)
-      FactoryGirl.create(:showback_charge, :showback_pool => pool)
+      2.times do
+        FactoryGirl.create(:showback_charge, :showback_pool => pool)
+      end
       expect(pool.showback_charges.count).to be(2)
       event = pool.showback_charges.first.showback_event
       expect { event.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(1)
@@ -47,7 +49,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'it can  be on states open, processing, close' do
       pool.state = "ERROR"
       expect(pool).not_to be_valid
-      expect(pool.errors[:state]).to include "is not included in the list"
+      expect(pool.errors.details[:state]).to include({:error => :inclusion, :value => "ERROR"})
     end
 
     it 'it can not be different of states open, processing, close' do
@@ -101,7 +103,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     pending 'it can not exists 2 pools opened from one resource'
   end
 
-  describe "Methods events" do
+  describe 'Methods events' do
     it 'Add event to a Pool' do
       count = pool.showback_events.count
       pool.add_event(event)
@@ -109,19 +111,19 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.showback_events).to include(event)
     end
 
-    it 'Throw error in Add event to a Pool if duplicate' do
+    it 'Throw error in Add event to a Pool if it is a duplicate' do
       pool.add_event(event)
       pool.add_event(event)
       expect(pool.errors.details[:showback_events]). to include(:error => "duplicate")
     end
 
-    it 'Throw error in Add event is not type' do
+    it 'Throw error in add event if it is not of a proper type' do
       obj = FactoryGirl.create(:vm)
       pool.add_event(obj)
       expect(pool.errors.details[:showback_events]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::ShowbackEvent")
     end
 
-    it 'Remove event to a Pool' do
+    it 'Remove event from a Pool' do
       pool.add_event(event)
       count = pool.showback_events.count
       pool.remove_event(event)
@@ -129,34 +131,33 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.showback_events).not_to include(event)
     end
 
-    it 'Throw error in Remove event to a Pool if not found' do
+    it 'Throw error in Remove event from a Pool if the event can not be found' do
       pool.add_event(event)
       pool.remove_event(event)
       pool.remove_event(event)
       expect(pool.errors.details[:showback_events]). to include(:error => "not found")
     end
 
-    it 'Throw error in Remove event is not type' do
+    it 'Throw error in Remove event if the type is not correct' do
       obj = FactoryGirl.create(:vm)
       pool.remove_event(obj)
       expect(pool.errors.details[:showback_events]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::ShowbackEvent")
     end
   end
 
-  describe "methods charge" do
-=begin
-    it 'Add charge of a charge' do
+  describe 'methods with #showback_charge' do
+    it 'Add charge directly' do
       charge = FactoryGirl.create(:showback_charge)
-      pool.add_charge(charge,2, 3)
-      expect(charge.fixed_rate). to eq(Money.new(2))
-      expect(charge.variable_rate). to eq(Money.new(3))
+      pool.add_charge(charge, 2)
+      expect(charge.cost). to eq(Money.new(2))
     end
 
-    it 'Add charge of a event' do
+    it 'Add charge from an event' do
       event  = FactoryGirl.create(:showback_event)
       charge = FactoryGirl.create(:showback_charge, :showback_event => event)
+      expect(event.showback_charges).to include(charge)
     end
-=end
+
     it 'get_charge' do
       charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => Money.new(10))
       expect(pool.get_charge(charge)).to eq(Money.new(10))

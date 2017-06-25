@@ -83,26 +83,23 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     end
   end
 
-  def update_charge(input, fixed_cost, variable_cost)
+  def update_charge(input, cost)
     ch = find_charge(input)
     unless ch.nil?
-      ch.fixed_rate = Money.new(fixed_cost)
-      ch.variable_rate = Money.new(variable_cost)
+      ch.cost = Money.new(cost)
       ch
     end
   end
 
-  def add_charge(input, fixed_cost, variable_cost)
+  def add_charge(input, cost)
     ch = find_charge(input)
     # updates an existing charge
     if ch
-      ch.fixed_rate = Money.new(fixed_cost)
-      ch.variable_rate = Money.new(variable_cost)
+      ch.cost = Money.new(cost)
       ch
     else # Or create a new one
       ch = showback_charges.new(:showback_event => input,
-                                :fixed_rate     => fixed_cost,
-                                :variable_rate  => variable_cost)
+                                :cost           => cost)
     end
     ch.save
   end
@@ -110,19 +107,17 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   def nullify_charge(input)
     ch = find_charge(input)
     unless ch.nil?
-      ch.fixed_cost = nil
-      ch.variable_cost = nil
+      ch.cost = 0
       ch.save
     end
   end
 
   def sum_of_charges
-    a, b = 0.to_d, 0.to_d
+    a = 0.to_d
     showback_charges.each do |x|
-      a += x.fixed_rate if x.fixed_rate
-      b += x.variable_rate if x.variable_rate
+      a += x.cost if x.cost
     end
-    [a, b]
+    a
   end
 
   def clean_all_charges
