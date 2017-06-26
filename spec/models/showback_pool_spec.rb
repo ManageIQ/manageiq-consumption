@@ -148,13 +148,19 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   end
 
   describe 'methods with #showback_charge' do
-    it 'Add charge directly' do
-      charge = FactoryGirl.create(:showback_charge)
+    it 'add charge directly' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool)
       pool.add_charge(charge, 2)
       expect(charge.cost). to eq(Money.new(2))
     end
 
-    it 'Add charge from an event' do
+    it 'add charge directly' do
+      charge = FactoryGirl.create(:showback_charge, :cost => Money.new(7)) # different pool
+      pool.add_charge(charge, 2)
+      expect(charge.cost).not_to eq(Money.new(2))
+    end
+
+    it 'add charge from an event' do
       event  = FactoryGirl.create(:showback_event)
       charge = FactoryGirl.create(:showback_charge, :showback_event => event)
       expect(event.showback_charges).to include(charge)
@@ -172,15 +178,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'calculate_charge with an error' do
       charge = FactoryGirl.create(:showback_charge, :cost => Money.new(10))
       pool.calculate_charge(charge)
-      expect(charge.errors.details[:showback_price_plan]). to include(:error => "ShowbackPricePlan not found")
-      expect(pool.calculate_charge(charge).cost). to eq(Money.new(0))
+      expect(charge.errors.details[:showback_charge]). to include(:error => 'not found')
+      expect(pool.calculate_charge(charge)). to eq(Money.new(0))
     end
 
     it 'calculate_charge fail with no charge' do
-      ManageIQ::Consumption::ShowbackPricePlan.seed
+      enterprise_plan
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.calculate_charge(nil)
-      expect(pool.errors.details[:showback_charges]). to include(:error => "not found")
+      expect(pool.errors.details[:showback_charge]). to include(:error => "not found")
       expect(pool.calculate_charge(nil)). to eq(0)
     end
 
@@ -219,6 +225,11 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'update a charge in the pool with update_charge' do
       charge = FactoryGirl.create(:showback_charge, :showback_pool => pool)
       expect { pool.update_charge(charge, 5) }.to change(charge, :cost).to(Money.new(5))
+    end
+
+    it 'update a charge in the pool gets nil if the charge is not there' do
+      charge = FactoryGirl.create(:showback_charge) # not in the pool
+      expect(pool.update_charge(charge, 5)).to be_nil
     end
 
     it '#clear_charge' do
