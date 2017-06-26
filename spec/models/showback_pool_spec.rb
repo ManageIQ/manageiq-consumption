@@ -190,8 +190,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
     it '#calculate charge' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
-      ManageIQ::Consumption::ShowbackPricePlan.seed
-      expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
+      expect(ManageIQ::Consumption::ShowbackPricePlan.all.count).to eq(1)
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
@@ -233,8 +232,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
     it 'calculate_all_charges' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
-      ManageIQ::Consumption::ShowbackPricePlan.seed
-      expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
+      expect(ManageIQ::Consumption::ShowbackPricePlan.all.count).to eq(1)
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
