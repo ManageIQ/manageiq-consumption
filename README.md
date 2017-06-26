@@ -10,6 +10,10 @@
 
 ManageIQ Gem plugin for the Consumption.
 
+## Demo documentation
+
+Go to [demo section](/docs/demo/README.md)
+
 ## Development
 
 See the section on pluggable providers in the [ManageIQ Developer Setup](http://manageiq.org/docs/guides/developer_setup)
