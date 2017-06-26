@@ -10,7 +10,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
 
   def calculate_cost(event)
     # Accumulator
-    tc = 0
+    tc = Money.new(0)
     # For each rate in the price_plan, try to find a measure, and if that exists, add rate
     # Get all rates for the price plan
     # Group them in category + dimension
