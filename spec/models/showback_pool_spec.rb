@@ -188,7 +188,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
     end
 
-    it '#Calculate charge' do
+    it '#calculate charge' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
       expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
       FactoryGirl.create(:showback_rate,
