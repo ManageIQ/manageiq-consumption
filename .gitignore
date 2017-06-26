@@ -28,3 +28,4 @@ coverage/
 /.idea/
 /.rubocop-https---raw-githubusercontent-com-ManageIQ-guides-master--rubocop-base-yml
 /bundler.d/
+.ruby-version

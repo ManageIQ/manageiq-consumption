@@ -190,11 +190,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
     it '#calculate charge' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
-      puts "Starting to print it"
-      ManageIQ::Consumption::ShowbackPricePlan.all do  |x|
-        puts x.inspect
-      end
-      puts "Stopped printing it"
       expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
