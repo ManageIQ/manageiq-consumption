@@ -1,6 +1,6 @@
-#Manageiq Demo
+# Manageiq Demo
 
-##Install the Gem
+## Install the Gem
 
 Set in the Gemfile
 

@@ -1,4 +1,4 @@
-#Manageiq-Consumption Gem Documentation
+# Manageiq-Consumption Gem Documentation
 
 # Demo
 
