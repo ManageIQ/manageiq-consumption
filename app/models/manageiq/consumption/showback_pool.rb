@@ -5,7 +5,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   before_save :check_pool_state, :if => :state_changed?
 
 
-  has_many :showback_charges, :dependent => :destroy, :inverse_of => :showback_pool
+  has_many :showback_charges, :dependent => :destroy
   has_many :showback_events, :through => :showback_charges, :inverse_of => :showback_pools
 
   validates :name,                  :presence => true
@@ -77,72 +77,66 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   def get_charge(input)
     ch = find_charge(input)
     if ch.nil?
-      [nil, nil]
+      Money.new(0)
     else
       ch.cost
     end
   end
 
-  def update_charge(input, fixed_cost, variable_cost)
+  def update_charge(input, cost)
     ch = find_charge(input)
     unless ch.nil?
-      ch.fixed_rate = Money.new(fixed_cost)
-      ch.variable_rate = Money.new(variable_cost)
+      ch.cost = Money.new(cost)
       ch
     end
   end
 
-  def add_charge(input, fixed_cost, variable_cost)
+  def add_charge(input, cost)
     ch = find_charge(input)
     # updates an existing charge
     if ch
-      ch.fixed_rate = Money.new(fixed_cost)
-      ch.variable_rate = Money.new(variable_cost)
-      ch
+      ch.cost = Money.new(cost)
     else # Or create a new one
       ch = showback_charges.new(:showback_event => input,
-                                :fixed_rate     => fixed_cost,
-                                :variable_rate  => variable_cost)
+                                :cost           => cost)
     end
     ch.save
   end
 
-  def nullify_charge(input)
+  def clear_charge(input)
     ch = find_charge(input)
-    unless ch.nil?
-      ch.fixed_cost = nil
-      ch.variable_cost = nil
-      ch.save
-    end
+    ch.cost = 0
+    ch.save
   end
 
   def sum_of_charges
-    a, b = 0.to_d, 0.to_d
+    a = Money.new(0)
     showback_charges.each do |x|
-      a += x.fixed_rate if x.fixed_rate
-      b += x.variable_rate if x.variable_rate
+      a += x.cost if x.cost
     end
-    [a, b]
+    a
   end
 
   def clean_all_charges
-    showback_charges.each(&:clean_costs)
+    showback_charges.each(&:clean_cost)
   end
 
   def calculate_charge(input)
     ch = find_charge(input)
     if ch.kind_of? ManageIQ::Consumption::ShowbackCharge
-      ch.calculate_cost(find_price_plan)
+      ch.cost = ch.calculate_cost(find_price_plan) || Money.new(0)
+      save
+      ch
     else
       errors.add(:showback_charges, 'not found')
-      nil
+      Money.new(0)
     end
   end
 
   def calculate_all_charges
-    plan = find_price_plan
+    # plan = find_price_plan
     showback_charges.each do |x|
-      x.calculate_cost(plan)
+      calculate_charge(x)
     end
   end
 
