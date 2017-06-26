@@ -164,7 +164,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
 
     it 'get_charge with nil' do
-      expect(pool.get_charge(nil)).to eq([nil, nil])
+      expect(pool.get_charge(nil)).to be_nil
     end
 
     it 'calculate_charge with an error' do
@@ -180,7 +180,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.calculate_charge(nil)). to be_nil
     end
 
-    it 'Frind a price plan' do
+    it 'Find a price plan' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
     end
@@ -188,7 +188,13 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     pending "Calculate charge"
     pending "Add charge"
     pending "Update charge"
-    pending "nullify_charge"
+    it 'nullifies_charge' do
+      pool.add_event(event)
+      pool.showback_charges.reload
+      charge = pool.showback_charges.find_by(:showback_event => event)
+      charge.cost = Money.new(5)
+      expect{ pool.clear_charge(charge) }.to change(charge, :cost).from(Money.new(5)).to(Money.new(0))
+    end
     pending "sum_of_charges"
   end
 

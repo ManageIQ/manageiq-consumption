@@ -5,7 +5,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   before_save :check_pool_state, :if => :state_changed?
 
 
-  has_many :showback_charges, :dependent => :destroy, :inverse_of => :showback_pool
+  has_many :showback_charges, :dependent => :destroy
   has_many :showback_events, :through => :showback_charges, :inverse_of => :showback_pools
 
   validates :name,                  :presence => true
@@ -77,7 +77,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   def get_charge(input)
     ch = find_charge(input)
     if ch.nil?
-      [nil, nil]
+      nil
     else
       ch.cost
     end
@@ -104,12 +104,10 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     ch.save
   end
 
-  def nullify_charge(input)
+  def clear_charge(input)
     ch = find_charge(input)
-    unless ch.nil?
-      ch.cost = 0
-      ch.save
-    end
+    ch.cost = 0
+    ch.save
   end
 
   def sum_of_charges
