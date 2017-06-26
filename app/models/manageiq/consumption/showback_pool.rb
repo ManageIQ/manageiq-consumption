@@ -111,7 +111,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   end
 
   def sum_of_charges
-    a = 0.to_d
+    a = Money.new(0)
     showback_charges.each do |x|
       a += x.cost if x.cost
     end
@@ -125,7 +125,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   def calculate_charge(input)
     ch = find_charge(input)
     if ch.kind_of? ManageIQ::Consumption::ShowbackCharge
-      ch.calculate_cost(find_price_plan)
+      ch.cost = ch.calculate_cost(find_price_plan)
     else
       errors.add(:showback_charges, 'not found')
       nil

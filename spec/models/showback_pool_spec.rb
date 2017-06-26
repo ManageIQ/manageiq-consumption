@@ -2,8 +2,9 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
-  let(:pool) { FactoryGirl.build(:showback_pool) }
-  let(:event) { FactoryGirl.build(:showback_event) }
+  let(:pool)   { FactoryGirl.build(:showback_pool) }
+  let(:event)  { FactoryGirl.build(:showback_event) }
+  let(:event2) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
 
   describe '#basic lifecycle' do
     it 'has a valid factory' do
@@ -185,17 +186,40 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
     end
 
-    pending "Calculate charge"
+    it '#Calculate charge' do
+      ManageIQ::Consumption::ShowbackPricePlan.seed
+      expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
+      FactoryGirl.create(:showback_rate,
+                         :fixed_rate => Money.new(67),
+                         :variable_rate => Money.new(12),
+                         :category => 'CPU',
+                         :dimension => 'average',
+                         :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+      pool.add_event(event2)
+      event2.reload
+      pool.showback_charges.reload
+      charge = pool.showback_charges.find_by(:showback_event => event2)
+      charge.cost = Money.new(0)
+      expect { pool.calculate_charge(charge) }.to change(charge, :cost).
+          from(Money.new(0)).to(Money.new((event2.data['CPU']['average'] * 12) + 67))
+    end
+
     pending "Add charge"
     pending "Update charge"
-    it 'nullifies_charge' do
+    it '#clear_charge' do
       pool.add_event(event)
       pool.showback_charges.reload
       charge = pool.showback_charges.find_by(:showback_event => event)
       charge.cost = Money.new(5)
-      expect{ pool.clear_charge(charge) }.to change(charge, :cost).from(Money.new(5)).to(Money.new(0))
+      expect { pool.clear_charge(charge) }.to change(charge, :cost).from(Money.new(5)).to(Money.new(0))
     end
-    pending "sum_of_charges"
+
+    it '#sum_of_charges' do
+      pool.add_charge(event, Money.new(57))
+      pool.add_charge(event2, Money.new(123))
+      expect(pool.sum_of_charges).to eq(Money.new(180))
+
+    end
   end
 
   describe '#state:open' do
