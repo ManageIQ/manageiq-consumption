@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   let(:pool)   { FactoryGirl.build(:showback_pool) }
-  let(:event)  { FactoryGirl.build(:showback_event) }
+  let(:event)  { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
   let(:event2) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
 
   describe '#basic lifecycle' do
@@ -165,20 +165,22 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
 
     it 'get_charge with nil' do
-      expect(pool.get_charge(nil)).to be_nil
+      expect(pool.get_charge(nil)).to eq(0)
     end
 
     it 'calculate_charge with an error' do
-      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => 10)
+      charge = FactoryGirl.create(:showback_charge, :cost => Money.new(10))
       pool.calculate_charge(charge)
       expect(charge.errors.details[:showback_price_plan]). to include(:error => "ShowbackPricePlan not found")
-      expect(pool.calculate_charge(charge)). to be_nil
+      expect(pool.calculate_charge(charge).cost). to eq(Money.new(0))
     end
 
     it 'calculate_charge fail with no charge' do
+      ManageIQ::Consumption::ShowbackPricePlan.seed
+      expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.calculate_charge(nil)
       expect(pool.errors.details[:showback_charges]). to include(:error => "not found")
-      expect(pool.calculate_charge(nil)). to be_nil
+      expect(pool.calculate_charge(nil)). to eq(0)
     end
 
     it 'Find a price plan' do
@@ -204,8 +206,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
           from(Money.new(0)).to(Money.new((event2.data['CPU']['average'] * 12) + 67))
     end
 
-    pending "Add charge"
-    pending "Update charge"
+    it '#Add an event' do
+      event = FactoryGirl.create(:showback_event)
+      expect { pool.add_charge(event, 5) }.to change(pool.showback_charges, :count).by(1)
+    end
+
+    it 'update a charge in the pool' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool)
+      expect { pool.add_charge(charge, 5) }.to change(charge, :cost).to(Money.new(5))
+    end
+
     it '#clear_charge' do
       pool.add_event(event)
       pool.showback_charges.reload
@@ -218,7 +228,30 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       pool.add_charge(event, Money.new(57))
       pool.add_charge(event2, Money.new(123))
       expect(pool.sum_of_charges).to eq(Money.new(180))
+    end
 
+    it 'calculate_all_charges' do
+      ManageIQ::Consumption::ShowbackPricePlan.seed
+      expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
+      FactoryGirl.create(:showback_rate,
+                         :fixed_rate => Money.new(67),
+                         :variable_rate => Money.new(12),
+                         :category => 'CPU',
+                         :dimension => 'average',
+                         :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+      pool.add_event(event)
+      pool.add_event(event2)
+      event.reload
+      event2.reload
+      pool.showback_charges.reload
+      pool.showback_charges.each do |x|
+        expect(x.cost).to eq(Money.new(0))
+      end
+      pool.showback_charges.reload
+      pool.calculate_all_charges
+      pool.showback_charges.each do |x|
+        expect(x.cost).not_to eq(Money.new(0))
+      end
     end
   end
 
