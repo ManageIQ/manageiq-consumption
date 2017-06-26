@@ -2,9 +2,10 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
-  let(:pool)   { FactoryGirl.build(:showback_pool) }
-  let(:event)  { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
-  let(:event2) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
+  let(:pool)    { FactoryGirl.build(:showback_pool) }
+  let(:event)   { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
+  let(:event2)  { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
+  let(:enterprise_plan) { FactoryGirl.create(:showback_price_plan) }
 
   describe '#basic lifecycle' do
     it 'has a valid factory' do
@@ -189,8 +190,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
 
     it '#calculate charge' do
-      ManageIQ::Consumption::ShowbackPricePlan.seed
-      expect(ManageIQ::Consumption::ShowbackPricePlan.all.count).to eq(1)
+      enterprise_plan
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
@@ -211,9 +211,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect { pool.add_charge(event, 5) }.to change(pool.showback_charges, :count).by(1)
     end
 
-    it 'update a charge in the pool' do
+    it 'update a charge in the pool with add_charge' do
       charge = FactoryGirl.create(:showback_charge, :showback_pool => pool)
       expect { pool.add_charge(charge, 5) }.to change(charge, :cost).to(Money.new(5))
+    end
+
+    it 'update a charge in the pool with update_charge' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool)
+      expect { pool.update_charge(charge, 5) }.to change(charge, :cost).to(Money.new(5))
     end
 
     it '#clear_charge' do
@@ -240,8 +245,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     end
 
     it 'calculate_all_charges' do
-      ManageIQ::Consumption::ShowbackPricePlan.seed
-      expect(ManageIQ::Consumption::ShowbackPricePlan.all.count).to eq(1)
+      enterprise_plan
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
