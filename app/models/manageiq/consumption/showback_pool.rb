@@ -118,7 +118,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   end
 
   def clean_all_charges
-    showback_charges.each(&:clean_costs)
+    showback_charges.each(&:clean_cost)
   end
 
   def calculate_charge(input)

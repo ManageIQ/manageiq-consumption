@@ -224,6 +224,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect { pool.clear_charge(charge) }.to change(charge, :cost).from(Money.new(5)).to(Money.new(0))
     end
 
+    it '#clear all charges' do
+      pool.add_charge(event, Money.new(57))
+      pool.add_charge(event2, Money.new(123))
+      pool.clean_all_charges
+      pool.showback_charges.each do |x|
+        expect(x.cost).to eq(Money.new(0))
+      end
+    end
+
     it '#sum_of_charges' do
       pool.add_charge(event, Money.new(57))
       pool.add_charge(event2, Money.new(123))
