@@ -16,16 +16,11 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   validates :description,           :presence => true
   validates :resource,              :presence => true
   validates :start_time, :end_time, :presence => true
-  validates :state,                 :presence => true, :inclusion => { :in => %w(OPEN PROCESSING CLOSED) }, :default => "OPEN"
+  validates :state,                 :presence => true, :inclusion => { :in => %w(OPEN PROCESSING CLOSED) }
 
-  after_initialize :set_state_open
+
   # Test that end_time happens later than start_time.
   validate  :start_time_before_end_time
-
-  def set_state_open
-    raise _("Pool can't change state to CLOSED from OPEN") unless  !ManageIQ::Consumption::ShowbackPool.exists?(:resource => self.resource, :state=>"OPEN")
-    self.state = "OPEN"
-  end
 
   def start_time_before_end_time
     errors.add(:end_time, _('should happen after start_time')) unless end_time.to_i > start_time.to_i
