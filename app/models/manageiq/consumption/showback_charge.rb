@@ -1,5 +1,5 @@
 class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
-  self.table_name = "showback_charges"
+  self.table_name = 'showback_charges'
   monetize :cost_subunits
   default_value_for :cost, 0
 
