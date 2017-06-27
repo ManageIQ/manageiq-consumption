@@ -22,7 +22,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   validate  :start_time_before_end_time
 
   def start_time_before_end_time
-    errors.add(:start_time, _("Start time should be before end time")) unless end_time.to_i > start_time.to_i
+    errors.add(:end_time, _('should happen after start_time')) unless end_time.to_i > start_time.to_i
   end
 
   def check_pool_state
