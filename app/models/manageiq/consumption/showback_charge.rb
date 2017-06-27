@@ -9,6 +9,8 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   validates :showback_pool,  :presence => true, :allow_nil => false
   validates :showback_event, :presence => true, :allow_nil => false
 
+  serialize :cost, JSON # Implement cost column as a JSON
+
   def clean_cost
     self.cost = 0
     save
