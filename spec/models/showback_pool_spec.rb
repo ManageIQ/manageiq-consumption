@@ -7,7 +7,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   let(:event2)  { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
   let(:enterprise_plan) { FactoryGirl.create(:showback_price_plan) }
 
-  describe '#basic lifecycle' do
+  context '#basic lifecycle' do
     it 'has a valid factory' do
       pool.valid?
       expect(pool).to be_valid
@@ -37,6 +37,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       end
       expect(pool.showback_charges.count).to be(2)
       expect { pool.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(0)
+      expect(pool.showback_charges.count).to be(0)
     end
 
     it 'deletes costs associated when deleting the event' do
@@ -46,74 +47,85 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.showback_charges.count).to be(2)
       event = pool.showback_charges.first.showback_event
       expect { event.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(1)
+      expect(pool.showback_events).not_to include(event)
     end
 
-    it 'it can  be on states open, processing, close' do
-      pool.state = "ERROR"
+    it 'it only can be in approved states' do
+      pool.state = 'ERROR'
       expect(pool).not_to be_valid
-      expect(pool.errors.details[:state]).to include({:error => :inclusion, :value => "ERROR"})
+      expect(pool.errors.details[:state]).to include({:error => :inclusion, :value => 'ERROR'})
     end
 
-    it 'it can not be different of states open, processing, close' do
-      pool.state = "CLOSE"
+    it 'it can not be different of states open, processing, closed' do
+      states = %w(CLOSED PROCESSING OPEN)
+      states.each do |x|
+        pool.state = x
+        expect(pool).to be_valid
+      end
+    end
+
+    it 'start time should happen earlier than end time' do
+      pool.start_time = pool.end_time
+      pool.valid?
+      expect(pool.errors.details[:end_time]).to include(:error => 'should happen after start_time')
+    end
+  end
+
+  context ".control lifecycle state" do
+    let(:pool_lifecycle) { FactoryGirl.create(:showback_pool) }
+
+
+    it 'it can transition from open to processing' do
+      pool_lifecycle.state = 'PROCESSING'
+      pool_lifecycle.valid?
       expect(pool).to be_valid
     end
 
-    context ".control lifecycle state" do
-      before(:each) do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool)
-      end
+    it 'a new pool is created automatically when transitioning from open to processing if not exists' do
+      pool_lifecycle.state = 'PROCESSING'
+      pool_lifecycle.save
+      # There should be two pools when I save, the one in processing state + the one in OPEN state
+      expect(described_class.count).to eq(1)
+      # expect(pool_lifecycle.save).to change(described_class, :count).from(1).to(2)
+      # ERROR ERROR ERROR
+    end
 
-      it 'it can transition from open to processing' do
-        @pool_lifecycle.state = "PROCESSING"
-        expect { @pool_lifecycle.save }.not_to raise_error
-      end
+    it 'it can not transition from open to closed' do
+      pool_lifecycle.state = 'CLOSED'
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state to CLOSED from OPEN"))
+    end
 
-      it 'a new pool is created automatically when transitioning from open to processing if not exists' do
-        @pool_lifecycle.state = "PROCESSING"
-        @pool_lifecycle.save
-        expect(described_class.count).to eq(1)
-      end
+    it 'it can not transition from processing to open' do
+      pool_lifecycle = FactoryGirl.create(:showback_pool, :processing)
+      pool_lifecycle.state = 'OPEN'
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state to OPEN from PROCESSING"))
+    end
 
-      it 'it can not transition from open to closed' do
-        @pool_lifecycle.state = "CLOSE"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state to CLOSE from OPEN")
-      end
+    it 'it can transition from processing to closed' do
+      pool_lifecycle = FactoryGirl.create(:showback_pool, :processing)
+      pool_lifecycle.state = 'CLOSED'
+      expect { pool_lifecycle.save }.not_to raise_error
+    end
 
-      it 'it can not transition from processing to open' do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_processing)
-        @pool_lifecycle.state = "OPEN"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state to OPEN from PROCESSING")
-      end
-
-      it 'it can transition from processing to closed' do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_processing)
-        @pool_lifecycle.state = "CLOSE"
-        expect { @pool_lifecycle.save }.not_to raise_error
-      end
-
-      it 'it can not transition from closed to open or processing' do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_close)
-        @pool_lifecycle.state = "OPEN"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state when it's CLOSE")
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_close)
-        @pool_lifecycle.state = "PROCESSING"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state when it's CLOSE")
-      end
+    it 'it can not transition from closed to open or processing' do
+      pool_lifecycle = FactoryGirl.create(:showback_pool, :closed)
+      pool_lifecycle.state = 'OPEN'
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state when it's CLOSED"))
+      pool_lifecycle = FactoryGirl.create(:showback_pool, :closed)
+      pool_lifecycle.state = 'PROCESSING'
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state when it's CLOSED"))
     end
 
     pending 'it can not exists 2 pools opened from one resource'
   end
 
-  describe 'Methods events' do
-    it 'Add event to a Pool' do
-      count = pool.showback_events.count
-      pool.add_event(event)
-      expect(pool.showback_events.count).to eq(count + 1)
+  describe 'methods for events' do
+    it 'can add an event to a pool' do
+      expect { pool.add_event(event) }.to change(pool.showback_events, :count).by(1)
       expect(pool.showback_events).to include(event)
     end
 
-    it 'Throw error in Add event to a Pool if it is a duplicate' do
+    it 'throws an error for duplicate events when using Add event to a Pool' do
       pool.add_event(event)
       pool.add_event(event)
       expect(pool.errors.details[:showback_events]). to include(:error => "duplicate")
@@ -127,9 +139,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
     it 'Remove event from a Pool' do
       pool.add_event(event)
-      count = pool.showback_events.count
-      pool.remove_event(event)
-      expect(pool.showback_events.count).to eq(count - 1)
+      expect { pool.remove_event(event) }.to change(pool.showback_events, :count).by(-1)
       expect(pool.showback_events).not_to include(event)
     end
 
@@ -157,21 +167,30 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'add charge directly' do
       charge = FactoryGirl.create(:showback_charge, :cost => Money.new(7)) # different pool
       pool.add_charge(charge, 2)
+      # Charge won't be updated as it does not belongs to the pool
       expect(charge.cost).not_to eq(Money.new(2))
+      expect(charge.showback_pool).not_to eq(pool)
     end
 
     it 'add charge from an event' do
       event  = FactoryGirl.create(:showback_event)
-      charge = FactoryGirl.create(:showback_charge, :showback_event => event)
+      charge = FactoryGirl.create(:showback_charge, :showback_event => event, :showback_pool => pool)
       expect(event.showback_charges).to include(charge)
+      expect(pool.showback_charges).to include(charge)
     end
 
-    it 'get_charge' do
+    it 'get_charge from a charge' do
       charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => Money.new(10))
       expect(pool.get_charge(charge)).to eq(Money.new(10))
     end
 
-    it 'get_charge with nil' do
+    it 'get_charge from an event' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => Money.new(10))
+      event = charge.showback_event
+      expect(pool.get_charge(event)).to eq(Money.new(10))
+    end
+
+    it 'get_charge from nil get 0' do
       expect(pool.get_charge(nil)).to eq(0)
     end
 
@@ -182,7 +201,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.calculate_charge(charge)). to eq(Money.new(0))
     end
 
-    it 'calculate_charge fail with no charge' do
+    it 'calculate_charge fails with no charge' do
       enterprise_plan
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.calculate_charge(nil)
@@ -190,10 +209,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.calculate_charge(nil)). to eq(0)
     end
 
-    it 'Find a price plan' do
+    it 'find a price plan' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
     end
+
+    pending 'find a price plan associated to the resource'
+    pending 'find a price plan associated to a parent resource'
+    pending 'find a price plan finds the default price plan if not found'
 
     it '#calculate charge' do
       enterprise_plan
@@ -202,7 +225,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
                          :variable_rate => Money.new(12),
                          :category => 'CPU',
                          :dimension => 'average',
-                         :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+                         :showback_price_plan => enterprise_plan)
       pool.add_event(event2)
       event2.reload
       pool.showback_charges.reload
