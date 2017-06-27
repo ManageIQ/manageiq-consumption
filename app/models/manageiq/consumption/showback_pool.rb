@@ -2,6 +2,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   self.table_name = 'showback_pools'
 
   belongs_to :resource, :polymorphic => true
+
   before_save :check_pool_state, :if => :state_changed?
 
   has_many :showback_charges,

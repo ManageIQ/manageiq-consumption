@@ -37,6 +37,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       end
       expect(pool.showback_charges.count).to be(2)
       expect { pool.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(0)
+      expect(pool.showback_charges.count).to be(0)
     end
 
     it 'deletes costs associated when deleting the event' do
@@ -46,59 +47,62 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.showback_charges.count).to be(2)
       event = pool.showback_charges.first.showback_event
       expect { event.destroy }.to change(ManageIQ::Consumption::ShowbackCharge, :count).from(2).to(1)
+      expect(pool.showback_events).not_to include(event)
     end
 
-    it 'it can  be on states open, processing, close' do
-      pool.state = "ERROR"
+    it 'it only can be in approved states' do
+      pool.state = 'ERROR'
       expect(pool).not_to be_valid
       expect(pool.errors.details[:state]).to include({:error => :inclusion, :value => "ERROR"})
     end
 
     it 'it can not be different of states open, processing, close' do
-      pool.state = "CLOSE"
-      expect(pool).to be_valid
+      states = %w(CLOSE PROCESSING OPEN)
+      states.each do |x|
+        pool.state = x
+        expect(pool).to be_valid
+      end
     end
 
     context ".control lifecycle state" do
-      before(:each) do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool)
-      end
+      let(:pool_lifecycle) { FactoryGirl.create(:showback_pool) }
+
 
       it 'it can transition from open to processing' do
-        @pool_lifecycle.state = "PROCESSING"
-        expect { @pool_lifecycle.save }.not_to raise_error
+        pool_lifecycle.state = "PROCESSING"
+        expect { pool_lifecycle.save }.not_to raise_error
       end
 
       it 'a new pool is created automatically when transitioning from open to processing if not exists' do
-        @pool_lifecycle.state = "PROCESSING"
-        @pool_lifecycle.save
+        pool_lifecycle.state = "PROCESSING"
+        pool_lifecycle.save
         expect(described_class.count).to eq(1)
       end
 
       it 'it can not transition from open to closed' do
-        @pool_lifecycle.state = "CLOSE"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state to CLOSE from OPEN")
+        pool_lifecycle.state = "CLOSE"
+        expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state to CLOSE from OPEN"))
       end
 
       it 'it can not transition from processing to open' do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_processing)
-        @pool_lifecycle.state = "OPEN"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state to OPEN from PROCESSING")
+        pool_lifecycle = FactoryGirl.create(:showback_pool_processing)
+        pool_lifecycle.state = "OPEN"
+        expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state to OPEN from PROCESSING"))
       end
 
       it 'it can transition from processing to closed' do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_processing)
-        @pool_lifecycle.state = "CLOSE"
-        expect { @pool_lifecycle.save }.not_to raise_error
+        pool_lifecycle = FactoryGirl.create(:showback_pool_processing)
+        pool_lifecycle.state = "CLOSE"
+        expect { pool_lifecycle.save }.not_to raise_error
       end
 
       it 'it can not transition from closed to open or processing' do
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_close)
-        @pool_lifecycle.state = "OPEN"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state when it's CLOSE")
-        @pool_lifecycle = FactoryGirl.create(:showback_pool_close)
-        @pool_lifecycle.state = "PROCESSING"
-        expect { @pool_lifecycle.save }.to raise_error(RuntimeError, "Pool can't change its state when it's CLOSE")
+        pool_lifecycle = FactoryGirl.create(:showback_pool_close)
+        pool_lifecycle.state = "OPEN"
+        expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state when it's CLOSE"))
+        pool_lifecycle = FactoryGirl.create(:showback_pool_close)
+        pool_lifecycle.state = "PROCESSING"
+        expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state when it's CLOSE"))
       end
     end
 
