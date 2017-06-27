@@ -133,9 +133,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
     it 'Remove event from a Pool' do
       pool.add_event(event)
-      count = pool.showback_events.count
-      pool.remove_event(event)
-      expect(pool.showback_events.count).to eq(count - 1)
+      expect { pool.remove_event(event) }.to change(pool.showback_events, :count).by(-1)
       expect(pool.showback_events).not_to include(event)
     end
 
@@ -163,21 +161,30 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'add charge directly' do
       charge = FactoryGirl.create(:showback_charge, :cost => Money.new(7)) # different pool
       pool.add_charge(charge, 2)
+      # Charge won't be updated as it does not belongs to the pool
       expect(charge.cost).not_to eq(Money.new(2))
+      expect(charge.showback_pool).not_to eq(pool)
     end
 
     it 'add charge from an event' do
       event  = FactoryGirl.create(:showback_event)
-      charge = FactoryGirl.create(:showback_charge, :showback_event => event)
+      charge = FactoryGirl.create(:showback_charge, :showback_event => event, :showback_pool => pool)
       expect(event.showback_charges).to include(charge)
+      expect(pool.showback_charges).to include(charge)
     end
 
-    it 'get_charge' do
+    it 'get_charge from a charge' do
       charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => Money.new(10))
       expect(pool.get_charge(charge)).to eq(Money.new(10))
     end
 
-    it 'get_charge with nil' do
+    it 'get_charge from an event' do
+      charge = FactoryGirl.create(:showback_charge, :showback_pool => pool, :cost => Money.new(10))
+      event = charge.showback_event
+      expect(pool.get_charge(event)).to eq(Money.new(10))
+    end
+
+    it 'get_charge from nil get 0' do
       expect(pool.get_charge(nil)).to eq(0)
     end
 
@@ -188,7 +195,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.calculate_charge(charge)). to eq(Money.new(0))
     end
 
-    it 'calculate_charge fail with no charge' do
+    it 'calculate_charge fails with no charge' do
       enterprise_plan
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.calculate_charge(nil)
@@ -196,10 +203,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.calculate_charge(nil)). to eq(0)
     end
 
-    it 'Find a price plan' do
+    it 'find a price plan' do
       ManageIQ::Consumption::ShowbackPricePlan.seed
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
     end
+
+    pending 'find a price plan associated to the resource'
+    pending 'find a price plan associated to a parent resource'
+    pending 'find a price plan finds the default price plan if not found'
 
     it '#calculate charge' do
       enterprise_plan
@@ -208,7 +219,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
                          :variable_rate => Money.new(12),
                          :category => 'CPU',
                          :dimension => 'average',
-                         :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+                         :showback_price_plan => enterprise_plan)
       pool.add_event(event2)
       event2.reload
       pool.showback_charges.reload
