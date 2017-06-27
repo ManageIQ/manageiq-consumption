@@ -96,11 +96,15 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     # updates an existing charge
     if ch
       ch.cost = Money.new(cost)
-    else # Or create a new one
+    elsif input.class == ManageIQ::Consumption::ShowbackEvent # Or create a new one
       ch = showback_charges.new(:showback_event => input,
                                 :cost           => cost)
+    else
+      errors.add(:input, 'bad class')
+      return
     end
     ch.save
+    ch
   end
 
   def clear_charge(input)
@@ -126,9 +130,11 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     if ch.kind_of? ManageIQ::Consumption::ShowbackCharge
       ch.cost = ch.calculate_cost(find_price_plan) || Money.new(0)
       save
-      ch
+    elsif input.nil?
+      self.errors.add(:showback_charge, 'not found')
+      Money.new(0)
     else
-      errors.add(:showback_charges, 'not found')
+      input.errors.add(:showback_charge, 'not found')
       Money.new(0)
     end
   end
@@ -156,8 +162,8 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
 
   def find_charge(input)
     if input.kind_of? ManageIQ::Consumption::ShowbackEvent
-      showback_charges.find_by :showback_event => input
-    elsif input.kind_of? ManageIQ::Consumption::ShowbackCharge
+      showback_charges.find_by :showback_event => input, :showback_pool => self
+    elsif (input.kind_of? ManageIQ::Consumption::ShowbackCharge) && (input.showback_pool == self)
       input
     else
       nil

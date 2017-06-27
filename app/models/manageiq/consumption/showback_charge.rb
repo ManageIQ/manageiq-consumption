@@ -22,7 +22,7 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
       save
       cost
     else
-      errors.add(:showback_price_plan, 'ShowbackPricePlan not found')
+      errors.add(:showback_price_plan, _('not found'))
       nil
     end
   end
