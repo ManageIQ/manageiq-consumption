@@ -18,5 +18,9 @@ FactoryGirl.define do
     trait :quantity do
       calculation 'quantity'
     end
+
+    trait :with_screener do
+      screener { { 'tag' => { 'environment' => ['test'] } } }
+    end
   end
 end
