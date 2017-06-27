@@ -1,0 +1,9 @@
+ExtManagementSystem.delete_all
+Host.delete_all
+Vm.delete_all
+Metric.delete_all
+Hardware.delete_all
+ManageIQ::Consumption::ShowbackEvent.delete_all
+ManageIQ::Consumption::ShowbackPool.delete_all
+ManageIQ::Consumption::ShowbackRate.delete_all
+ManageIQ::Consumption::ShowbackCharge.delete_all
