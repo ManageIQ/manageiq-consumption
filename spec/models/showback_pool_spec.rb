@@ -89,20 +89,19 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       pool_lifecycle.state = 'PROCESSING'
       pool_lifecycle.save
       # There should be two pools when I save, the one in processing state + the one in OPEN state
-      expect(described_class.count).to eq(1)
-      # expect(pool_lifecycle.save).to change(described_class, :count).from(1).to(2)
+      expect(described_class.count).to eq(2)
       # ERROR ERROR ERROR
     end
 
     it 'it can not transition from open to closed' do
       pool_lifecycle.state = 'CLOSED'
-      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state to CLOSED from OPEN"))
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change state to CLOSED from OPEN"))
     end
 
     it 'it can not transition from processing to open' do
       pool_lifecycle = FactoryGirl.create(:showback_pool, :processing)
       pool_lifecycle.state = 'OPEN'
-      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state to OPEN from PROCESSING"))
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change state to OPEN from PROCESSING"))
     end
 
     it 'it can transition from processing to closed' do
@@ -114,10 +113,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'it can not transition from closed to open or processing' do
       pool_lifecycle = FactoryGirl.create(:showback_pool, :closed)
       pool_lifecycle.state = 'OPEN'
-      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state when it's CLOSED"))
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change state when it's CLOSED"))
       pool_lifecycle = FactoryGirl.create(:showback_pool, :closed)
       pool_lifecycle.state = 'PROCESSING'
-      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change its state when it's CLOSED"))
+      expect { pool_lifecycle.save }.to raise_error(RuntimeError, _("Pool can't change state when it's CLOSED"))
     end
 
     pending 'it can not exists 2 pools opened from one resource'

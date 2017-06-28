@@ -128,7 +128,8 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   # Find a pool
   def find_pool(res)
     ManageIQ::Consumption::ShowbackPool.find_by(
-        :resource => res)
+        :resource => res,
+        :state    => "OPEN")
   end
 
   #Get the parent of a respurce, we need ancestry here
