@@ -31,6 +31,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       expect(pool.errors.details[:description]). to include(:error => :blank)
     end
 
+    it 'monetizes accumulated cost' do
+      expect(ManageIQ::Consumption::ShowbackPool).to monetize(:accumulated_cost)
+    end
+
     it 'deletes costs associated when deleting the pool' do
       2.times do
         FactoryGirl.create(:showback_charge, :showback_pool => pool)

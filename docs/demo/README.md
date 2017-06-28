@@ -1,8 +1,8 @@
 # Manageiq Demo
 
-## Install the Gem
+## Install the Gem in manageiq
 
-Set in the Gemfile
+Set in the Gemfile (for development, demos, you can use a .rb file in /bundler.d)
 
 ```ruby
 gem "manageiq-consumption",   :git => "https://github.com/miq-consumption/manageiq-consumption.git", :branch => "master"
@@ -15,7 +15,17 @@ PATH_TO_RUBY_SEED_PLAY_FILE is in [/docs/demo/seed_play_data.rb](/docs/demo/seed
 bin/rails r PATH_TO_RUBY_SEED_PLAY_FILE
 ```
 
-## Go to Rails Console
+### You could use a console where the information is deleted after you get out
+
+```ruby
+bin/rails c -s
+```
+
+```ruby
+load PATH_TO_RUBY_SEED_PLAY_FILE
+```
+
+## Go to Rails Console if you haven't used the temporary console
 
 ```ruby
 
@@ -28,7 +38,7 @@ ManageIQ::Consumption::ShowbackUsageType.seed
 ManageIQ::Consumption::ShowbackPricePlan.seed
 
 ```
-We get the first Vm and his host and we define his pool
+We get the first Vm and his host and we define a pool associated to the host
 
 ```ruby
 host = Host.first
@@ -38,6 +48,8 @@ ManageIQ::Consumption::ShowbackPool.new(:name => "Pool host",:description=>"Firs
 ConsumptionManager generate the events and we can get the event of the first vm of this host
 
 ```ruby
+ManageIQ::Consumption::ShowbackEvent.count
+# Returns 0
 ManageIQ::Consumption::ConsumptionManager.generate_events
 ManageIQ::Consumption::ShowbackEvent.where(:resource => host.vms.first)
 ```
@@ -64,7 +76,9 @@ pool = ManageIQ::Consumption::ShowbackPool.first
 pool.showback_events
 ```
 
-If we get the sum of this charges we get #<Money fractional:0 currency:USD>
+If we get the sum of this charges we get #<Money fractional:0 currency:USD>,
+there are not charges nor price plans associated to the pool
+
 ```ruby
 pool.sum_of_charges
 ```
@@ -73,6 +87,7 @@ Now we can add some charges
 ```ruby
 pool.add_charge(pool.showback_events.first,10)
 pool.add_charge(pool.showback_events.second,20)
+pool.showback_charges.reload
 ```
 And if we make now the sum we get the total <Money fractional:30 currency:USD>
 ```ruby
@@ -99,3 +114,4 @@ ManageIQ::Consumption::ShowbackRate.create(:showback_price_plan => plan,
                                            :dimension           => "max_number_of_cpu").save!
 ```
 
+Now the rate is associated to the price plan, and thus if you call calculate_charge in the pool it will use it
