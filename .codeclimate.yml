@@ -21,6 +21,7 @@ exclude_paths:
 - "test/"
 - "tmp/"
 - "vendor/assets/"
+- "lib/manageiq/consumption/version.rb"
 engines:
   brakeman:
     # very slow :sad_panda:
