@@ -163,8 +163,6 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
     ManageIQ::Consumption::ShowbackPricePlan.first
   end
 
-  protected
-
   def find_charge(input)
     if input.kind_of? ManageIQ::Consumption::ShowbackEvent
       showback_charges.find_by :showback_event => input, :showback_pool => self
