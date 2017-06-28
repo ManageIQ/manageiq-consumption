@@ -2,6 +2,11 @@
 
 # Demo
 
-Go to de the [demo](/docs/demo) section
+Go to [demo](/docs/demo) section
+
+# Benchmarks
+
+Go to [benchmarks](/docs/benchmarks) section
+
 # Architecture
 
