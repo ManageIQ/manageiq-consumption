@@ -23,7 +23,12 @@ for i in 1..9 do
   h.hardware   = generateHardware(i)
   h.hostname   = "hostname_#{i}"
   h.vmm_vendor = "redhat"
-  h.ems_id        = ext.id
+  h.ems_id     = ext.id
+  if i%2==0
+    h.tags=Tag.where(:name => "/managed/location/ny")
+  else
+    h.tags=Tag.where(:name => "/managed/location/chicago")
+  end
   h.save
   for n in 1..4 do
     v      = Vm.new
@@ -35,9 +40,13 @@ for i in 1..9 do
     v.host_id = h.id
     v.ems_id = ext.id
     v.save
-
+    if i%2==0
+      v.tags=Tag.where(:name => "/managed/location/ny")
+    else
+      v.tags=Tag.where(:name => "/managed/location/chicago")
+    end
+    v.save
     date_seed = DateTime.now + 5.hours
-
     times = [
         date_seed,
         date_seed + 1.days,
