@@ -10,6 +10,7 @@ class ManageIQ::Consumption::ShowbackRate < ApplicationRecord
   validates :dimension,   :presence => true
 
   serialize :screener, JSON # Implement data column as a JSON
+  default_value_for :screener, { }
 
   def name
     "#{category}:#{dimension}"

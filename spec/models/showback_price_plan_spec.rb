@@ -98,24 +98,81 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       pending 'calculates costs when there is no rate'
       pending 'calculates costs when one rate applies'
       pending 'calculates costs when more than one rate applies'
+
+      let(:event) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :with_tags_in_context) }
+      let(:fixed_rate)    { Money.new(11) }
+      let(:variable_rate) { Money.new(7) }
+      let(:plan)  { FactoryGirl.create(:showback_price_plan) }
+      let(:rate)  { FactoryGirl.build(:showback_rate,
+                                      :with_screener,
+                                      :showback_price_plan => plan,
+                                      :fixed_rate => fixed_rate,
+                                      :variable_rate => variable_rate) }
+      let(:rate2) { FactoryGirl.build(:showback_rate,
+                                      :showback_price_plan => plan,
+                                      :fixed_rate => fixed_rate,
+                                      :variable_rate => variable_rate) }
+
+      it 'calculates costs when rate is not found' do
+        event.save
+        event.reload
+        # test that the event has the information we need in data
+        expect(event.data['CPU']).not_to be_nil
+        expect(event.data['CPU']['average']).not_to be_nil
+        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
+        # Make rate category not found
+        rate.category = 'not-found'
+        rate.save
+        expect(plan.calculate_cost(event)).to eq(Money.new(0))
+      end
+
+      it 'calculates costs with one rate' do
+        event.save
+        event.reload
+        # test that the event has the information we need in data
+        expect(event.data['CPU']).not_to be_nil
+        expect(event.data['CPU']['average']).not_to be_nil
+        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
+        rate.category  = 'CPU'
+        rate.dimension = 'max_number_of_cpu'
+        rate.save
+        # Rating now should return the value
+        expect(plan.calculate_cost(event)).to eq(Money.new(0))
+      end
+
+      it 'calculates costs when more than one rate applies' do
+        event.save
+        event.reload
+        # test that the event has the information we need in data
+        expect(event.data['CPU']).not_to be_nil
+        expect(event.data['CPU']['average']).not_to be_nil
+        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
+        rate.category  = 'CPU'
+        rate.dimension = 'max_number_of_cpu'
+        rate.save
+        rate2.dimension = 'average'
+        rate2.category  = 'CPU'
+        rate2.save
+        # Rating now should return the value
+        expect(plan.calculate_cost(event)).to eq(Money.new(rate.fixed_rate + (event.data['CPU']['average'] *rate.variable_rate)))
+      end
+
     end
   end
 
-  context ".seed" do
-    before(:all) do
-      @expected_showback_price_plan_count = 1
-      FactoryGirl.create(:miq_enterprise, :name => 'Enterprise')
+  context '.seed' do
+    let(:expected_showback_price_plan_count) { 1 }
+    let!(:resource) { FactoryGirl.create(:miq_enterprise, :name => 'Enterprise') }
+
+    it 'empty table' do
+      described_class.seed
+      expect(described_class.count).to eq(expected_showback_price_plan_count)
     end
 
-    it "empty table" do
-      described_class.seed
-      expect(described_class.count).to eq(@expected_showback_price_plan_count)
-    end
-
-    it "run twice" do
+    it 'run twice' do
       described_class.seed
       described_class.seed
-      expect(described_class.count).to eq(@expected_showback_price_plan_count)
+      expect(described_class.count).to eq(expected_showback_price_plan_count)
     end
   end
 end

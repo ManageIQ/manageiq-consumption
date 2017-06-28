@@ -3,6 +3,9 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
 
   belongs_to :resource, :polymorphic => true
 
+  monetize :accumulated_cost_subunits
+  default_value_for :accumulated_cost, Money.new(0)
+
   before_save :check_pool_state, :if => :state_changed?
 
   has_many :showback_charges,

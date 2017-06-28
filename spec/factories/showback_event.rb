@@ -4,15 +4,21 @@ FactoryGirl.define do
     start_time                4.hours.ago
     end_time                  1.hour.ago
     context                   {}
-    data { { } }
+    data                      {}
+
+    trait :with_tags_in_context do
+      context { { "tag"=>{"environment"=>["test"] } } }
+    end
+
+    #trait :with_several_tags_in_context do
+
+    trait :with_vm_data do
+      data { { "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 } } }
+    end
 
     trait :full_month do
       start_time  DateTime.now.utc.beginning_of_month
       end_time    DateTime.now.utc.end_of_month
-    end
-
-    trait :with_vm_data do
-      data { { "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 } } }
     end
 
     trait :first_half_month do
