@@ -21,6 +21,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   validates :start_time, :end_time, :presence => true
   validates :state,                 :presence => true, :inclusion => { :in => %w(OPEN PROCESSING CLOSED) }
 
+
   # Test that end_time happens later than start_time.
   validate  :start_time_before_end_time
 
@@ -30,24 +31,24 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
 
   def check_pool_state
     case state_was
-      when 'OPEN' then raise _("Pool can't change its state to CLOSED from OPEN") unless state != 'CLOSED'
-      when 'PROCESSING'
-        raise _("Pool can't change its state to OPEN from PROCESSING") unless state != 'OPEN'
-        s_time = (self.start_time + 1.months).beginning_of_month
-        if self.end_time != self.start_time.end_of_month
-          s_time = self.end_time
-        else
-          s_time = (self.start_time + 1.month).beginning_of_month
-        end
-        e_time = s_time.end_of_month
-        ManageIQ::Consumption::ShowbackPool.create(:name => self.name,
-                              :description => self.description,
-                              :resource    => self.resource,
-                              :start_time  => s_time,
-                              :end_time    => e_time,
-                              :state       => "OPEN"
-        ) unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => self.resource, :start_time  => s_time)
-      when 'CLOSED' then raise _("Pool can't change its state when it's CLOSED")
+      when 'OPEN'
+         raise _("Pool can't change state to CLOSED from OPEN") unless state != 'CLOSED'
+         s_time = (self.start_time + 1.months).beginning_of_month
+         if self.end_time != self.start_time.end_of_month
+           s_time = self.end_time
+         else
+           s_time = (self.start_time + 1.month).beginning_of_month
+         end
+         e_time = s_time.end_of_month
+         ManageIQ::Consumption::ShowbackPool.create(:name => self.name,
+                                                    :description => self.description,
+                                                    :resource    => self.resource,
+                                                    :start_time  => s_time,
+                                                    :end_time    => e_time,
+                                                    :state       => "OPEN"
+         ) unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => self.resource, :start_time  => s_time)
+      when 'PROCESSING' then raise _("Pool can't change state to OPEN from PROCESSING") unless state != 'OPEN'
+      when 'CLOSED' then raise _("Pool can't change state when it's CLOSED")
     end
   end
 
