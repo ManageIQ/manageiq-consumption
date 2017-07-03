@@ -1,4 +1,10 @@
+#
 # Helper for unit converters
+#
+# Allows the user to find distance between prefixes, and also to convert between units.
+# It also allows the user to extract the prefix from a unit 'Mb' -> 'M'
+#
+#
 
 module ManageIQ::Consumption
   module UnitsConverterHelper
