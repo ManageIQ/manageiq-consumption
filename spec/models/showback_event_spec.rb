@@ -53,7 +53,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
         next unless showback_event.resource.type.ends_with?(measure_type.category)
         hash[measure_type.measure] = {}
         measure_type.dimensions.each do |dim|
-          hash[measure_type.measure][dim] = 0
+          hash[measure_type.measure][dim] = 0 unless measure_type.measure == "TEMPLATE"
         end
       end
       showback_event.generate_data
@@ -382,6 +382,33 @@ describe ManageIQ::Consumption::ShowbackEvent do
         vm.reload
         event.collect_tags
         expect(event.context).to eq({"tag"=>{"environment"=>["test"]}})
+      end
+    end
+
+    context 'template methods' do
+      before do
+        t1 = Time.now
+        t0 = t1 - 1.hours
+        @event = FactoryGirl.create(:showback_event,
+                                   :start_time => DateTime.now.utc.beginning_of_month,
+                                   :end_time => DateTime.now.utc.beginning_of_month + 2.days,
+                                   :resource => vm)
+        @event.data = {"TEMPLATE" => {
+            t0 => {"cores"  => [2,"cores"],
+                   "memory" => [2048,"Mb"]},
+            t1 => {"cores"  => [4,"cores"],
+                   "memory" =>[4096,"Mb"]}
+        }}
+      end
+
+      it "Get last template" do
+        expect(@event.get_last_template).to eq({"cores"  => [4,"cores"],
+                                                        "memory" =>[4096,"Mb"]})
+      end
+
+      it "Get key template" do
+        expect(@event.get_key_template("cores")).to eq([4,"cores"])
+        expect(@event.get_key_template("memory")).to eq([4096,"Mb"])
       end
     end
 

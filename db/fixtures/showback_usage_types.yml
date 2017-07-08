@@ -4,6 +4,10 @@
   :measure: "CPU"
   :dimensions: ["average", "number", "max_number_of_cpu"]
 - :category: "Vm"
+  :description: "Template Showback of VM"
+  :measure: "TEMPLATE"
+  :dimensions: ["number","memory_reserve"]
+- :category: "Vm"
   :description: "Calculate MEM Showback of VM"
   :measure: "MEM"
   :dimensions: ["total_mem"]
@@ -15,3 +19,7 @@
   :description: "Calculate MEM Showback of Container"
   :measure: "MEM"
   :dimensions: ["total_mem"]
+- :category: "Container"
+  :description: "Template Showback of VM"
+  :measure: "FLAVOR"
+  :dimensions: ["number","memory_reserve"]
