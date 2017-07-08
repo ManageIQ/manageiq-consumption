@@ -34,6 +34,14 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     tc
   end
 
+  def bill(start_t, end_t)
+    t = Money.new(0)
+    ManageIQ::Consumption::ShowbackPool.where(:state => "CLOSED",:resource => resource).each do |pool|
+      pool.showback_charges.each do |charge|
+        t += charge.cost
+      end
+    end
+  end
   #
   # Seeding one global price plan in the system that will be used as a fallback
   #
