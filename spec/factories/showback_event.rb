@@ -3,8 +3,8 @@ FactoryGirl.define do
     association :resource, :factory => :vm, :strategy => :build_stubbed
     start_time                4.hours.ago
     end_time                  1.hour.ago
-    context                   {}
-    data                      {}
+    context                   { { } }
+    data                      { { } }
 
     trait :with_tags_in_context do
       context { { "tag"=>{"environment"=>["test"] } } }
