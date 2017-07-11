@@ -1,4 +1,5 @@
 class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
+
   self.table_name = 'showback_price_plans'
   has_many :showback_rates, :dependent => :destroy, :inverse_of => :showback_price_plan
   belongs_to :resource, :polymorphic => true
@@ -21,10 +22,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     # For each group, select the one applying
     rates_hash.each do |_, xvalue|
       xvalue.each do |rate|
-        # delete one hash from the other, so if it is empty
-        result_hash = rate.screener
-        result_hash.extract!(event.context || Hash.new())
-        next unless result_hash == {}
+        next unless ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, rate.screener
         # TODO Find the tier (can be more than one)
         # Calculate the measure applicable to each tier
         measure = event.get_measure(rate.category, rate.dimension)
