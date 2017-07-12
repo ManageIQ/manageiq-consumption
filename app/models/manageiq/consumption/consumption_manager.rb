@@ -57,4 +57,19 @@ class ManageIQ::Consumption::ConsumptionManager
     e.assign_by_tag
     e.save!
   end
+
+  def self.seed
+    ManageIQ::Consumption::ShowbackUsageType.seed
+    ManageIQ::Consumption::ShowbackPricePlan.seed
+  end
+
+  private
+
+  def self.load_column_units
+    File.exist?(seed_file_name) ? YAML.load_file(seed_file_name) : []
+  end
+
+  def self.seed_file_name
+    @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("app/models/manageiq/consumption","showback_column_units.yml")
+  end
 end
