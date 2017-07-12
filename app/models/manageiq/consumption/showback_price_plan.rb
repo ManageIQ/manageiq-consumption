@@ -8,14 +8,13 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   validates :description, :presence => true
   validates :resource, :presence => true
 
-
   def calculate_cost(event)
     # Accumulator
     tc = Money.new(0)
     # For each rate in the price_plan, try to find a measure, and if that exists, add rate
     # Get all rates for the price plan
     # Group them in category + dimension
-    rates_hash = Hash.new { |h, k| h[k] = Array.new } # Create an array for each new value
+    rates_hash = Hash.new { |h, k| h[k] = [] } # Create an array for each new value
     showback_rates.find_each do |x|
       rates_hash[x.name].push(x)
     end
@@ -51,7 +50,6 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     end
   end
 
-  private
 
   def self.seed_file_name
     @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("db", "fixtures", "#{table_name}.yml")

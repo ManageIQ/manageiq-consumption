@@ -46,8 +46,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
-      let(:rate)  { FactoryGirl.build(:showback_rate, :showback_price_plan => plan, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
-      let(:rate2) { FactoryGirl.build(:showback_rate, :showback_price_plan => plan, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
+      let(:rate)  do
+        FactoryGirl.build(:showback_rate,
+                          :showback_price_plan => plan,
+                          :fixed_rate          => fixed_rate,
+                          :variable_rate       => variable_rate)
+      end
+      let(:rate2) do
+        FactoryGirl.build(:showback_rate,
+                          :showback_price_plan => plan,
+                          :fixed_rate => fixed_rate,
+                          :variable_rate => variable_rate)
+      end
 
       it 'calculates costs when rate is not found' do
         event.save
@@ -103,15 +113,19 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
-      let(:rate)  { FactoryGirl.build(:showback_rate,
-                                      :with_screener,
-                                      :showback_price_plan => plan,
-                                      :fixed_rate => fixed_rate,
-                                      :variable_rate => variable_rate) }
-      let(:rate2) { FactoryGirl.build(:showback_rate,
-                                      :showback_price_plan => plan,
-                                      :fixed_rate => fixed_rate,
-                                      :variable_rate => variable_rate) }
+      let(:rate)  do
+        FactoryGirl.build(:showback_rate,
+                          :with_screener,
+                          :showback_price_plan => plan,
+                          :fixed_rate          => fixed_rate,
+                          :variable_rate       => variable_rate)
+      end
+      let(:rate2) do
+        FactoryGirl.build(:showback_rate,
+                          :showback_price_plan => plan,
+                          :fixed_rate          => fixed_rate,
+                          :variable_rate       => variable_rate)
+      end
 
       it 'calculates costs when rate is not found' do
         event.save
