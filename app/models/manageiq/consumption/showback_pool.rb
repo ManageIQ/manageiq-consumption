@@ -21,7 +21,6 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
   validates :start_time, :end_time, :presence => true
   validates :state,                 :presence => true, :inclusion => { :in => %w(OPEN PROCESSING CLOSED) }
 
-
   # Test that end_time happens later than start_time.
   validate  :start_time_before_end_time
 
@@ -31,24 +30,25 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
 
   def check_pool_state
     case state_was
-      when 'OPEN'
-         raise _("Pool can't change state to CLOSED from OPEN") unless state != 'CLOSED'
-         s_time = (self.start_time + 1.months).beginning_of_month
-         if self.end_time != self.start_time.end_of_month
-           s_time = self.end_time
-         else
-           s_time = (self.start_time + 1.month).beginning_of_month
-         end
-         e_time = s_time.end_of_month
-         ManageIQ::Consumption::ShowbackPool.create(:name => self.name,
-                                                    :description => self.description,
-                                                    :resource    => self.resource,
-                                                    :start_time  => s_time,
-                                                    :end_time    => e_time,
-                                                    :state       => "OPEN"
-         ) unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => self.resource, :start_time  => s_time)
-      when 'PROCESSING' then raise _("Pool can't change state to OPEN from PROCESSING") unless state != 'OPEN'
-      when 'CLOSED' then raise _("Pool can't change state when it's CLOSED")
+    when 'OPEN' then
+      raise _("Pool can't change state to CLOSED from OPEN") unless state != 'CLOSED'
+      # s_time = (self.start_time + 1.months).beginning_of_month # This is never used
+      if end_time != start_time.end_of_month
+        s_time = end_time
+      else
+        s_time = (start_time + 1.month).beginning_of_month
+      end
+      e_time = s_time.end_of_month
+      unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => resource, :start_time => s_time)
+        ManageIQ::Consumption::ShowbackPool.create(:name        => name,
+                                                   :description => description,
+                                                   :resource    => resource,
+                                                   :start_time  => s_time,
+                                                   :end_time    => e_time,
+                                                   :state       => 'OPEN')
+      end
+    when 'PROCESSING' then raise _("Pool can't change state to OPEN from PROCESSING") unless state != 'OPEN'
+    when 'CLOSED' then raise _("Pool can't change state when it's CLOSED")
     end
   end
 
@@ -58,7 +58,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
       if showback_events.include?(event)
         errors.add(:showback_events, 'duplicate')
       else
-        charge = ManageIQ::Consumption::ShowbackCharge.new(:showback_event  => event, :showback_pool => self)
+        charge = ManageIQ::Consumption::ShowbackCharge.new(:showback_event => event, :showback_pool => self)
         charge.save
       end
     else
@@ -137,7 +137,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
       ch.cost = ch.calculate_cost(find_price_plan) || Money.new(0)
       save
     elsif input.nil?
-      self.errors.add(:showback_charge, 'not found')
+      errors.add(:showback_charge, 'not found')
       Money.new(0)
     else
       input.errors.add(:showback_charge, 'not found')
@@ -169,8 +169,6 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
       showback_charges.find_by :showback_event => input, :showback_pool => self
     elsif (input.kind_of? ManageIQ::Consumption::ShowbackCharge) && (input.showback_pool == self)
       input
-    else
-      nil
     end
   end
 end
