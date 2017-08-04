@@ -2,9 +2,8 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackEvent do
+  let(:showback_event) { FactoryGirl.build(:showback_event) }
   context "validations" do
-    let(:showback_event) { FactoryGirl.build(:showback_event) }
-
     it "has a valid factory" do
       expect(showback_event).to be_valid
     end
@@ -45,7 +44,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       expect(showback_event).to be_valid
     end
 
-    it 'should generate a data' do
+    it 'should generate data' do
       showback_event.data = {}
       showback_event.resource = FactoryGirl.create(:vm)
       hash = {}

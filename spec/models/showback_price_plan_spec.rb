@@ -2,6 +2,11 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
+  # We need to ShowbackUsageType list to know what measures we should be looking for
+  before(:all) do
+    ManageIQ::Consumption::ShowbackUsageType.seed
+  end
+
   context 'basic tests' do
     let(:plan) { FactoryGirl.build(:showback_price_plan) }
 
@@ -42,21 +47,27 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
     end
 
     context 'rating with no context' do
-      let(:event) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
-      let(:fixed_rate)    { Money.new(11) }
-      let(:variable_rate) { Money.new(7) }
+      let(:event)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
+      let(:fixed_rate)     { Money.new(11) }
+      let(:variable_rate)  { Money.new(7) }
+      let(:fixed_rate2)    { Money.new(5) }
+      let(:variable_rate2) { Money.new(13) }
+      let(:dimension)      { 'CPU#average' }
+      let(:dimension2)     { 'CPU#max_number_of_cpu' }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
         FactoryGirl.build(:showback_rate,
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
-                          :variable_rate       => variable_rate)
+                          :variable_rate       => variable_rate,
+                          :dimension           => dimension)
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
                           :showback_price_plan => plan,
-                          :fixed_rate => fixed_rate,
-                          :variable_rate => variable_rate)
+                          :fixed_rate          => fixed_rate2,
+                          :variable_rate       => variable_rate2,
+                          :dimension           => dimension2)
       end
 
       it 'calculates costs when rate is not found' do
@@ -69,7 +80,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         # Make rate category not found
         rate.category = 'not-found'
         rate.save
-        expect(plan.calculate_cost(event)).to eq(Money.new(0))
+        expect(plan.calculate_total_cost(event)).to eq(Money.new(0))
       end
 
       it 'calculates costs with one rate' do
@@ -79,11 +90,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']).not_to be_nil
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.category  = 'CPU'
-        rate.dimension = 'max_number_of_cpu'
+        rate.dimension = 'CPU#max_number_of_cpu'
         rate.save
         # Rating now should return the value
-        expect(plan.calculate_cost(event)).to eq(Money.new(39))
+        expect(plan.calculate_total_cost(event)).to eq(Money.new(39))
       end
 
       it 'calculates costs when more than one rate applies' do
@@ -93,38 +103,35 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']).not_to be_nil
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.category  = 'CPU'
-        rate.dimension = 'max_number_of_cpu'
+        rate.dimension = 'CPU#max_number_of_cpu'
         rate.save
-        rate2.dimension = 'average'
-        rate2.category  = 'CPU'
+        rate2.dimension = 'CPU#average'
         rate2.save
         # Rating now should return the value
-        expect(plan.calculate_cost(event)).to eq(Money.new(419))
+        expect(plan.calculate_total_cost(event)).to eq(Money.new(729))
       end
     end
 
     context 'rating with context' do
-      pending 'calculates costs when there is no rate'
-      pending 'calculates costs when one rate applies'
-      pending 'calculates costs when more than one rate applies'
-
       let(:event) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :with_tags_in_context) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
+      let(:dimension)     { 'CPU#average' }
+      let(:dimension2)    { 'CPU#max_number_of_cpu' }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
         FactoryGirl.build(:showback_rate,
-                          :with_screener,
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
-                          :variable_rate       => variable_rate)
+                          :variable_rate       => variable_rate,
+                          :dimension           => dimension)
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
-                          :variable_rate       => variable_rate)
+                          :variable_rate       => variable_rate,
+                          :dimension           => dimension2)
       end
 
       it 'calculates costs when rate is not found' do
@@ -137,7 +144,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         # Make rate category not found
         rate.category = 'not-found'
         rate.save
-        expect(plan.calculate_cost(event)).to eq(Money.new(0))
+        expect(plan.calculate_total_cost(event)).to eq(Money.new(0))
       end
 
       it 'calculates costs with one rate' do
@@ -147,11 +154,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']).not_to be_nil
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.category  = 'CPU'
-        rate.dimension = 'max_number_of_cpu'
+        rate.dimension = 'CPU#max_number_of_cpu'
         rate.save
         # Rating now should return the value
-        expect(plan.calculate_cost(event)).to eq(fixed_rate + event.data['CPU']['max_number_of_cpu'] * variable_rate )
+        expect(plan.calculate_total_cost(event)).to eq(fixed_rate + event.data['CPU']['max_number_of_cpu'] * variable_rate )
       end
 
       it 'calculates costs when more than one rate applies' do
@@ -161,14 +167,12 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']).not_to be_nil
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.category  = 'CPU'
-        rate.dimension = 'max_number_of_cpu'
+        rate.dimension = 'CPU#max_number_of_cpu'
         rate.save
-        rate2.dimension = 'average'
-        rate2.category  = 'CPU'
+        rate2.dimension = 'CPU#average'
         rate2.save
         # Rating now should return the value
-        expect(plan.calculate_cost(event)).to eq(rate.fixed_rate + rate2.fixed_rate + event.data['CPU']['average'] * rate.variable_rate + event.data['CPU']['max_number_of_cpu'] * rate2.variable_rate)
+        expect(plan.calculate_total_cost(event)).to eq(rate.fixed_rate + rate2.fixed_rate + event.data['CPU']['average'] * rate.variable_rate + event.data['CPU']['max_number_of_cpu'] * rate2.variable_rate)
       end
 
     end
