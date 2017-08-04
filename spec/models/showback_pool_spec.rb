@@ -131,7 +131,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'throws an error for duplicate events when using Add event to a Pool' do
       pool.add_event(event)
       pool.add_event(event)
-      expect(pool.errors.details[:showback_events]). to include(:error => "duplicate")
+      expect(pool.errors.details[:showback_events]). to include(:error => 'duplicate')
     end
 
     it 'Throw error in add event if it is not of a proper type' do
@@ -208,7 +208,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       enterprise_plan
       expect(pool.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.calculate_charge(nil)
-      expect(pool.errors.details[:showback_charge]). to include(:error => "not found")
+      expect(pool.errors.details[:showback_charge]). to include(:error => 'not found')
       expect(pool.calculate_charge(nil)). to eq(0)
     end
 
@@ -226,8 +226,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
-                         :category => 'CPU',
-                         :dimension => 'average',
+                         :dimension => 'CPU#average',
                          :showback_price_plan => enterprise_plan)
       pool.add_event(event2)
       event2.reload
@@ -235,7 +234,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       charge = pool.showback_charges.find_by(:showback_event => event2)
       charge.cost = Money.new(0)
       expect { pool.calculate_charge(charge) }.to change(charge, :cost).
-          from(Money.new(0)).to(Money.new((event2.data['CPU']['average'] * 12) + 67))
+          from(Money.new(0)).to(Money.new((event2.data['Vm']['CPU']['average'] * 12) + 67))
     end
 
     it '#Add an event' do
@@ -286,8 +285,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
-                         :category => 'CPU',
-                         :dimension => 'average',
+                         :dimension => 'CPU#average',
                          :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.add_event(event)
       pool.add_event(event2)

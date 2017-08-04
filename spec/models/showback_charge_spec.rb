@@ -4,7 +4,7 @@ require 'money-rails/test_helpers'
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
   context 'basic life cycle' do
     let(:charge) { FactoryGirl.build(:showback_charge) }
-    let(:cost) { Money.new(1) }
+    let(:cost)   { Money.new(1) }
 
     it 'has a valid factory' do
       expect(charge).to be_valid
@@ -58,8 +58,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     let(:rate1) do
       FactoryGirl.create(:showback_rate,
                          :showback_price_plan => plan,
-                         :category            => 'CPU',
-                         :dimension           => 'average',
+                         :dimension           => 'CPU#average',
                          :fixed_rate          => fixed_rate1,
                          :variable_rate       => variable_rate1)
     end
@@ -67,8 +66,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     let(:rate2) do
       FactoryGirl.create(:showback_rate,
                          :showback_price_plan => plan2,
-                         :category            => 'CPU',
-                         :dimension           => 'average',
+                         :dimension           => 'CPU#average',
                          :fixed_rate          => fixed_rate2,
                          :variable_rate       => variable_rate2)
     end
@@ -95,7 +93,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(event.data).not_to be_nil # making sure that the default is not empty
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
         expect(charge.showback_event).to eq(event)
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['Vm']['CPU']['average'])
       end
     end
     context 'with price_plan' do
@@ -110,9 +108,9 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['Vm']['CPU']['average'])
         # Test that it changes if you provide a plan
-        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.data['CPU']['average'])
+        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.data['Vm']['CPU']['average'])
       end
 
       it 'raises an error if the plan provider is not working' do
@@ -125,7 +123,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['Vm']['CPU']['average'])
         # Test that it changes if you provide a plan
         expect(charge.calculate_cost("ERROR")).to eq(Money.new(0))
         expect(charge.errors.details[:showback_price_plan]).to include({ :error => "not found" })
