@@ -20,7 +20,7 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
     # Find the price plan, there should always be one as it is seeded(Enterprise)
     price_plan ||= showback_pool.find_price_plan
     if price_plan.class == ManageIQ::Consumption::ShowbackPricePlan
-      cost = price_plan.calculate_cost(showback_event)
+      cost = price_plan.calculate_total_cost(showback_event)
       save
       cost
     else

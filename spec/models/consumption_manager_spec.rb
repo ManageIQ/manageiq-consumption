@@ -52,7 +52,7 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
     expect(ManageIQ::Consumption::ShowbackEvent.all.count).to eq(count + 1)
   end
 
-  it "should generate a showbackevent of service" do
+  it "should generate a ShowbackEvent of service" do
     serv = FactoryGirl.create(:service)
     described_class.generate_events
     expect(ManageIQ::Consumption::ShowbackEvent.first.resource).to eq(serv)
@@ -62,10 +62,14 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
   it "should update the events" do
     event_metric = FactoryGirl.create(:showback_event,:start_time => DateTime.now.utc.beginning_of_month, :end_time => DateTime.now.utc.beginning_of_month + 2.days)
     event_metric.data = {
-        "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 }
+      'Vm' => {
+        'CPU' => { 'average' => 52.67, 'max_number_of_cpu' => 4 }
+      }
     }
     data_new = {
-        "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 }
+      'Vm' => {
+        'CPU' => { 'average' => 52.67, 'max_number_of_cpu' => 4 }
+      }
     }
     @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
     cases = [
@@ -90,9 +94,9 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
     event_metric.resource_id = @vm_metrics.id
     event_metric.resource_type = @vm_metrics.class.name
     event_metric.save!
-    new_average = (event_metric.data["CPU"]["average"].to_d * event_metric.event_days +
+    new_average = (event_metric.data['Vm']['CPU']['average'].to_d * event_metric.event_days +
         event_metric.resource.metrics.for_time_range(event_metric.end_time, nil).average(:cpu_usage_rate_average)) / (event_metric.event_days + 1)
-    data_new["CPU"]["average"] = new_average.to_s
+    data_new['Vm']['CPU']['average'] = new_average.to_s
     described_class.update_events
     event_metric.reload
     expect(event_metric.data).to eq(data_new)

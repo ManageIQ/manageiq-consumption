@@ -8,27 +8,32 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   validates :description, :presence => true
   validates :resource, :presence => true
 
-  def calculate_cost(event)
+  ###################################################################
+  # Calculate the total cost of an event
+  # Called with an event
+  # Returns the total accumulated costs for all rates that apply
+  ###################################################################
+  def calculate_total_cost(event)
     # Accumulator
     tc = Money.new(0)
-    # For each rate in the price_plan, try to find a measure, and if that exists, add rate
-    # Get all rates for the price plan
-    # Group them in category + dimension
-    rates_hash = Hash.new { |h, k| h[k] = [] } # Create an array for each new value
-    showback_rates.find_each do |x|
-      rates_hash[x.name].push(x)
-    end
-    # For each group, select the one applying
-    rates_hash.each do |_, xvalue|
-      xvalue.each do |rate|
-        next unless ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, rate.screener
-        # TODO Find the tier (can be more than one)
-        # Calculate the measure applicable to each tier
-        measure = event.get_measure(rate.category, rate.dimension)
-        tc += rate.rate(measure, event) unless measure.nil?
+    # For each measure type in ShowbackUsageType, I need to find the rates applying to the different dimensions
+    # If there is a rate associated to it, we call it with a measure (that can be 0)
+
+    ManageIQ::Consumption::ShowbackUsageType.all.each do |usage|
+      usage.dimensions.each do |dim|
+        rates = showback_rates.where(category: usage.category, dimension: "#{usage.measure}##{dim}")
+        rates.each do |r|
+          next unless ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, r.screener
+          measure = event.get_measure(r.category, usage.measure, dim)
+          tc += r.rate(measure, event)
+        end
       end
     end
     tc
+  end
+
+  def calculate_total_cost_with_values(event, start_time, end_time)
+
   end
 
   #

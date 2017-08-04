@@ -26,10 +26,10 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   include_concern 'MEM'
 
 
-  self.table_name = "showback_events"
+  self.table_name = 'showback_events'
 
   def start_time_before_end_time
-    errors.add(:start_time, "Start time should be before end time") unless end_time.to_i >= start_time.to_i
+    errors.add(:start_time, 'Start time should be before end time') unless end_time.to_i >= start_time.to_i
   end
 
   # return the parsing error message if not valid JSON; otherwise nil
@@ -68,8 +68,8 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
                                                                               DateTime.now.utc.end_of_month - 1.month)
   end
 
-  def get_measure(category, dimension)
-    data[category][dimension] if (data && data[category])
+  def get_measure(category, measure, dimension)
+    data[category][measure][dimension] if (data && data[category] && data[category][measure])
   end
 
   def update_event
