@@ -2,6 +2,11 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
+  
+  before(:all) do
+    ManageIQ::Consumption::ShowbackUsageType.seed
+  end
+
   context 'basic life cycle' do
     let(:charge) { FactoryGirl.build(:showback_charge) }
     let(:cost) { Money.new(1) }
