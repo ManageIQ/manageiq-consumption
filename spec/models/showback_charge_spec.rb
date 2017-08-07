@@ -51,7 +51,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     end
   end
 
-  context '#price_plan_missing' do
+  context '#validate price_plan_missing and snapshot' do
     let(:event) do
       FactoryGirl.build(:showback_event,
                         :with_vm_data,
@@ -69,6 +69,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
       charge.save
       expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(0)
       expect(charge.calculate_cost).to eq(Money.new(0))
+    end
+
+    it "fails if snapshot of charge is not the event data after create" do
+      event.save
+      charge.save
+      expect(charge.stored_data).to eq(event.data)
+      event.data = {"CPU"=>{"average":2,"max_number_of_cpu":40}}
+      event.save
+      charge.save
+      expect(charge.stored_data).not_to eq(event.data)
     end
   end
   context '#calculate_cost' do
