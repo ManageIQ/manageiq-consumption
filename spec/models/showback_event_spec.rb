@@ -2,9 +2,8 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackEvent do
+  let(:showback_event) { FactoryGirl.build(:showback_event) }
   context "validations" do
-    let(:showback_event) { FactoryGirl.build(:showback_event) }
-
     it "has a valid factory" do
       expect(showback_event).to be_valid
     end
@@ -45,7 +44,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       expect(showback_event).to be_valid
     end
 
-    it 'should generate a data' do
+    it 'should generate data' do
       showback_event.data = {}
       showback_event.resource = FactoryGirl.create(:vm)
       hash = {}
@@ -72,7 +71,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
 
     it 'fails validations with incorrect JSON data' do
       event = FactoryGirl.build(:showback_event, :data => ":-Invalid:\n-JSON")
-      expect(event.validate_format).not_to be_nil
+      expect(event.validate_format).to be_nil
     end
   end
 
@@ -237,9 +236,9 @@ describe ManageIQ::Consumption::ShowbackEvent do
         event.start_time = "2010-04-13T00:00:00Z"
         event.end_time   = "2010-04-14T22:52:30Z"
         event.data = {
-            "CPU" => {
-                "average" => event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average)
-            }
+          "CPU" => {
+              "average" => event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average)
+          }
         }
         new_average = (event.data["CPU"]["average"].to_d * event.event_days +
             event.resource.metrics.for_time_range(event.end_time, nil).average(:cpu_usage_rate_average)) / (event.event_days + 1)
@@ -250,12 +249,12 @@ describe ManageIQ::Consumption::ShowbackEvent do
 
       it 'should return the max number of cpu' do
         event.data = {
-            "CPU" => { "max_number_of_cpu" => 1 }
+          "CPU" => { "max_number_of_cpu" => 1 }
         }
         event.update_event
         expect(event.data).to eq("CPU" => { "max_number_of_cpu" => @vm_metrics.cpu_total_cores })
         event.data = {
-            "CPU" => { "max_number_of_cpu" => 3 }
+          "CPU" => { "max_number_of_cpu" => 3 }
         }
         event.update_event
         expect(event.start_time.month).to eq(event.end_time.month)

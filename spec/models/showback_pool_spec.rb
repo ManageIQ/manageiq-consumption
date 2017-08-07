@@ -2,6 +2,11 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
+
+  before(:all) do
+    ManageIQ::Consumption::ShowbackUsageType.seed
+  end
+
   let(:pool)    { FactoryGirl.build(:showback_pool) }
   let(:event)   { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
   let(:event2)  { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
@@ -226,8 +231,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
-                         :category => 'CPU',
-                         :dimension => 'average',
+                         :dimension => 'CPU#average',
                          :showback_price_plan => enterprise_plan)
       pool.add_event(event2)
       event2.reload
@@ -286,8 +290,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       FactoryGirl.create(:showback_rate,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
-                         :category => 'CPU',
-                         :dimension => 'average',
+                         :dimension => 'CPU#average',
                          :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
       pool.add_event(event)
       pool.add_event(event2)

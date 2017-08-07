@@ -2,6 +2,11 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
+
+  before(:all) do
+    ManageIQ::Consumption::ShowbackUsageType.seed
+  end
+
   context 'basic life cycle' do
     let(:charge) { FactoryGirl.build(:showback_charge) }
     let(:cost) { Money.new(1) }
@@ -46,9 +51,29 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     end
   end
 
+  context '#price_plan_missing' do
+    let(:event) do
+      FactoryGirl.build(:showback_event,
+                        :with_vm_data,
+                        :full_month)
+    end
+
+    let(:charge) do
+      FactoryGirl.build(:showback_charge,
+                        :showback_event => event)
+    end
+
+    it "fails if can't find a price plan" do
+      event.save
+      event.reload
+      charge.save
+      expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(0)
+      expect(charge.calculate_cost).to eq(Money.new(0))
+    end
+  end
   context '#calculate_cost' do
-    let(:cost)   { Money.new(32) }
-    let(:pool)   { FactoryGirl.create(:showback_pool) }
+    let(:cost)           { Money.new(32) }
+    let(:pool)           { FactoryGirl.create(:showback_pool) }
     let!(:plan)          { FactoryGirl.create(:showback_price_plan) } # By default is :enterprise
     let(:plan2)          { FactoryGirl.create(:showback_price_plan) }
     let(:fixed_rate1)    { Money.new(3) }
@@ -58,8 +83,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     let(:rate1) do
       FactoryGirl.create(:showback_rate,
                          :showback_price_plan => plan,
-                         :category            => 'CPU',
-                         :dimension           => 'average',
+                         :dimension           => 'CPU#average',
                          :fixed_rate          => fixed_rate1,
                          :variable_rate       => variable_rate1)
     end
@@ -67,8 +91,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     let(:rate2) do
       FactoryGirl.create(:showback_rate,
                          :showback_price_plan => plan2,
-                         :category            => 'CPU',
-                         :dimension           => 'average',
+                         :dimension           => 'CPU#average',
                          :fixed_rate          => fixed_rate2,
                          :variable_rate       => variable_rate2)
     end
@@ -127,8 +150,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         # Test that it works without a plan
         expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
         # Test that it changes if you provide a plan
-        expect(charge.calculate_cost("ERROR")).to eq(Money.new(0))
-        expect(charge.errors.details[:showback_price_plan]).to include({ :error => "not found" })
+        expect(charge.calculate_cost('ERROR')).to eq(Money.new(0))
+        expect(charge.errors.details[:showback_price_plan]).to include({ :error => 'not found' })
       end
     end
   end

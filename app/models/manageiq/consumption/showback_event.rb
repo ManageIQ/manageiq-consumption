@@ -2,7 +2,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   belongs_to :resource, :polymorphic => true
 
   has_many :showback_charges,
-           :dependent => :destroy,
+           :dependent  => :destroy,
            :inverse_of => :showback_event
   has_many :showback_pools,
            :through    => :showback_charges,
@@ -26,7 +26,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   include_concern 'MEM'
 
 
-  self.table_name = "showback_events"
+  self.table_name = 'showback_events'
 
   def start_time_before_end_time
     errors.add(:start_time, "Start time should be before end time") unless end_time.to_i >= start_time.to_i
@@ -34,15 +34,16 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   # return the parsing error message if not valid JSON; otherwise nil
   def validate_format
+    data = JSON.decode(data) if data.class == Hash
     JSON.parse(data) && nil if data.present?
-  rescue JSON::ParserError => err
-    err.message
+  rescue JSON::ParserError
+    nil
   end
 
   def generate_data
     self.data = {}
     ManageIQ::Consumption::ShowbackUsageType.all.each do |measure_type|
-      next unless resource.type.ends_with?(measure_type.category)
+      next unless resource_type.include?(measure_type.category)
       self.data[measure_type.measure] = {}
       measure_type.dimensions.each do |dim|
         self.data[measure_type.measure][dim] = 0

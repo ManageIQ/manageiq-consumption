@@ -2,6 +2,9 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackRate do
+  before(:all) do
+    ManageIQ::Consumption::ShowbackUsageType.seed
+  end
   context 'validations' do
     let(:showback_rate) { FactoryGirl.build(:showback_rate) }
 
