@@ -13,7 +13,7 @@ FactoryGirl.define do
     #trait :with_several_tags_in_context do
 
     trait :with_vm_data do
-      data { { "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 } } }
+      data { {"CPU"=>{"average":52.67,"max_number_of_cpu":4}} }
     end
 
     trait :full_month do
