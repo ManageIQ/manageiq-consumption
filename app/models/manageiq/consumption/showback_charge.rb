@@ -10,10 +10,15 @@ class ManageIQ::Consumption::ShowbackCharge < ApplicationRecord
   validates :showback_event, :presence => true, :allow_nil => false
 
   serialize :cost, JSON # Implement cost column as a JSON
+  before_create :stored_data_event
 
   def clean_cost
     self.cost = 0
     save
+  end
+
+  def stored_data_event
+    self.stored_data = self.showback_event.data
   end
 
   def calculate_cost(price_plan = nil)
