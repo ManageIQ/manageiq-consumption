@@ -4,8 +4,7 @@
 /_yardoc/
 /doc/
 /pkg/
-/spec/reports/
-/spec/manageiq/
+/spec/reports
 /spec/manageiq
 
 
