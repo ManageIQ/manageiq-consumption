@@ -2,6 +2,11 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
+
+  before(:all) do
+    ManageIQ::Consumption::ShowbackUsageType.seed
+  end
+
   let(:pool)    { FactoryGirl.build(:showback_pool) }
   let(:event)   { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
   let(:event2)  { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
