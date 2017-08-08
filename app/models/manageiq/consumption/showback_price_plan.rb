@@ -17,9 +17,8 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     # Accumulator
     tc = Money.new(0)
     # For each measure type in ShowbackUsageType, I need to find the rates applying to the different dimensions
-    # If there is a rate associated to it, we call it with a measure (that can be 0)
-
-    ManageIQ::Consumption::ShowbackUsageType.all.each do |usage|
+    # If there is a rate associated to it, we call it with a measure (that can be 0
+    ManageIQ::Consumption::ShowbackUsageType.where(category: event.resource.type).each do |usage|
       usage.dimensions.each do |dim|
         rates = showback_rates.where(category: usage.category, dimension: "#{usage.measure}##{dim}")
         rates.each do |r|
@@ -27,6 +26,25 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
                       (event.resource_type.include? r.category)
           measure = event.get_measure(usage.measure, dim)
           tc += r.rate(measure, event)
+        end
+      end
+    end
+    tc
+  end
+
+  def calculate_total_cost_input(category, data, time_span, cycle_duration, context)
+    # Accumulator
+    tc = Money.new(0)
+    # For each measure type in ShowbackUsageType, I need to find the rates applying to the different dimensions
+    # If there is a rate associated to it, we call it with a measure (that can be 0)
+    ManageIQ::Consumption::ShowbackUsageType.where(category: category).each do |usage|
+      usage.dimensions.each do |dim|
+        rates = showback_rates.where(category: usage.category, dimension: "#{usage.measure}##{dim}")
+        rates.each do |r|
+          next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? context, r.screener) &&
+              (event.resource_type.include? r.category)
+          val = data[measure][dimension] if ( data && data[measure])
+          tc += r.rate_with_values(val, time_span, cycle_duration)
         end
       end
     end
