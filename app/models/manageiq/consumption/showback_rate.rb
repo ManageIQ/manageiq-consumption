@@ -29,23 +29,23 @@ class ManageIQ::Consumption::ShowbackRate < ApplicationRecord
 
   private
 
-  def occurrence(_value, time_span, month_duration)
+  def occurrence(_value, time_span, cycle_duration)
     # Returns fixed_cost + variable_cost prorated on time
     # total_time = calculate_total_time(event)
     # [event.fixed_cost, variable_cost * (end_time - start_time) / total_time]
-    fixed_rate + (variable_rate * time_span / month_duration)
+    fixed_rate + (variable_rate * time_span / cycle_duration)
   end
 
-  def duration(value, time_span, month_duration)
+  def duration(value, time_span, cycle_duration)
     # Returns fixed_cost + event_measure * variable_cost * (end_time - start_time) / total_time
     # total_time = calculate_total_time(event)
     # [event.fixed_cost, event_measure * (event.end_time - event.start_time) / total_time]
-    (fixed_rate * time_span / month_duration) + (value * variable_rate * time_span / month_duration)
+    (fixed_rate * time_span / cycle_duration) + (value * variable_rate * time_span / cycle_duration)
   end
 
-  def quantity(value, time_span, month_duration)
+  def quantity(value, time_span, cycle_duration)
     # event.fixed_cost + variable_cost * event
     # [event.fixed_cost, event_measure * variable_cost]
-    (fixed_rate * time_span / month_duration) + (value * variable_rate)
+    (fixed_rate * time_span / cycle_duration) + (value * variable_rate)
   end
 end
