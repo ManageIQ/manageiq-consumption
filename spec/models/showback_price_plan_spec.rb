@@ -47,7 +47,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
     end
 
     context 'rating with no context' do
-      let(:event)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month) }
+      let(:resource)       { FactoryGirl.create(:vm) }
+      let(:event)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, resource: resource) }
       let(:fixed_rate)     { Money.new(11) }
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
@@ -83,6 +84,17 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(plan.calculate_total_cost(event)).to eq(Money.new(0))
       end
 
+      it 'calculates costs when rate is not found and event data' do
+        rate.category = 'not-found'
+        rate.save
+        category = event.resource.type
+        data = event.data
+        time_span = event.time_span
+        cycle_duration = event.month_duration
+        context = event.context
+        expect(plan.calculate_total_cost_input(category, data, time_span, cycle_duration, context)).to eq(plan.calculate_total_cost(event))
+      end
+
       it 'calculates costs with one rate' do
         event.save
         event.reload
@@ -113,7 +125,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
     end
 
     context 'rating with context' do
-      let(:event) { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :with_tags_in_context) }
+      let(:resource)      { FactoryGirl.create(:vm) }
+      let(:event)         { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :with_tags_in_context, resource: resource) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:dimension)     { 'CPU#average' }
