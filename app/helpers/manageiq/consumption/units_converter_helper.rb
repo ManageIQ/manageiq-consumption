@@ -9,6 +9,7 @@
 module ManageIQ::Consumption
   module UnitsConverterHelper
     SYMBOLS = %w(b B Hz bps Bps).freeze # What symbols are going to be searched
+
     SI_PREFIX = { :''  => { name: '',
                             value: 1 },
                   :'K' => { name: 'kilo',
