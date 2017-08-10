@@ -26,11 +26,10 @@ module ManageIQ::Consumption::ShowbackEvent::CPU
   #
   def CPU_max_number_of_cpu(value)
     if resource.class.name.ends_with?("Container")
-      numcpus = resource.vim_performance_states.last.try(:state_data) ? resource.vim_performance_states.last.state_data[:numvcpus] : 0
+      numcpus = resource.vim_performance_states.last.state_data[:numvcpus]
     else
       numcpus = if resource.methods.include?(:cpu_total_cores) then resource.cpu_total_cores else 0 end
     end
-
-    [value, numcpus].compact.max.to_i
+    [value, numcpus].max.to_i
   end
 end
