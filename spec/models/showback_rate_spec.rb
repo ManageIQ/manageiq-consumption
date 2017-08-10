@@ -183,7 +183,7 @@ module ManageIQ::Consumption
       context 'empty #context, modified per_time' do
         it 'should charge an event by occurrence' do
           showback_rate.calculation = 'occurrence'
-          showback_rate.fixed_rate_per_time =    'daily'
+          showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
           days_in_month = Time.days_in_month(Time.now.month)
           expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(days_in_month * (11 + 7)))
@@ -191,12 +191,18 @@ module ManageIQ::Consumption
 
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(11 + 21))
+          showback_rate.fixed_rate_per_time    = 'daily'
+          showback_rate.variable_rate_per_time = 'daily'
+          days_in_month = Time.days_in_month(Time.now.month)
+          expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(days_in_month * (11 + 21)))
         end
 
         it 'should charge an event by quantity' do
           showback_rate.calculation = 'quantity'
-          expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(11 + 21))
+          showback_rate.fixed_rate_per_time    = 'daily'
+          showback_rate.variable_rate_per_time = 'daily'
+          days_in_month = Time.days_in_month(Time.now.month)
+          expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(days_in_month * (11 + 21)))
         end
       end
 
@@ -234,6 +240,32 @@ module ManageIQ::Consumption
         it 'should charge an event by quantity' do
           showback_rate.calculation = 'quantity'
           expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(21))
+        end
+      end
+
+      context 'empty #context, modified per_time' do
+        it 'should charge an event by occurrence' do
+          showback_rate.calculation = 'occurrence'
+          showback_rate.fixed_rate_per_time    = 'daily'
+          showback_rate.variable_rate_per_time = 'daily'
+          days_in_month = Time.days_in_month(Time.now.month)
+          expect(showback_rate.rate(3, showback_event_hm)).to eq( Money.new(days_in_month * (11 + 7 * proration)))
+        end
+
+        it 'should charge an event by duration' do
+          showback_rate.calculation = 'duration'
+          showback_rate.fixed_rate_per_time    = 'daily'
+          showback_rate.variable_rate_per_time = 'daily'
+          days_in_month = Time.days_in_month(Time.now.month)
+          expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(days_in_month * (11 * proration + 7 * 3 * proration)))
+        end
+
+        it 'should charge an event by quantity' do
+          showback_rate.calculation = 'quantity'
+          showback_rate.fixed_rate_per_time    = 'daily'
+          showback_rate.variable_rate_per_time = 'daily'
+          days_in_month = Time.days_in_month(Time.now.month)
+          expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(days_in_month * (11 * proration + 7 * 3)))
         end
       end
 
