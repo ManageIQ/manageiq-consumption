@@ -27,57 +27,61 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
 
     it 'hourly' do
       interval = 'hourly'
-      interval_duration = 1.hour
+      results = [1, 1, 1, 1, 2, 5, 24, 36, 168, 236, 1.month * 24]
+      expect(results.length).to eq(time_values.length)
       start_t = Time.now.beginning_of_month
-      time_values.each do |x|
+      time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(start_t, end_t, interval)
+        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(end_t - start_t, interval)
         expect(conversion)
-          .to eq(x.seconds.div interval_duration),
-              "Expected with #{interval} for #{x} s to match #{x.seconds.div interval_duration}, start: #{start_t}, end: #{end_t}, got #{conversion}"
+          .to eq(results[y]),
+              "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
       end
     end
 
     it 'daily' do
       interval = 'daily'
-      interval_duration = 1.day
+      results = [1, 1, 1, 1, 1, 1, 1, 2, 7, 10, 1.month]
+      expect(results.length).to eq(time_values.length)
       start_t = Time.now.beginning_of_month
-      time_values.each do |x|
+      time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(start_t, end_t, interval)
+        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(end_t - start_t, interval)
         expect(conversion)
-          .to eq(x.seconds.div interval_duration),
-              "Expected with #{interval} for #{x} s to match #{x.seconds.div interval_duration}, start: #{start_t}, end: #{end_t}, got #{conversion}"
+          .to eq(results[y]),
+              "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
       end
     end
 
     it 'weekly' do
       interval = 'weekly'
-      interval_duration = 1.week
+      results = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 5]
+      expect(results.length).to eq(time_values.length)
       start_t = Time.now.beginning_of_month
-      time_values.each do |x|
+      time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(start_t, end_t, interval)
+        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(end_t - start_t, interval)
         expect(conversion)
-            .to eq(x.seconds.div interval_duration),
-                "Expected with #{interval} for #{x} s to match #{x.seconds.div interval_duration}, start: #{start_t}, end: #{end_t}, got #{conversion}"
+            .to eq(results[y]),
+                "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
       end
     end
 
     it 'monthly' do
       interval = 'monthly'
-      interval_duration = 1.month
+      results = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      expect(results.length).to eq(time_values.length)
       start_t = Time.now.beginning_of_month
-      time_values.each do |x|
+      time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(start_t, end_t, interval)
+        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(end_t - start_t, interval)
         expect(conversion)
-            .to eq(x.seconds.div interval_duration),
-                "Expected with #{interval} for #{x} s to match #{x.seconds.div interval_duration}, start: #{start_t}, end: #{end_t}, got #{conversion}"
+            .to eq(results[y]),
+                "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
       end
     end
   end
