@@ -4,11 +4,11 @@ FactoryGirl.define do
     dimension              { %w[CPU#average CPU#number CPU#max_number_of_cpu].sample }
     sequence(:concept)     { |n| "Concept #{n}" }
     fixed_rate             { Money.new(rand(5..200), 'USD') }
-    fixed_rate_per_unit    { nil }
-    fixed_rate_per_time    { nil }
+    fixed_rate_per_unit    { '' }
+    fixed_rate_per_time    { 'monthly' }
     variable_rate          { Money.new(rand(5..200), 'USD') }
-    variable_rate_per_unit { nil }
-    variable_rate_per_time { nil }
+    variable_rate_per_unit { '' }
+    variable_rate_per_time { 'monthly' }
     screener               { {} }
     calculation            'duration'
     showback_price_plan
