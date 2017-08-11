@@ -17,6 +17,10 @@ module ManageIQ::Consumption::ShowbackEvent::CPU
     return value
   end
 
+  def CPU_allocated_number_cpus(_value)
+    @metrics.average(:derived_vm_numvcpus)
+  end
+
   #
   #  Return the max number of cpu for object
   #
