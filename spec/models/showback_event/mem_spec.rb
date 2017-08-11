@@ -33,9 +33,12 @@ describe ManageIQ::Consumption::ShowbackEvent::MEM do
     end
 
     it "Calculate MEM_total_mem" do
-      expect(event.MEM_total_mem(1024)).to eq(1024)
-      expect(event.MEM_total_mem(0)).to eq(1024)
-      expect(event.MEM_total_mem(2048)).to eq(2048)
+      #validate that if memory is the same stored the same
+      expect(event.MEM_total_mem(4096)).to eq(4096)
+      #validate taht if memory values is 0 stored the same
+      expect(event.MEM_total_mem(0)).to eq(4096)
+      #validate
+      expect(event.MEM_total_mem(8492)).to eq(8492)
     end
   end
 
@@ -57,9 +60,12 @@ describe ManageIQ::Consumption::ShowbackEvent::MEM do
       event.generate_data
     end
 
-    it "Calculate MEM_total_mem" do
+    it "Calculate MEM_max_mem" do
+      #Expect return 1024 and assign 1024 because max is 0
       expect(event.MEM_total_mem(1024)).to eq(1024)
+      #Expect return 1024 because 1024 >= 1024
       expect(event.MEM_total_mem(0)).to eq(1024)
+      #Expect return 2048  because 2048 > 1024
       expect(event.MEM_total_mem(2048)).to eq(2048)
     end
   end

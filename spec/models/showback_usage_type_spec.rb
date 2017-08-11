@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackUsageType do
-  before(:all) do
-    @expected_showback_usage_type_count = 4
+  before do
+    @expected_showback_usage_type_count = 6
   end
 
   before(:each) do
