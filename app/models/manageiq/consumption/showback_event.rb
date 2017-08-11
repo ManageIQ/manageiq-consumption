@@ -93,7 +93,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     else
       self.context["tag"] = {} unless self.context.has_key?("tag")
     end
-    resource.tags.each do |tag|
+    resource.tagged_with(:ns => '/managed').each do |tag|
       category = tag.classification.category
       self.context["tag"][category] = [] unless self.context["tag"].has_key?(category)
       self.context["tag"][category] << tag.classification.name unless self.context["tag"][category].include?(tag.classification.name)
