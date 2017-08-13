@@ -53,13 +53,28 @@ describe ManageIQ::Consumption::ShowbackEvent do
         next unless showback_event.resource.type.ends_with?(measure_type.category)
         hash[measure_type.measure] = {}
         measure_type.dimensions.each do |dim|
-          hash[measure_type.measure][dim] = 0
+          hash[measure_type.measure][dim] = 0 unless measure_type.measure == "FLAVOR"
         end
       end
       showback_event.generate_data
       expect(showback_event.data).to eq(hash)
       expect(showback_event.data).not_to be_empty
       expect(showback_event.start_time).not_to eq("")
+    end
+  end
+
+  context '#flavor functions' do
+    it 'should return last flavor' do
+      showback_event.data = {"FLAVOR"=> {
+                      1501545600 => {"cores"=>4, "memory"=>16},
+                      1501632000 => {"cores"=>8, "memory"=>32},
+                      1501804800 => {"cores"=>4, "memory"=>16},
+                      1501704800 => {"cores"=>16,"memory"=>64},
+      }}
+
+      expect(showback_event.get_last_flavor).to eq({"cores"=>4,"memory"=>16})
+      expect(showback_event.get_key_flavor("cores")).to eq(4)
+      expect(showback_event.get_key_flavor("memory")).to eq(16)
     end
   end
 

@@ -33,9 +33,8 @@ describe ManageIQ::Consumption::ShowbackEvent::MEM do
     end
 
     it "Calculate MEM_total_mem" do
-      expect(event.MEM_total_mem(1024)).to eq(1024)
-      expect(event.MEM_total_mem(0)).to eq(1024)
-      expect(event.MEM_total_mem(2048)).to eq(2048)
+      expect(event.MEM_max_mem(1024)).to eq(4096)
+      expect(event.MEM_max_mem(4096)).to eq(4096)
     end
   end
 
@@ -58,9 +57,8 @@ describe ManageIQ::Consumption::ShowbackEvent::MEM do
     end
 
     it "Calculate MEM_total_mem" do
-      expect(event.MEM_total_mem(1024)).to eq(1024)
-      expect(event.MEM_total_mem(0)).to eq(1024)
-      expect(event.MEM_total_mem(2048)).to eq(2048)
+      expect(event.MEM_max_mem(1024)).to eq(1024)
+      expect(event.MEM_max_mem(0)).to eq(1024)
     end
   end
 end
