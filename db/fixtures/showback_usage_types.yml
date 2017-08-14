@@ -6,7 +6,11 @@
 - :category: "Vm"
   :description: "Calculate MEM Showback of VM"
   :measure: "MEM"
-  :dimensions: ["total_mem"]
+  :dimensions: ["max_mem"]
+- :category: "Vm"
+  :description: "Template Showback of VM"
+  :measure: "FLAVOR"
+  :dimensions: ["cpu_reserved","memory_reserve"]
 - :category: "Container"
   :description: "Calculate CPU Showback of Container"
   :measure: "CPU"
@@ -14,4 +18,8 @@
 - :category: "Container"
   :description: "Calculate MEM Showback of Container"
   :measure: "MEM"
-  :dimensions: ["total_mem"]
+  :dimensions: ["max_mem"]
+- :category: "Container"
+  :description: "Template Showback of VM"
+  :measure: "FLAVOR"
+  :dimensions: ["cpu_reserved","memory_reserve"]

@@ -24,6 +24,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   include_concern 'CPU'
   include_concern 'MEM'
+  include_concern 'FLAVOR'
 
 
   self.table_name = 'showback_events'
@@ -46,7 +47,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
       next unless resource_type.include?(measure_type.category)
       self.data[measure_type.measure] = {}
       measure_type.dimensions.each do |dim|
-        self.data[measure_type.measure][dim] = 0
+        self.data[measure_type.measure][dim] = 0 unless measure_type.measure == "FLAVOR"
       end
     end
   end
@@ -73,12 +74,21 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     data[category][dimension] if (data && data[category])
   end
 
+  def get_last_flavor
+    data["FLAVOR"][data["FLAVOR"].keys.max]
+  end
+
+  def get_key_flavor(key)
+    data["FLAVOR"][data["FLAVOR"].keys.max][key]
+  end
+
   def update_event
+    #data_units = load_column_units
     generate_data unless self.data.present?
     @metrics = if  resource.methods.include?(:metrics) then metrics_time_range(end_time,start_time.end_of_month) else [] end
     self.data.each do |key,dimensions|
       dimensions.keys.each do |dim|
-        self.data[key][dim] = self.send("#{key}_#{dim}", data[key][dim].to_d)
+        key == "FLAVOR" ? self.send("#{key}_#{dim}") : self.data[key][dim] = self.send("#{key}_#{dim}", data[key][dim].to_d)
       end
     end
     if @metrics.count>0
@@ -93,7 +103,8 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     else
       self.context["tag"] = {} unless self.context.has_key?("tag")
     end
-    resource.tags.each do |tag|
+    resource.tagged_with(:ns => '/managed').each do |tag|
+      next unless tag.classification
       category = tag.classification.category
       self.context["tag"][category] = [] unless self.context["tag"].has_key?(category)
       self.context["tag"][category] << tag.classification.name unless self.context["tag"][category].include?(tag.classification.name)
