@@ -122,15 +122,15 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   #  Return the event days passed between start_time - end_time
   #
   def event_days
-    (end_time - start_time).to_i / (24 * 60 * 60)
+    time_span / (24 * 60 * 60)
   end
 
   def time_span
-    end_time - start_time
+    (end_time - start_time).round.to_i
   end
 
   def month_duration
-    end_time.end_of_month - start_time.beginning_of_month
+    (end_time.end_of_month - start_time.beginning_of_month).round.to_i
   end
 
   #
