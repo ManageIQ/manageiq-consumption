@@ -41,13 +41,13 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     nil
   end
 
-  def generate_data
+  def generate_data(data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units)
     self.data = {}
     ManageIQ::Consumption::ShowbackUsageType.all.each do |measure_type|
       next unless resource_type.include?(measure_type.category)
       self.data[measure_type.measure] = {}
       measure_type.dimensions.each do |dim|
-        self.data[measure_type.measure][dim] = 0 unless measure_type.measure == "FLAVOR"
+        self.data[measure_type.measure][dim] = [0,data_units[dim.to_sym] || "" ] unless measure_type.measure == "FLAVOR"
       end
     end
   end
@@ -74,6 +74,15 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     data[category][dimension] if (data && data[category])
   end
 
+  def get_measure_unit(category, dimension)
+    get_measure(category,dimension).last
+  end
+
+  def get_measure_value(category, dimension)
+    get_measure(category,dimension).first
+  end
+
+
   def get_last_flavor
     data["FLAVOR"][data["FLAVOR"].keys.max]
   end
@@ -82,19 +91,22 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     data["FLAVOR"][data["FLAVOR"].keys.max][key]
   end
 
-  def update_event
-    #data_units = load_column_units
-    generate_data unless self.data.present?
+  def update_event(data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units)
+    generate_data(data_units) unless self.data.present?
     @metrics = if  resource.methods.include?(:metrics) then metrics_time_range(end_time,start_time.end_of_month) else [] end
     self.data.each do |key,dimensions|
       dimensions.keys.each do |dim|
-        key == "FLAVOR" ? self.send("#{key}_#{dim}") : self.data[key][dim] = self.send("#{key}_#{dim}", data[key][dim].to_d)
+        self.data[key][dim] = [generate_metric(key,dim),  data_units[dim.to_sym] || ""]
       end
     end
     if @metrics.count>0
       self.end_time = @metrics.last.timestamp
     end
     collect_tags
+  end
+
+  def generate_metric(key,dim)
+    key == "FLAVOR" ? self.send("#{key}_#{dim}") : self.send("#{key}_#{dim}", get_measure_value(key,dim).to_d)
   end
 
   def collect_tags

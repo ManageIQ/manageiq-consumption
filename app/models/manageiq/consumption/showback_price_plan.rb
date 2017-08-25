@@ -27,7 +27,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
         rates = showback_rates.where(category: usage.category, dimension: "#{usage.measure}##{dim}")
         rates.each do |r|
           next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? context, r.screener)
-          val = data[usage.measure][dim] if ( data && data[usage.measure])
+          val = data[usage.measure][dim][0] if ( data && data[usage.measure])
           tc += r.rate_with_values(val, time_span, cycle_duration)
         end
       end

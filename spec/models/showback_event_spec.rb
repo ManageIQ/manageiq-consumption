@@ -49,11 +49,12 @@ describe ManageIQ::Consumption::ShowbackEvent do
       showback_event.resource = FactoryGirl.create(:vm)
       hash = {}
       ManageIQ::Consumption::ShowbackUsageType.seed
+      data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
       ManageIQ::Consumption::ShowbackUsageType.all.each do |measure_type|
         next unless showback_event.resource.type.ends_with?(measure_type.category)
         hash[measure_type.measure] = {}
         measure_type.dimensions.each do |dim|
-          hash[measure_type.measure][dim] = 0 unless measure_type.measure == "FLAVOR"
+          hash[measure_type.measure][dim] = [0,data_units[dim.to_sym] || ""] unless measure_type.measure == "FLAVOR"
         end
       end
       showback_event.generate_data
@@ -110,7 +111,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       it 'trait #with_vm_data should have a valid factory' do
         myevent = FactoryGirl.build(:showback_event, :with_vm_data)
         myevent.valid?
-        expect(myevent.data).to eq('CPU' => { 'average' => 52.67, 'max_number_of_cpu' => 4 })
+        expect(myevent.data).to eq('CPU' => { 'average' => [52.67,"percent"], 'max_number_of_cpu' => [4,"cores"] })
         expect(myevent).to be_valid
       end
 
@@ -128,7 +129,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
         expect(myevent.end_time).to eq(myevent.end_time.end_of_month)
-        expect(myevent.data).to eq('CPU' => { 'average' => 52.67, 'max_number_of_cpu' => 4 })
+        expect(myevent.data).to eq('CPU' => { 'average' => [52.67,"percent"], 'max_number_of_cpu' => [4,"cores"] })
       end
 
       it 'trait #with_vm_datra and half_month has a valid factory' do
@@ -137,7 +138,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
         expect(myevent.end_time).to eq(myevent.end_time.change(:day => 15).end_of_day)
-        expect(myevent.data).to eq('CPU' => { 'average' => 52.67, 'max_number_of_cpu' => 4 })
+        expect(myevent.data).to eq('CPU' => { 'average' => [52.67,"percent"], 'max_number_of_cpu' => [4,"cores"] })
       end
     end
 
@@ -173,17 +174,17 @@ describe ManageIQ::Consumption::ShowbackEvent do
       it 'should return value of the measure with dimension' do
         event.data = {
             'CPU' => {
-                'average' => event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average)
+                'average' => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average),"percent"]
             }
         }
         expect(event.start_time.month).to eq(event.end_time.month)
-        expect(event.get_measure('CPU', 'average')).to eq(event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average).to_s)
+        expect(event.get_measure('CPU', 'average')).to eq([event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average).to_s,"percent"])
       end
 
       it 'return nil if dimension is not found' do
         event.data = {
             'CPU' => {
-                'average' => event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average)
+                'average' => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average),"percent"]
             }
         }
         expect(event.get_measure('CPU', 'not there')).to be_nil
@@ -192,10 +193,15 @@ describe ManageIQ::Consumption::ShowbackEvent do
       it 'return nil if category is not found' do
         event.data = {
             'CPU' => {
-                'average' => event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average)
+                'average' => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average),"percent"]
             }
         }
         expect(event.get_measure('not there', 'average')).to be_nil
+      end
+
+      it 'should return [value,unit]n' do
+        event.data = {"CPU" => { "average" => [52.67, "percent" ]}}
+        expect(event.get_measure('CPU', 'average')).to eq([52.67,"percent"])
       end
 
       it 'should return metrics time range' do
@@ -252,28 +258,28 @@ describe ManageIQ::Consumption::ShowbackEvent do
         event.end_time   = "2010-04-14T22:52:30Z"
         event.data = {
           "CPU" => {
-              "average" => event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average)
+              "average" => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average),"percent"]
           }
         }
-        new_average = (event.data["CPU"]["average"].to_d * event.event_days +
+        new_average = (event.get_measure_value("CPU","average").to_d * event.event_days +
             event.resource.metrics.for_time_range(event.end_time, nil).average(:cpu_usage_rate_average)) / (event.event_days + 1)
         event.update_event
         expect(event.start_time.month).to eq(event.end_time.month)
-        expect(event.data).to eq("CPU" => { "average" => new_average })
+        expect(event.data).to eq("CPU" => { "average" => [new_average, "percent" ]})
       end
 
       it 'should return the max number of cpu' do
         event.data = {
-          "CPU" => { "max_number_of_cpu" => 1 }
+          "CPU" => { "max_number_of_cpu" => [1,"cores"] }
         }
         event.update_event
-        expect(event.data).to eq("CPU" => { "max_number_of_cpu" => @vm_metrics.cpu_total_cores })
+        expect(event.data).to eq("CPU" => { "max_number_of_cpu" => [@vm_metrics.cpu_total_cores, "cores"] })
         event.data = {
-          "CPU" => { "max_number_of_cpu" => 3 }
+          "CPU" => { "max_number_of_cpu" => [3,"cores"] }
         }
         event.update_event
         expect(event.start_time.month).to eq(event.end_time.month)
-        expect(event.data["CPU"]["max_number_of_cpu"]).to eq(3)
+        expect(event.get_measure("CPU","max_number_of_cpu")).to eq([3,"cores"])
       end
     end
 
@@ -306,6 +312,16 @@ describe ManageIQ::Consumption::ShowbackEvent do
         host = FactoryGirl.create(:host)
         vm = FactoryGirl.create(:vm, :host => host)
         expect(event.get_parent(vm, "H3dt")).to be_nil
+      end
+
+      it "Should return value of CPU data" do
+        event.data = {"CPU" => { "average" => [52.67, "percent" ]}}
+        expect(event.get_measure_value('CPU','average')).to eq(52.67)
+      end
+
+      it "Should return unit of CPU data" do
+        event.data = {"CPU" => { "average" => [52.67, "percent" ]}}
+        expect(event.get_measure_unit('CPU','average')).to eq("percent")
       end
 
       it "Assign resource to pool" do

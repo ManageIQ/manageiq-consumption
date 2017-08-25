@@ -1,0 +1,12 @@
+---
+:cpu_usage_rate_average: "Vm"
+:numvcpus: "vcpus"
+:cpu_total_cores: "cores"
+:total_mem: "Mb"
+:ram_size: "Mb"
+:max_number_of_cpu: "cores"
+:average: "percent"
+:number: "cores"
+:max_mem: "Mb"
+:memory_reserve: "Mb"
+:cpu_reserved: "cores"

@@ -62,10 +62,10 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
   it "should update the events" do
     event_metric = FactoryGirl.create(:showback_event,:start_time => DateTime.now.utc.beginning_of_month, :end_time => DateTime.now.utc.beginning_of_month + 2.days)
     event_metric.data = {
-        "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 }
+        "CPU" => { "average" => [52.67,"percent"], "max_number_of_cpu" => [4,"cores"] }
     }
     data_new = {
-        "CPU" => { "average" => 52.67, "max_number_of_cpu" => 4 }
+        "CPU" => { "average" => [52.67,"percent"], "max_number_of_cpu" => [4,"cores"] }
     }
     @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
     cases = [
@@ -90,12 +90,30 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
     event_metric.resource_id = @vm_metrics.id
     event_metric.resource_type = @vm_metrics.class.name
     event_metric.save!
-    new_average = (event_metric.data["CPU"]["average"].to_d * event_metric.event_days +
+    new_average = (event_metric.get_measure_value("CPU","average").to_d * event_metric.event_days +
         event_metric.resource.metrics.for_time_range(event_metric.end_time, nil).average(:cpu_usage_rate_average)) / (event_metric.event_days + 1)
-    data_new["CPU"]["average"] = new_average.to_s
+    data_new["CPU"]["average"][0] = new_average.to_s
     described_class.update_events
     event_metric.reload
     expect(event_metric.data).to eq(data_new)
     expect(event_metric.end_time).to eq(@vm_metrics.metrics.last.timestamp)
+  end
+
+  it "Make the seed of ShowbackUsageType and ShowbackPricePlan" do
+    expect(ManageIQ::Consumption::ShowbackPricePlan).to receive(:seed)
+    expect(ManageIQ::Consumption::ShowbackUsageType).to receive(:seed)
+    described_class.seed
+  end
+
+  context 'Units' do
+    it "Should be the unit defined in YAML" do
+      ManageIQ::Consumption::ShowbackUsageType.seed
+      data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
+      ManageIQ::Consumption::ShowbackUsageType.all.each do |usage|
+        usage.dimensions.each do |dim|
+          expect(data_units).to include(dim.to_sym)
+        end
+      end
+    end
   end
 end

@@ -239,7 +239,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       charge = pool.showback_charges.find_by(:showback_event => event2)
       charge.cost = Money.new(0)
       expect { pool.calculate_charge(charge) }.to change(charge, :cost).
-          from(Money.new(0)).to(Money.new((event2.reload.data['CPU']['average'] * 12) + 67))
+          from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU','average') * 12) + 67))
     end
 
     it '#Add an event' do

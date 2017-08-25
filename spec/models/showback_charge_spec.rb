@@ -75,7 +75,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
       event.save
       charge.save
       expect(charge.stored_data).to eq(event.data)
-      event.data = {"CPU"=>{"average":2,"max_number_of_cpu":40}}
+      event.data = {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}
       event.save
       charge.save
       expect(charge.stored_data).not_to eq(event.data)
@@ -127,7 +127,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(event.data).not_to be_nil # making sure that the default is not empty
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
         expect(charge.showback_event).to eq(event)
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'].first)
       end
     end
     context 'with price_plan' do
@@ -141,9 +141,9 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_measure_value('CPU','average'))
         # Test that it changes if you provide a plan
-        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.data['CPU']['average'])
+        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.get_measure_value('CPU','average'))
       end
 
       it 'raises an error if the plan provider is not working' do
@@ -154,7 +154,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'])
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_measure_value('CPU','average'))
         # Test that it changes if you provide a plan
         expect(charge.calculate_cost('ERROR')).to eq(Money.new(0))
         expect(charge.errors.details[:showback_price_plan]).to include({ :error => 'not found' })

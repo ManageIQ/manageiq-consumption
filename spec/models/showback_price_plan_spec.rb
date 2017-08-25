@@ -170,7 +170,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate.dimension = 'CPU#max_number_of_cpu'
         rate.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(fixed_rate + event.data['CPU']['max_number_of_cpu'] * variable_rate )
+        expect(plan.calculate_total_cost(event)).to eq(fixed_rate + event.get_measure_value('CPU','max_number_of_cpu') * variable_rate )
       end
 
       it 'calculates costs when more than one rate applies' do
@@ -185,7 +185,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate2.dimension = 'CPU#average'
         rate2.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(rate.fixed_rate + rate2.fixed_rate + event.data['CPU']['average'] * rate.variable_rate + event.data['CPU']['max_number_of_cpu'] * rate2.variable_rate)
+        expect(plan.calculate_total_cost(event)).to eq(rate.fixed_rate + rate2.fixed_rate + event.get_measure_value('CPU','average')  * rate.variable_rate + event.get_measure_value('CPU','max_number_of_cpu')  * rate2.variable_rate)
       end
 
     end
