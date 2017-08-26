@@ -13,11 +13,9 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   # Called with an event
   # Returns the total accumulated costs for all rates that apply
   ###################################################################
-  def calculate_total_cost(event)
-    calculate_total_cost_input(event.resource.type, event.data, event.time_span, event.month_duration, event.context)
-  end
-
-  def calculate_total_cost_input(resource_type, data, time_span, cycle_duration, context)
+  def calculate_total_cost(event, cycle_duration = nil)
+    cycle_duration ||= event.month_duration
+    resource_type = event.resource&.type || event.resource_type
     # Accumulator
     tc = Money.new(0)
     # For each measure type in ShowbackUsageType, I need to find the rates applying to the different dimensions
@@ -26,13 +24,24 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
       usage.dimensions.each do |dim|
         rates = showback_rates.where(category: usage.category, dimension: "#{usage.measure}##{dim}")
         rates.each do |r|
-          next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? context, r.screener)
-          val = data[usage.measure][dim][0] if ( data && data[usage.measure])
-          tc += r.rate_with_values(val, time_span, cycle_duration)
+          next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, r.screener)
+          val = event.get_measure_value(usage.measure, dim)
+          tc += r.rate_with_values(val, event.time_span, cycle_duration)
         end
       end
     end
     tc
+  end
+
+  # Calculate total costs using input data instead of an event
+  def calculate_total_cost_input(resource_type, data, context = nil, start_time = nil, end_time = nil, cycle_duration = nil)
+    event = ManageIQ::Consumption::ShowbackEvent.new
+    event.resource_type = resource_type
+    event.data = data
+    event.context = context || {}
+    event.start_time = start_time || Time.zone.beginning_of_month
+    event.end_time = end_time || Time.zone.end_of_month
+    calculate_total_cost(event, cycle_duration)
   end
 
   #

@@ -81,18 +81,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         # Make rate category not found
         rate.category = 'not-found'
         rate.save
-        expect(plan.calculate_total_cost(event)).to eq(Money.new(0))
+        expect(plan.calculate_total_cost(event)).to(eq(Money.new(0)))
       end
 
       it 'calculates costs when rate is not found and event data' do
         rate.category = 'not-found'
         rate.save
-        category = event.resource.type
+        resource_type = event.resource.type
         data = event.data
-        time_span = event.time_span
-        cycle_duration = event.month_duration
+        start_time = event.start_time
+        end_time = event.end_time
         context = event.context
-        expect(plan.calculate_total_cost_input(category, data, time_span, cycle_duration, context)).to eq(plan.calculate_total_cost(event))
+        expect(plan.calculate_total_cost_input(resource_type, data, context, start_time, end_time)).to eq(plan.calculate_total_cost(event))
       end
 
       it 'calculates costs with one rate' do

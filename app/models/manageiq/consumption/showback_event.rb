@@ -75,11 +75,11 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   end
 
   def get_measure_unit(category, dimension)
-    get_measure(category,dimension).last
+    get_measure(category, dimension).last
   end
 
   def get_measure_value(category, dimension)
-    get_measure(category,dimension).first
+    get_measure(category, dimension).first
   end
 
 
