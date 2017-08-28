@@ -2,11 +2,15 @@
 - :category: "Vm"
   :description: "Calculate CPU Showback of VM"
   :measure: "CPU"
-  :dimensions: ["average", "number", "max_number_of_cpu"]
+  :dimensions: ["sb_max_cpu_total_cores","sb_usage_rate_average", "num_cpu","cpu_total_cores","cpu_cores_per_socket"]
 - :category: "Vm"
   :description: "Calculate MEM Showback of VM"
   :measure: "MEM"
-  :dimensions: ["max_mem"]
+  :dimensions: ["sb_average_memory_percent","sb_max_mem","ram_size","ram_size_in_bytes"]
+- :category: "Vm"
+  :description: "All about Storage"
+  :measure: "STORAGE"
+  :dimensions: ["used_storage","num_disks","num_hard_disks"]
 - :category: "Vm"
   :description: "Template Showback of VM"
   :measure: "FLAVOR"
@@ -14,7 +18,7 @@
 - :category: "Container"
   :description: "Calculate CPU Showback of Container"
   :measure: "CPU"
-  :dimensions: ["max_number_of_cpu"]
+  :dimensions: ["numvcpus"]
 - :category: "Container"
   :description: "Calculate MEM Showback of Container"
   :measure: "MEM"

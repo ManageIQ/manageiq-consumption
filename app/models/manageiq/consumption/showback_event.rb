@@ -22,10 +22,8 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   extend ActiveSupport::Concern
 
-  include_concern 'CPU'
-  include_concern 'MEM'
-  include_concern 'FLAVOR'
 
+  Dir.glob(Pathname.new(File.dirname(__dir__)).join("consumption/showback_event/*")).each { |lib| include_concern lib.split("consumption/showback_event/")[1].split(".rb")[0].upcase }
 
   self.table_name = 'showback_events'
 
@@ -46,8 +44,16 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
     ManageIQ::Consumption::ShowbackUsageType.all.each do |measure_type|
       next unless resource_type.include?(measure_type.category)
       self.data[measure_type.measure] = {}
+      if measure_type.measure == "FLAVOR"
+        t    = Time.now
+        self.data[measure_type.measure][t] = {}
+      end
       measure_type.dimensions.each do |dim|
-        self.data[measure_type.measure][dim] = [0,data_units[dim.to_sym] || "" ] unless measure_type.measure == "FLAVOR"
+        if measure_type.measure == "FLAVOR"
+          self.data[measure_type.measure][t][dim] = [self.send("#{measure_type.measure}","#{dim}"),data_units[dim.to_sym] || "" ]
+        else
+          self.data[measure_type.measure][dim] = [self.send("#{measure_type.measure}","#{dim}",0),data_units[dim.to_sym] || "" ]
+        end
       end
     end
   end
@@ -79,7 +85,8 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   end
 
   def get_measure_value(category, dimension)
-    get_measure(category, dimension).first
+    0 unless get_measure(category,dimension).length!=0
+    get_measure(category,dimension).first
   end
 
 
@@ -106,7 +113,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   end
 
   def generate_metric(key,dim)
-    key == "FLAVOR" ? self.send("#{key}_#{dim}") : self.send("#{key}_#{dim}", get_measure_value(key,dim).to_d)
+    key == "FLAVOR" ? self.send("#{key}","#{dim}") : self.send("#{key}","#{dim}", get_measure_value(key,dim))
   end
 
   def collect_tags

@@ -1,4 +1,5 @@
 
+ManageIQ::Consumption::ConsumptionManager.seed
 
 def generateHardware(n)
   h = Hardware.new

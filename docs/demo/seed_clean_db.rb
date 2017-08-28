@@ -7,3 +7,5 @@ ManageIQ::Consumption::ShowbackEvent.delete_all
 ManageIQ::Consumption::ShowbackPool.delete_all
 ManageIQ::Consumption::ShowbackRate.delete_all
 ManageIQ::Consumption::ShowbackCharge.delete_all
+ManageIQ::Consumption::ShowbackUsageType.delete_all
+ManageIQ::Consumption::ShowbackPricePlan.delete_all
