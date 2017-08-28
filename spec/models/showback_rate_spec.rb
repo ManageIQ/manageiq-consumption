@@ -44,9 +44,10 @@ module ManageIQ::Consumption
         expect(showback_rate.errors.details[:calculation]).to include(:error=>:blank)
       end
 
-      it 'calculation can be occurrence, duration, quantity' do
-        states = %w(occurrence duration quantity)
-        states.each do |calc|
+      it 'calculation is valid when in occurrence, duration, quantity' do
+        calculations = %w(occurrence duration quantity)
+        expect(ManageIQ::Consumption::ShowbackRate::VALID_RATE_CALCULATIONS).to eq(calculations)
+        calculations.each do |calc|
           showback_rate.calculation = calc
           expect(showback_rate).to be_valid
         end
@@ -55,7 +56,7 @@ module ManageIQ::Consumption
       it 'calculation is not valid if it is not occurrence, duration, quantity' do
         showback_rate.calculation = 'ERROR'
         expect(showback_rate).not_to be_valid
-        expect(showback_rate.errors.details[:calculation]). to include({ :error => :inclusion, :value => 'ERROR' })
+        expect(showback_rate.errors.details[:calculation]). to include(:error => :inclusion, :value => 'ERROR')
       end
 
       it 'is not valid with a nil category' do
@@ -93,7 +94,7 @@ module ManageIQ::Consumption
       it '#fixed_rate_per_time not included in VALID_INTERVAL_UNITS is not valid' do
         showback_rate.fixed_rate_per_time = 'bad_interval'
         showback_rate.valid?
-        expect(showback_rate.errors.details[:fixed_rate_per_time]).to include({:error => :inclusion, :value => 'bad_interval'})
+        expect(showback_rate.errors.details[:fixed_rate_per_time]).to include(:error => :inclusion, :value => 'bad_interval')
       end
 
       it '#fixed_rate_per_unit is valid with a non empty string' do
@@ -111,7 +112,7 @@ module ManageIQ::Consumption
       it '#fixed_rate_per_unit is not valid when nil' do
         showback_rate.fixed_rate_per_unit = nil
         showback_rate.valid?
-        expect(showback_rate.errors.details[:fixed_rate_per_unit]).to include({:error => :exclusion, :value => nil})
+        expect(showback_rate.errors.details[:fixed_rate_per_unit]).to include(:error => :exclusion, :value => nil)
       end
 
       it '#variable_rate_per_time included in VALID_INTERVAL_UNITS is valid' do
@@ -125,7 +126,7 @@ module ManageIQ::Consumption
       it '#variable_rate_per_time not included in VALID_INTERVAL_UNITS is not valid' do
         showback_rate.variable_rate_per_time = 'bad_interval'
         showback_rate.valid?
-        expect(showback_rate.errors.details[:variable_rate_per_time]).to include({:error => :inclusion, :value => 'bad_interval'})
+        expect(showback_rate.errors.details[:variable_rate_per_time]).to include(:error => :inclusion, :value => 'bad_interval')
       end
 
       it '#variable_rate_per_unit is valid with a non empty string' do
@@ -143,16 +144,25 @@ module ManageIQ::Consumption
       it '#variable_rate_per_unit is not valid when nil' do
         showback_rate.variable_rate_per_unit = nil
         showback_rate.valid?
-        expect(showback_rate.errors.details[:variable_rate_per_unit]).to include({:error => :exclusion, :value => nil})
+        expect(showback_rate.errors.details[:variable_rate_per_unit]).to include(:error => :exclusion, :value => nil)
       end
 
+      it 'is valid with a JSON screener' do
+        showback_rate.screener = JSON.generate({ 'tag' => { 'environment' => ['test'] } })
+        showback_rate.valid?
+        expect(showback_rate).to be_valid
+      end
 
-      pending 'has a JSON screener'
+      pending 'is not valid with a wronly formatted screener' do
+        showback_rate.screener = JSON.generate({ 'tag' => { 'environment' => ['test'] } })
+        showback_rate.valid?
+        expect(showback_rate).not_to be_valid
+      end
 
-      pending 'is not valid with a nil screener' do
+      it 'is not valid with a nil screener' do
         showback_rate.screener = nil
         showback_rate.valid?
-        expect(showback_rate.errors.details[:screener]).to include(:error=>:blank)
+        expect(showback_rate.errors.details[:screener]).to include(:error => :exclusion, :value => nil)
       end
     end
 
@@ -161,7 +171,6 @@ module ManageIQ::Consumption
       let(:variable_rate) { Money.new(7) }
       let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
       let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month) }
-
 
       context 'empty #context, default rate per_time and per_unit' do
         it 'should charge an event by occurrence' do
@@ -185,7 +194,7 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'occurrence'
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
-          days_in_month = Time.days_in_month(Time.now.month)
+          days_in_month = Time.days_in_month(Time.current.month)
           expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(days_in_month * (11 + 7)))
         end
 
@@ -193,7 +202,7 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'duration'
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
-          days_in_month = Time.days_in_month(Time.now.month)
+          days_in_month = Time.days_in_month(Time.current.month)
           expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(days_in_month * (11 + 21)))
         end
 
@@ -201,7 +210,7 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'quantity'
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
-          days_in_month = Time.days_in_month(Time.now.month)
+          days_in_month = Time.days_in_month(Time.current.month)
           expect(showback_rate.rate(3, showback_event_fm)).to eq(Money.new(days_in_month * (11 + 21)))
         end
       end
@@ -229,7 +238,7 @@ module ManageIQ::Consumption
       context 'empty #context' do
         it 'should charge an event by occurrence' do
           showback_rate.calculation = 'occurrence'
-          expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(11) + Money.new(7 * proration))
+          expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(11) + Money.new(7))
         end
 
         it 'should charge an event by duration' do
@@ -248,15 +257,15 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'occurrence'
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
-          days_in_month = Time.days_in_month(Time.now.month)
-          expect(showback_rate.rate(3, showback_event_hm)).to eq( Money.new(days_in_month * (11 + 7 * proration)))
+          days_in_month = Time.days_in_month(Time.current.month)
+          expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(days_in_month * (11 + 7)))
         end
 
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
-          days_in_month = Time.days_in_month(Time.now.month)
+          days_in_month = Time.days_in_month(Time.current.month)
           expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(days_in_month * (11 * proration + 7 * 3 * proration)))
         end
 
@@ -264,7 +273,7 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'quantity'
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
-          days_in_month = Time.days_in_month(Time.now.month)
+          days_in_month = Time.days_in_month(Time.current.month)
           expect(showback_rate.rate(3, showback_event_hm)).to eq(Money.new(days_in_month * (11 * proration + 7 * 3)))
         end
       end

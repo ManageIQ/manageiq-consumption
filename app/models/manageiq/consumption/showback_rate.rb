@@ -1,12 +1,13 @@
 module ManageIQ::Consumption
   class ShowbackRate < ApplicationRecord
+    VALID_RATE_CALCULATIONS = %w(occurrence duration quantity).freeze
     self.table_name = 'showback_rates'
     belongs_to :showback_price_plan, :inverse_of => :showback_rates
 
     monetize :fixed_rate_subunits,    :with_model_currency => :currency
     monetize :variable_rate_subunits, :with_model_currency => :currency
 
-    validates :calculation, :presence => true, :inclusion => { :in => %w(occurrence duration quantity) }
+    validates :calculation, :presence => true, :inclusion => { :in => VALID_RATE_CALCULATIONS }
     validates :category,    :presence => true
     validates :dimension,   :presence => true
 
@@ -24,6 +25,7 @@ module ManageIQ::Consumption
 
     serialize :screener, JSON # Implement data column as a JSON
     default_value_for :screener, { }
+    validates :screener, :exclusion => { :in => [nil] }
 
     def name
       "#{category}:#{dimension}"
@@ -36,23 +38,23 @@ module ManageIQ::Consumption
       rate_with_values(value || 0, event.time_span, event.month_duration)
     end
 
-    def rate_with_values(value, time_span, cycle_duration, date = Time.now)
+    def rate_with_values(value, time_span, cycle_duration, date = Time.current)
       send(calculation.downcase, value || 0, time_span, cycle_duration, date)
     end
 
     private
 
-    def occurrence(_value, time_span, cycle_duration, date)
+    def occurrence(value, _time_span, cycle_duration, date)
       # Returns fixed_cost + variable_cost prorated on time
-      # Fixed cost are always added fully, variable costs are prorated on the cycle duration
+      # Fixed cost are always added fully, variable costs are only added if value is not nil
       # time_span = end_time - start_time
       # cycle_duration: duration of the cycle (i.e 1.month)
-      # fix_inter: number of intervals in the calculation => how many time do we need to apply the rate to get a monthly rate
+      # fix_inter: number of intervals in the calculation => how many times do we need to apply the rate to get a monthly rate
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
-      # var_inter * variable_rate == interval_rate (i.e. monthly variable)
+      # var_inter * variable_rate == interval_rate (i.e. monthly)
       fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
       var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
-      fix_inter * fixed_rate + (var_inter * variable_rate * time_span.to_f / cycle_duration)
+      fix_inter * fixed_rate + (var_inter * variable_rate if value)
     end
 
     def duration(value, time_span, cycle_duration, date)
