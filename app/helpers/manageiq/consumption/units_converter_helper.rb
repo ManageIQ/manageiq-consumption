@@ -8,7 +8,7 @@
 
 module ManageIQ::Consumption
   module UnitsConverterHelper
-    SYMBOLS = %w(b B Hz bps Bps).freeze # What symbols are going to be searched
+    SYMBOLS = %w(b B Hz bps Bps).freeze # What symbols are going to be searched for
 
     SI_PREFIX = { :''  => { name: '',
                             value: 1 },
@@ -51,24 +51,25 @@ module ManageIQ::Consumption
                       :'Ei' => { name: 'exbi',
                                  value: 1_152_921_504_606_846_976} }.freeze
 
-    ALL_PREFIXES = SI_PREFIX.merge BINARY_PREFIX
+    ALL_PREFIXES = (SI_PREFIX.merge BINARY_PREFIX).freeze
 
-    def self.to_unit(value, prefix = '', destination_prefix = '', prefix_type = 'ALL_PREFIXES')
+    def self.to_unit(value, unit = '', destination_unit = '', prefix_type = 'ALL_PREFIXES')
       # It returns the value converted to the new unit
-      multiplier = distance(prefix, destination_prefix, prefix_type)
-      value * multiplier
+      prefix = extract_prefix(unit)
+      destination_prefix = extract_prefix(destination_unit)
+      (value * distance(prefix, destination_prefix, prefix_type)).to_f
     end
 
     def self.distance(prefix, other_prefix = '', prefix_type = 'ALL_PREFIXES')
       # Returns the distance and whether you need to divide or multiply
       # Check that the list of conversions exists or use the International Sistem SI
-      list = (self.const_get(prefix_type.upcase) if const_defined?(prefix_type.upcase)) || SI_PREFIX
+      list = (self.const_get(prefix_type.upcase) if const_defined?(prefix_type.upcase)) || ALL_PREFIXES
 
       # Find the prefix name, value pair in the list
       orig = list[prefix.to_sym]
       dest = list[other_prefix.to_sym]
       # Return 1 if there is an error in the symbols NO ERROR THROWN
-      return 1.to_r if (orig.nil? or dest.nil?)
+      return nil if (orig.nil? or dest.nil?)
       orig[:value].to_r / dest[:value]
     end
 
@@ -77,7 +78,7 @@ module ManageIQ::Consumption
       SYMBOLS.each do |x|
         prefix ||= /(.*)#{x}\z/.match(unit)&.captures
       end
-      (prefix[0] unless prefix.nil?) || (unit unless unit.nil?) || ''
+      (prefix[0] unless prefix.nil?) || unit  || ''
     end
   end
 end
