@@ -51,13 +51,15 @@ module ManageIQ::Consumption
                       :'Ei' => { name: 'exbi',
                                  value: 1_152_921_504_606_846_976} }.freeze
 
-    def self.to_unit(value, prefix = '', destination_prefix = '', prefix_type = 'SI_PREFIX')
+    ALL_PREFIXES = SI_PREFIX.merge BINARY_PREFIX
+
+    def self.to_unit(value, prefix = '', destination_prefix = '', prefix_type = 'ALL_PREFIXES')
       # It returns the value converted to the new unit
       multiplier = distance(prefix, destination_prefix, prefix_type)
       value * multiplier
     end
 
-    def self.distance(prefix, other_prefix = '', prefix_type = 'SI_PREFIX')
+    def self.distance(prefix, other_prefix = '', prefix_type = 'ALL_PREFIXES')
       # Returns the distance and whether you need to divide or multiply
       # Check that the list of conversions exists or use the International Sistem SI
       list = (self.const_get(prefix_type.upcase) if const_defined?(prefix_type.upcase)) || SI_PREFIX
