@@ -74,10 +74,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       it 'calculates costs when rate is not found' do
         event.save
         event.reload
-        # test that the event has the information we need in data
-        expect(event.data['CPU']).not_to be_nil
-        expect(event.data['CPU']['average']).not_to be_nil
-        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
         # Make rate category not found
         rate.category = 'not-found'
         rate.save
@@ -95,15 +91,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(plan.calculate_total_cost_input(resource_type, data, context, start_time, end_time)).to eq(plan.calculate_total_cost(event))
       end
 
-      it 'calculates costs with one rate' do
+      it 'test that data is right' do
         event.save
         event.reload
         # test that the event has the information we need in data
         expect(event.data['CPU']).not_to be_nil
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.dimension = 'CPU#max_number_of_cpu'
-        rate.variable_rate_per_unit = 'cores'
+      end
+
+      it 'calculates costs with one rate' do
+        event.save
+        event.reload
         rate.save
         # Rating now should return the value
         expect(plan.calculate_total_cost(event)).to eq(Money.new(18))
@@ -112,18 +111,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       it 'calculates costs when more than one rate applies' do
         event.save
         event.reload
-        # test that the event has the information we need in data
-        expect(event.data['CPU']).not_to be_nil
-        expect(event.data['CPU']['average']).not_to be_nil
-        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.dimension = 'CPU#max_number_of_cpu'
-        rate.variable_rate_per_unit = 'cores'
         rate.save
-        rate2.dimension = 'CPU#average'
-        rate2.variable_rate_per_unit = 'percent'
         rate2.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(Money.new(411))
+        expect(plan.calculate_total_cost(event)).to eq(rate.rate(event) + rate2.rate(event))
       end
     end
 
@@ -148,13 +139,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
                           :variable_rate       => variable_rate)
       end
 
-      it 'calculates costs when rate is not found' do
+      it 'test that data is right' do
         event.save
         event.reload
         # test that the event has the information we need in data
         expect(event.data['CPU']).not_to be_nil
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
+      end
+
+      it 'calculates costs when rate is not found' do
+        event.save
+        event.reload
         # Make rate category not found
         rate.category = 'not-found'
         rate.save
@@ -164,32 +160,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       it 'calculates costs with one rate' do
         event.save
         event.reload
-        # test that the event has the information we need in data
-        expect(event.data['CPU']).not_to be_nil
-        expect(event.data['CPU']['average']).not_to be_nil
-        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.dimension = 'CPU#max_number_of_cpu'
-        rate.variable_rate_per_unit = 'cores'
-        rate.save
+        rate2.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(fixed_rate + event.get_measure_value('CPU','max_number_of_cpu') * variable_rate )
+        expect(plan.calculate_total_cost(event)).to eq(rate2.rate(event))
       end
 
       it 'calculates costs when more than one rate applies' do
         event.save
         event.reload
-        # test that the event has the information we need in data
-        expect(event.data['CPU']).not_to be_nil
-        expect(event.data['CPU']['average']).not_to be_nil
-        expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
-        rate.dimension = 'CPU#max_number_of_cpu'
-        rate.variable_rate_per_unit = 'cores'
         rate.save
-        rate2.dimension = 'CPU#average'
-        rate2.variable_rate_per_unit = 'percent'
         rate2.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(rate.fixed_rate + rate2.fixed_rate + event.get_measure_value('CPU','average')  * rate.variable_rate + event.get_measure_value('CPU','max_number_of_cpu')  * rate2.variable_rate)
+        expect(plan.calculate_total_cost(event)).to eq(rate.rate(event) + rate2.rate(event))
       end
 
     end

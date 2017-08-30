@@ -1,10 +1,10 @@
 FactoryGirl.define do
   factory :showback_rate, :class => ManageIQ::Consumption::ShowbackRate do
     category               'Vm'
-    dimension              'CPU#max_number_of_cpu'
+    dimension              'max_number_of_cpu'
+    measure                'CPU'
     sequence(:concept)     { |n| "Concept #{n}" }
     fixed_rate             { Money.new(rand(5..200), 'USD') }
-    fixed_rate_per_unit    'cores'
     fixed_rate_per_time    { 'monthly' }
     variable_rate          { Money.new(rand(5..200), 'USD') }
     variable_rate_per_unit 'cores'
@@ -26,15 +26,18 @@ FactoryGirl.define do
       screener { { 'tag' => { 'environment' => ['test'] } } }
     end
     trait :CPU_average do
-      dimension 'CPU#average'
+      dimension 'average'
+      measure 'CPU'
       variable_rate_per_unit 'percent'
     end
     trait :CPU_number do
-      dimension 'CPU#number'
+      measure 'CPU'
+      dimension 'number'
       variable_rate_per_unit 'cores'
     end
     trait :CPU_max_number_of_cpu do
-      dimension 'CPU#max_number_of_CPU'
+      measure 'CPU'
+      dimension 'max_number_of_cpu'
       variable_rate_per_unit 'cores'
     end
   end

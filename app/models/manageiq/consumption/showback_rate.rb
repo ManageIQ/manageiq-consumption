@@ -12,10 +12,12 @@ module ManageIQ::Consumption
     validates :dimension,   :presence => true
 
     validates :fixed_rate_per_time, :inclusion => { :in => TimeConverterHelper::VALID_INTERVAL_UNITS }
-    validates :fixed_rate_per_unit, :presence  => true, :allow_blank => true
-    validates :fixed_rate_per_unit, :exclusion => { :in => [nil] }
-    default_value_for :fixed_rate_per_unit, ''
     default_value_for :fixed_rate_per_time, 'monthly'
+
+    # There is no fixed_rate unit (only presence or not, and time), TODO: change column name in a migration
+    alias_attribute :measure, :fixed_rate_per_unit
+    validates :measure, :presence => true
+    default_value_for :measure, ''
 
     validates :variable_rate_per_time, :inclusion => { :in => TimeConverterHelper::VALID_INTERVAL_UNITS }
     validates :variable_rate_per_unit, :presence  => true, :allow_blank => true
@@ -28,7 +30,7 @@ module ManageIQ::Consumption
     validates :screener, :exclusion => { :in => [nil] }
 
     def name
-      "#{category}:#{dimension}"
+      "#{category}:#{measure}:#{dimension}"
     end
 
     def rate(event)
@@ -37,9 +39,8 @@ module ManageIQ::Consumption
       # For each tier used, calculate costs
 
       # TODO event.resource.type should be eq to category
-      a = dimension.split('#')
-      value, measure = event.get_measure(a[0], a[1])
-      rate_with_values(value, measure,event.time_span, event.month_duration)
+      value, measurement = event.get_measure(measure, dimension)
+      rate_with_values(value, measurement,event.time_span, event.month_duration)
     end
 
     def rate_with_values(value, measure, time_span, cycle_duration, date = Time.current)

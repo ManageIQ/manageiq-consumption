@@ -12,6 +12,13 @@ module ManageIQ::Consumption
         expect(showback_rate).to be_valid
       end
 
+      it 'returns name as category + dimension' do
+        category = showback_rate.category
+        dimension = showback_rate.dimension
+        measure = showback_rate.measure
+        expect(showback_rate.name).to eq("#{category}:#{measure}:#{dimension}")
+      end
+
       it 'is not valid with a nil fixed_rate' do
         showback_rate.fixed_rate_subunits = nil
         showback_rate.valid?
@@ -77,12 +84,6 @@ module ManageIQ::Consumption
         expect(showback_rate).to be_valid
       end
 
-      it 'returns name as category + dimension' do
-        category = showback_rate.category
-        dimension = showback_rate.dimension
-        expect(showback_rate.name).to eq("#{category}:#{dimension}")
-      end
-
       it '#fixed_rate_per_time included in VALID_INTERVAL_UNITS is valid' do
         TimeConverterHelper::VALID_INTERVAL_UNITS.each do |interval|
           showback_rate.fixed_rate_per_time = interval
@@ -97,22 +98,16 @@ module ManageIQ::Consumption
         expect(showback_rate.errors.details[:fixed_rate_per_time]).to include(:error => :inclusion, :value => 'bad_interval')
       end
 
-      it '#fixed_rate_per_unit is valid with a non empty string' do
-        showback_rate.fixed_rate_per_unit = 'Hz'
+      it '#measure is valid with a non empty string' do
+        showback_rate.measure = 'Hz'
         showback_rate.valid?
         expect(showback_rate).to be_valid
       end
 
-      it '#fixed_rate_per_unit is valid with an empty string' do
-        showback_rate.fixed_rate_per_unit = ''
+      it '#measure is not valid when nil' do
+        showback_rate.measure = nil
         showback_rate.valid?
-        expect(showback_rate).to be_valid
-      end
-
-      it '#fixed_rate_per_unit is not valid when nil' do
-        showback_rate.fixed_rate_per_unit = nil
-        showback_rate.valid?
-        expect(showback_rate.errors.details[:fixed_rate_per_unit]).to include(:error => :exclusion, :value => nil)
+        expect(showback_rate.errors.details[:measure]).to include(:error => :blank)
       end
 
       it '#variable_rate_per_time included in VALID_INTERVAL_UNITS is valid' do
@@ -169,7 +164,12 @@ module ManageIQ::Consumption
     describe 'when the event lasts for the full month and the rates too' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate, :dimension => 'CPU#number') }
+      let(:showback_rate) {
+        FactoryGirl.build(:showback_rate,
+                          :CPU_number,
+                          :fixed_rate => fixed_rate,
+                          :variable_rate => variable_rate)
+                          }
       let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month, :with_vm_data) }
 
       context 'empty #context, default rate per_time and per_unit' do
@@ -225,10 +225,10 @@ module ManageIQ::Consumption
       context 'empty context, modified per unit' do
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
-          showback_rate.dimension = 'MEM#max_mem'
+          showback_rate.dimension = 'max_mem'
+          showback_rate.measure = 'MEM'
           showback_rate.variable_rate_per_unit = 'b'
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + (2048 * 1024 * 1024 * 7)))
-          showback_rate.fixed_rate_per_unit    = 'Kib'
           showback_rate.variable_rate_per_unit = 'Kib'
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + (2048 * 1024 * 7)))
         end
@@ -254,7 +254,12 @@ module ManageIQ::Consumption
     describe 'event lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :CPU_number, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
+      let(:showback_rate) {
+        FactoryGirl.build(:showback_rate,
+                          :CPU_number,
+                          :fixed_rate => fixed_rate,
+                          :variable_rate => variable_rate)
+      }
       let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month, :with_vm_data) }
       let(:proration)         { showback_event_hm.time_span.to_f / showback_event_hm.month_duration }
 
