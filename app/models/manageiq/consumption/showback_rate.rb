@@ -33,14 +33,14 @@ module ManageIQ::Consumption
       "#{category}:#{measure}:#{dimension}"
     end
 
-    def rate(event)
+    def rate(event, cycle_duration = nil)
       # Find tier (use context)
       # Calculate value within tier
       # For each tier used, calculate costs
-
+      duration = cycle_duration || event.month_duration
       # TODO event.resource.type should be eq to category
       value, measurement = event.get_measure(measure, dimension)
-      rate_with_values(value, measurement,event.time_span, event.month_duration)
+      rate_with_values(value, measurement,event.time_span, duration)
     end
 
     def rate_with_values(value, measure, time_span, cycle_duration, date = Time.current)

@@ -85,11 +85,5 @@ module ManageIQ::Consumption
       end
       (prefix[0] unless prefix.nil?) || unit || ''
     end
-
-    def self.extract_base_unit(unit)
-      prefix = extract_prefix(unit)
-      unit.slice(prefix.size, unit.size)
-
-    end
   end
 end
