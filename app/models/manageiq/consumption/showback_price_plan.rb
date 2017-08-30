@@ -22,11 +22,10 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     # If there is a rate associated to it, we call it with a measure (that can be 0)
     ManageIQ::Consumption::ShowbackUsageType.where(category: resource_type).each do |usage|
       usage.dimensions.each do |dim|
-        rates = showback_rates.where(category: usage.category, dimension: "#{usage.measure}##{dim}")
+        rates = showback_rates.where(category: usage.category, measure: usage.measure, dimension: dim)
         rates.each do |r|
           next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, r.screener)
-          val = event.get_measure_value(usage.measure, dim)
-          tc += r.rate_with_values(val, event.time_span, cycle_duration)
+          tc += r.rate(event, cycle_duration)
         end
       end
     end

@@ -8,7 +8,7 @@
 
 module ManageIQ::Consumption
   module UnitsConverterHelper
-    SYMBOLS = %w(b B Hz bps Bps).freeze # What symbols are going to be searched
+    SYMBOLS = %w(b B Hz bps Bps).freeze # What symbols are going to be searched for
 
     SI_PREFIX = { :''  => { name: '',
                             value: 1 },
@@ -51,22 +51,30 @@ module ManageIQ::Consumption
                       :'Ei' => { name: 'exbi',
                                  value: 1_152_921_504_606_846_976} }.freeze
 
-    def self.to_unit(value, prefix = '', destination_prefix = '', prefix_type = 'SI_PREFIX')
+    ALL_PREFIXES = (SI_PREFIX.merge BINARY_PREFIX).freeze
+
+    def self.to_unit(value, unit = '', destination_unit = '', prefix_type = 'ALL_PREFIXES')
       # It returns the value converted to the new unit
-      multiplier = distance(prefix, destination_prefix, prefix_type)
-      value * multiplier
+      prefix = extract_prefix(unit)
+      destination_prefix = extract_prefix(destination_unit)
+      prefix_distance = distance(prefix, destination_prefix, prefix_type)
+      return nil if prefix_distance.nil?
+      (value * prefix_distance).to_f
     end
 
-    def self.distance(prefix, other_prefix = '', prefix_type = 'SI_PREFIX')
+    def self.distance(prefix, other_prefix = '', prefix_type = 'ALL_PREFIXES')
       # Returns the distance and whether you need to divide or multiply
       # Check that the list of conversions exists or use the International Sistem SI
-      list = (self.const_get(prefix_type.upcase) if const_defined?(prefix_type.upcase)) || SI_PREFIX
+      list = (self.const_get(prefix_type.upcase) if const_defined?(prefix_type.upcase)) || ALL_PREFIXES
 
       # Find the prefix name, value pair in the list
       orig = list[prefix.to_sym]
       dest = list[other_prefix.to_sym]
-      # Return 1 if there is an error in the symbols NO ERROR THROWN
-      return 1.to_r if (orig.nil? or dest.nil?)
+      # If I can't find the prefixes in the list:
+      # If they are the same, return 1
+      # If they are different (i.e. "cores" vs "none", return nil)
+      return 1 if prefix == other_prefix
+      return nil if orig.nil? || dest.nil?
       orig[:value].to_r / dest[:value]
     end
 
@@ -75,7 +83,7 @@ module ManageIQ::Consumption
       SYMBOLS.each do |x|
         prefix ||= /(.*)#{x}\z/.match(unit)&.captures
       end
-      (prefix[0] unless prefix.nil?) || (unit unless unit.nil?) || ''
+      (prefix[0] unless prefix.nil?) || unit || ''
     end
   end
 end
