@@ -169,7 +169,7 @@ module ManageIQ::Consumption
     describe 'when the event lasts for the full month and the rates too' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
+      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate, :dimension => 'CPU#number') }
       let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month, :with_vm_data) }
 
       context 'empty #context, default rate per_time and per_unit' do
@@ -180,17 +180,18 @@ module ManageIQ::Consumption
 
         it 'should charge an event by occurrence only the fixed rate when value is nil' do
           showback_rate.calculation = 'occurrence'
-          expect(showback_rate.rate(nil, showback_event_fm)).to eq(fixed_rate)
+          showback_event_fm.data = {} # There is no data for this rate in the event
+          expect(showback_rate.rate(showback_event_fm)).to eq(fixed_rate)
         end
 
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 21))
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2))
         end
 
         it 'should charge an event by quantity' do
           showback_rate.calculation = 'quantity'
-          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 21))
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2))
         end
       end
 
@@ -208,7 +209,7 @@ module ManageIQ::Consumption
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(days_in_month * (11 + 21)))
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(days_in_month * (11 + 7 * 2)))
         end
 
         it 'should charge an event by quantity' do
@@ -216,7 +217,8 @@ module ManageIQ::Consumption
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(days_in_month * (11 + 21)))
+          # Fixed is 11 per day, variable is 7 per CPU, event has average of 2 CPU
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new((days_in_month * 11) + (7 * 2)))
         end
       end
 
@@ -225,7 +227,7 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'duration'
           showback_rate.fixed_rate_per_unit    = 'b'
           showback_rate.variable_rate_per_unit = 'b'
-          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new((11 + 21)))
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new((11 + 7 * 2)))
         end
 
         it 'should charge an event by quantity' do
@@ -249,7 +251,7 @@ module ManageIQ::Consumption
     describe 'event lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
+      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate, :dimension => 'CPU#number') }
       let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month, :with_vm_data) }
       let(:proration)         { showback_event_hm.time_span.to_f / showback_event_hm.month_duration }
 
@@ -261,12 +263,14 @@ module ManageIQ::Consumption
 
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(21 * proration))
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(7 * 2 * proration))
         end
 
         it 'should charge an event by quantity' do
           showback_rate.calculation = 'quantity'
-          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(21))
+          days_in_month = Time.days_in_month(Time.current.month)
+          # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * 2))
         end
       end
 
@@ -284,7 +288,7 @@ module ManageIQ::Consumption
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(days_in_month * (11 * proration + 7 * 3 * proration)))
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(days_in_month * proration * (11 + 7 * 2)))
         end
 
         it 'should charge an event by quantity' do
@@ -292,7 +296,8 @@ module ManageIQ::Consumption
           showback_rate.fixed_rate_per_time    = 'daily'
           showback_rate.variable_rate_per_time = 'daily'
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(days_in_month * (11 * proration + 7 * 3)))
+          # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new((days_in_month * 11) + (7 * 2)))
         end
       end
 

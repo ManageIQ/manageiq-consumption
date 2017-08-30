@@ -13,7 +13,7 @@ FactoryGirl.define do
     #trait :with_several_tags_in_context do
 
     trait :with_vm_data do
-      data { {"CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[1.0, "cores"], "max_number_of_cpu"=>[1, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mb"]}, "FLAVOR"=>{}} }
+      data { {"CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mb"]}, "FLAVOR"=>{}} }
     end
 
     trait :full_month do

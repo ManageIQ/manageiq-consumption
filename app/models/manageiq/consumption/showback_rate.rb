@@ -49,46 +49,40 @@ module ManageIQ::Consumption
     private
 
     def occurrence(value, _measure, _time_span, cycle_duration, date)
-      # Returns fixed_cost + variable_cost prorated on time
+      # Returns fixed_cost always + variable_cost sometimes
       # Fixed cost are always added fully, variable costs are only added if value is not nil
-      # time_span = end_time - start_time
-      # cycle_duration: duration of the cycle (i.e 1.month)
-      # fix_inter: number of intervals in the calculation => how many times do we need to apply the rate to get a monthly rate
+      # fix_inter: number of intervals in the calculation => how many times do we need to apply the rate to get a monthly (cycle) rate (min = 1)
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
       # var_inter * variable_rate == interval_rate (i.e. monthly)
       fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
       var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
-      fix_inter * fixed_rate + (value ? var_inter * variable_rate : 0)
+      fix_inter * fixed_rate + (value ? var_inter * variable_rate : 0) # fixed always, variable if value
     end
 
     def duration(value, _measure, time_span, cycle_duration, date)
-      # Returns fixed_cost + event_measure * variable_cost * (end_time - start_time) / total_time
+      # Returns fixed_cost + variable costs taking into account value and duration
       # Fixed cost and variable costs are prorated on time
-      # time_span = end_time - start_time
-      # cycle_duration: duration of the cycle (i.e 1.month)
-      # fix_inter: number of intervals in the calculation => how many time do we need to apply the rate to get a monthly rate
-      # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
-      # var_inter * variable_rate == interval_rate (i.e. monthly variable)
+      # time_span = end_time - start_time (duration of the event)
+      # cycle_duration: duration of the cycle (i.e 1.month, 1.week, 1.hour)
+      # fix_inter: number of intervals in the calculation => how many time do we need to apply the rate to get a monthly (cycle) rate (min = 1)
+      # fix_inter * fixed_rate ==  interval_rate (i.e. monthly from hourly)
+      # var_inter * variable_rate == interval_rate (i.e. monthly variable from hourly)
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
-      byebug
       fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
       var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
-      (fix_inter * fixed_rate * time_span.to_f / cycle_duration) + (var_inter * value * variable_rate * time_span.to_f / cycle_duration)
+      ((fix_inter * fixed_rate) + (var_inter * value * variable_rate)) * time_span.to_f / cycle_duration
     end
 
-    def quantity(value, _measure, time_span, cycle_duration, date)
-      # Returns costs based on quantity (independently of duration)
-      # [event.fixed_cost, event_measure * variable_cost]
-      # Fixed cost and variable costs are prorated on time
+    def quantity(value, _measure, _time_span, cycle_duration, date)
+      # Returns costs based on quantity (independently of duration).
+      # Fixed cost are calculated per period (i.e. 5€/month). You could use occurrence or duration
       # time_span = end_time - start_time
       # cycle_duration: duration of the cycle (i.e 1.month)
       # fix_inter: number of intervals in the calculation => how many time do we need to apply the rate to get a monthly rate
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
-      # var_inter * variable_rate == interval_rate (i.e. monthly variable)
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
       fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
-      var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
-      (fix_inter * fixed_rate * time_span.to_f / cycle_duration) + (var_inter * value * variable_rate)
+      (fix_inter * fixed_rate) + (value * variable_rate)
     end
   end
 end
