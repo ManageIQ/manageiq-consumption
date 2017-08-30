@@ -4,10 +4,28 @@ FactoryGirl.define do
     dimension              { %w[CPU#average CPU#number CPU#max_number_of_cpu].sample }
     sequence(:concept)     { |n| "Concept #{n}" }
     fixed_rate             { Money.new(rand(5..200), 'USD') }
-    fixed_rate_per_unit    { '' }
+    fixed_rate_per_unit    do
+      case dimension
+      when "CPU#average"
+        'percent'
+      when "CPU#number"
+        'cores'
+      when "CPU#max_number_of_cpu"
+        'cores'
+      end
+    end
     fixed_rate_per_time    { 'monthly' }
     variable_rate          { Money.new(rand(5..200), 'USD') }
-    variable_rate_per_unit { '' }
+    variable_rate_per_unit    do
+      case dimension
+      when "CPU#average"
+        'percent'
+      when "CPU#number"
+        'cores'
+      when "CPU#max_number_of_cpu"
+        'cores'
+      end
+    end
     variable_rate_per_time { 'monthly' }
     screener               { {} }
     calculation            'duration'

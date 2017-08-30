@@ -62,7 +62,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
                           :variable_rate       => variable_rate,
-                          :dimension           => dimension)
+                          :dimension           => dimension,
+                          :variable_rate_per_unit => 'percent')
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
@@ -70,7 +71,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate2,
                           :variable_rate       => variable_rate2,
-                          :dimension           => dimension2)
+                          :dimension           => dimension2,
+                          :variable_rate_per_unit => 'cores')
       end
 
       it 'calculates costs when rate is not found' do
@@ -105,6 +107,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
         rate.dimension = 'CPU#max_number_of_cpu'
+        rate.variable_rate_per_unit = 'cores'
         rate.save
         # Rating now should return the value
         expect(plan.calculate_total_cost(event)).to eq(Money.new(18))
@@ -118,8 +121,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
         rate.dimension = 'CPU#max_number_of_cpu'
+        rate.variable_rate_per_unit = 'cores'
         rate.save
         rate2.dimension = 'CPU#average'
+        rate2.variable_rate_per_unit = 'percent'
         rate2.save
         # Rating now should return the value
         expect(plan.calculate_total_cost(event)).to eq(Money.new(411))
@@ -139,14 +144,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
                           :variable_rate       => variable_rate,
-                          :dimension           => dimension)
+                          :dimension           => dimension,
+                          :variable_rate_per_unit => 'percent')
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
                           :variable_rate       => variable_rate,
-                          :dimension           => dimension2)
+                          :dimension           => dimension2,
+                          :variable_rate_per_unit => 'cores')
       end
 
       it 'calculates costs when rate is not found' do
@@ -170,6 +177,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
         rate.dimension = 'CPU#max_number_of_cpu'
+        rate.variable_rate_per_unit = 'cores'
         rate.save
         # Rating now should return the value
         expect(plan.calculate_total_cost(event)).to eq(fixed_rate + event.get_measure_value('CPU','max_number_of_cpu') * variable_rate )
@@ -183,8 +191,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']['average']).not_to be_nil
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
         rate.dimension = 'CPU#max_number_of_cpu'
+        rate.variable_rate_per_unit = 'cores'
         rate.save
         rate2.dimension = 'CPU#average'
+        rate2.variable_rate_per_unit = 'percent'
         rate2.save
         # Rating now should return the value
         expect(plan.calculate_total_cost(event)).to eq(rate.fixed_rate + rate2.fixed_rate + event.get_measure_value('CPU','average')  * rate.variable_rate + event.get_measure_value('CPU','max_number_of_cpu')  * rate2.variable_rate)

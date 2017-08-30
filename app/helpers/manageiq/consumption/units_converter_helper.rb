@@ -57,7 +57,9 @@ module ManageIQ::Consumption
       # It returns the value converted to the new unit
       prefix = extract_prefix(unit)
       destination_prefix = extract_prefix(destination_unit)
-      (value * distance(prefix, destination_prefix, prefix_type)).to_f
+      prefix_distance = distance(prefix, destination_prefix, prefix_type)
+      return nil if prefix_distance.nil?
+      (value * prefix_distance).to_f
     end
 
     def self.distance(prefix, other_prefix = '', prefix_type = 'ALL_PREFIXES')
@@ -68,8 +70,11 @@ module ManageIQ::Consumption
       # Find the prefix name, value pair in the list
       orig = list[prefix.to_sym]
       dest = list[other_prefix.to_sym]
-      # Return 1 if there is an error in the symbols NO ERROR THROWN
-      return nil if (orig.nil? or dest.nil?)
+      # If I can't find the prefixes in the list:
+      # If they are the same, return 1
+      # If they are different (i.e. "cores" vs "none", return nil)
+      return 1 if prefix == other_prefix
+      return nil if orig.nil? || dest.nil?
       orig[:value].to_r / dest[:value]
     end
 
@@ -78,7 +83,13 @@ module ManageIQ::Consumption
       SYMBOLS.each do |x|
         prefix ||= /(.*)#{x}\z/.match(unit)&.captures
       end
-      (prefix[0] unless prefix.nil?) || unit  || ''
+      (prefix[0] unless prefix.nil?) || unit || ''
+    end
+
+    def self.extract_base_unit(unit)
+      prefix = extract_prefix(unit)
+      unit.slice(prefix.size, unit.size)
+
     end
   end
 end

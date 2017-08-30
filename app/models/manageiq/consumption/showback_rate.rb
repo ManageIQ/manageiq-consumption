@@ -59,7 +59,7 @@ module ManageIQ::Consumption
       fix_inter * fixed_rate + (value ? var_inter * variable_rate : 0) # fixed always, variable if value
     end
 
-    def duration(value, _measure, time_span, cycle_duration, date)
+    def duration(value, measure, time_span, cycle_duration, date)
       # Returns fixed_cost + variable costs taking into account value and duration
       # Fixed cost and variable costs are prorated on time
       # time_span = end_time - start_time (duration of the event)
@@ -70,10 +70,11 @@ module ManageIQ::Consumption
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
       fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
       var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
-      ((fix_inter * fixed_rate) + (var_inter * value * variable_rate)) * time_span.to_f / cycle_duration
+      value_in_rate_units = UnitsConverterHelper.to_unit(value, measure, variable_rate_per_unit) || 0
+      ((fix_inter * fixed_rate) + (var_inter * value_in_rate_units * variable_rate)) * time_span.to_f / cycle_duration
     end
 
-    def quantity(value, _measure, _time_span, cycle_duration, date)
+    def quantity(value, measure, _time_span, cycle_duration, date)
       # Returns costs based on quantity (independently of duration).
       # Fixed cost are calculated per period (i.e. 5€/month). You could use occurrence or duration
       # time_span = end_time - start_time
@@ -82,7 +83,8 @@ module ManageIQ::Consumption
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
       fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
-      (fix_inter * fixed_rate) + (value * variable_rate)
+      value_in_rate_units = UnitsConverterHelper.to_unit(value, measure, variable_rate_per_unit) || 0
+      (fix_inter * fixed_rate) + (value_in_rate_units * variable_rate)
     end
   end
 end

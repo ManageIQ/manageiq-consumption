@@ -225,9 +225,13 @@ module ManageIQ::Consumption
       context 'empty context, modified per unit' do
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
+          showback_rate.dimension = 'MEM#max_mem'
           showback_rate.fixed_rate_per_unit    = 'b'
           showback_rate.variable_rate_per_unit = 'b'
-          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new((11 + 7 * 2)))
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + (2048 * 1024 * 1024 * 7)))
+          showback_rate.fixed_rate_per_unit    = 'Kib'
+          showback_rate.variable_rate_per_unit = 'Kib'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + (2048 * 1024 * 7)))
         end
 
         it 'should charge an event by quantity' do
