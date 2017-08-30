@@ -111,7 +111,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       it 'trait #with_vm_data should have a valid factory' do
         myevent = FactoryGirl.build(:showback_event, :with_vm_data)
         myevent.valid?
-        expect(myevent.data).to eq('CPU' => { 'average' => [52.67,"percent"], 'max_number_of_cpu' => [4,"cores"] })
+        expect(myevent.data).to eq("CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mb"]}, "FLAVOR"=>{})
         expect(myevent).to be_valid
       end
 
@@ -129,7 +129,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
         expect(myevent.end_time).to eq(myevent.end_time.end_of_month)
-        expect(myevent.data).to eq('CPU' => { 'average' => [52.67,"percent"], 'max_number_of_cpu' => [4,"cores"] })
+        expect(myevent.data).to eq("CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mb"]}, "FLAVOR"=>{})
       end
 
       it 'trait #with_vm_datra and half_month has a valid factory' do
@@ -138,7 +138,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
         expect(myevent.end_time).to eq(myevent.end_time.change(:day => 15).end_of_day)
-        expect(myevent.data).to eq('CPU' => { 'average' => [52.67,"percent"], 'max_number_of_cpu' => [4,"cores"] })
+        expect(myevent.data).to eq("CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mb"]}, "FLAVOR"=>{})
       end
     end
 

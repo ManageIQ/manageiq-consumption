@@ -58,6 +58,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
         FactoryGirl.build(:showback_rate,
+                          :calculation         => 'occurrence',
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
                           :variable_rate       => variable_rate,
@@ -65,6 +66,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
+                          :calculation         => 'duration',
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate2,
                           :variable_rate       => variable_rate2,
@@ -105,7 +107,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate.dimension = 'CPU#max_number_of_cpu'
         rate.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(Money.new(39))
+        expect(plan.calculate_total_cost(event)).to eq(Money.new(18))
       end
 
       it 'calculates costs when more than one rate applies' do
@@ -120,7 +122,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate2.dimension = 'CPU#average'
         rate2.save
         # Rating now should return the value
-        expect(plan.calculate_total_cost(event)).to eq(Money.new(729))
+        expect(plan.calculate_total_cost(event)).to eq(Money.new(411))
       end
     end
 

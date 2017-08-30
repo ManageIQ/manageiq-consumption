@@ -26,7 +26,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
         rates.each do |r|
           next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, r.screener)
           val = event.get_measure_value(usage.measure, dim)
-          tc += r.rate_with_values(val, event.time_span, cycle_duration)
+          tc += r.rate(event)
         end
       end
     end
