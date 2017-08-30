@@ -92,16 +92,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     let(:variable_rate2) { Money.new(7) }
     let(:rate1) do
       FactoryGirl.create(:showback_rate,
+                         :CPU_average,
                          :showback_price_plan => plan,
-                         :dimension           => 'CPU#average',
                          :fixed_rate          => fixed_rate1,
                          :variable_rate       => variable_rate1)
     end
 
     let(:rate2) do
       FactoryGirl.create(:showback_rate,
+                         :CPU_average,
                          :showback_price_plan => plan2,
-                         :dimension           => 'CPU#average',
                          :fixed_rate          => fixed_rate2,
                          :variable_rate       => variable_rate2)
     end

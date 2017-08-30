@@ -226,7 +226,6 @@ module ManageIQ::Consumption
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
           showback_rate.dimension = 'MEM#max_mem'
-          showback_rate.fixed_rate_per_unit    = 'b'
           showback_rate.variable_rate_per_unit = 'b'
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + (2048 * 1024 * 1024 * 7)))
           showback_rate.fixed_rate_per_unit    = 'Kib'
@@ -255,7 +254,7 @@ module ManageIQ::Consumption
     describe 'event lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :fixed_rate => fixed_rate, :variable_rate => variable_rate, :dimension => 'CPU#number') }
+      let(:showback_rate)     { FactoryGirl.build(:showback_rate, :CPU_number, :fixed_rate => fixed_rate, :variable_rate => variable_rate) }
       let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month, :with_vm_data) }
       let(:proration)         { showback_event_hm.time_span.to_f / showback_event_hm.month_duration }
 
@@ -272,8 +271,7 @@ module ManageIQ::Consumption
 
         it 'should charge an event by quantity' do
           showback_rate.calculation = 'quantity'
-          days_in_month = Time.days_in_month(Time.current.month)
-          # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
+        # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
           expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * 2))
         end
       end

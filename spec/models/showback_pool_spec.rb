@@ -229,9 +229,9 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it '#calculate charge' do
       enterprise_plan
       FactoryGirl.create(:showback_rate,
+                         :CPU_average,
                          :fixed_rate => Money.new(67),
                          :variable_rate => Money.new(12),
-                         :dimension => 'CPU#average',
                          :showback_price_plan => enterprise_plan)
       pool.add_event(event2)
       # event2.reload

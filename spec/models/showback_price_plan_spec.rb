@@ -53,26 +53,22 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
       let(:variable_rate2) { Money.new(13) }
-      let(:dimension)      { 'CPU#average' }
-      let(:dimension2)     { 'CPU#max_number_of_cpu' }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
         FactoryGirl.build(:showback_rate,
+                          :CPU_average,
                           :calculation         => 'occurrence',
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
-                          :variable_rate       => variable_rate,
-                          :dimension           => dimension,
-                          :variable_rate_per_unit => 'percent')
+                          :variable_rate       => variable_rate)
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
+                          :CPU_max_number_of_cpu,
                           :calculation         => 'duration',
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate2,
-                          :variable_rate       => variable_rate2,
-                          :dimension           => dimension2,
-                          :variable_rate_per_unit => 'cores')
+                          :variable_rate       => variable_rate2)
       end
 
       it 'calculates costs when rate is not found' do
@@ -136,24 +132,20 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:event)         { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :with_tags_in_context, resource: resource) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:dimension)     { 'CPU#average' }
-      let(:dimension2)    { 'CPU#max_number_of_cpu' }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
         FactoryGirl.build(:showback_rate,
+                          :CPU_average,
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
-                          :variable_rate       => variable_rate,
-                          :dimension           => dimension,
-                          :variable_rate_per_unit => 'percent')
+                          :variable_rate       => variable_rate)
       end
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
+                          :CPU_max_number_of_cpu,
                           :showback_price_plan => plan,
                           :fixed_rate          => fixed_rate,
-                          :variable_rate       => variable_rate,
-                          :dimension           => dimension2,
-                          :variable_rate_per_unit => 'cores')
+                          :variable_rate       => variable_rate)
       end
 
       it 'calculates costs when rate is not found' do

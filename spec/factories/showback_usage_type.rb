@@ -3,6 +3,6 @@ FactoryGirl.define do
     category                 'Vm'
     sequence(:description)   { |s| "Description #{s}" }
     measure                  'CPU'
-    dimensions               ["average"]
+    dimensions               ['average']
   end
 end
