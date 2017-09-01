@@ -157,6 +157,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
       end
 
+      it 'returns list of costs when no rate is found' do
+        event.save
+        event.reload
+        # Make rate category not found
+        rate.category = 'not-found'
+        rate.save
+        expect(plan.calculate_list_of_costs(event)).to be_empty
+      end
+
       it 'calculates costs when rate is not found' do
         event.save
         event.reload
@@ -174,6 +183,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(plan.calculate_total_cost(event)).to eq(rate2.rate(event))
       end
 
+      it 'returns list of costs with one rate' do
+        event.save
+        event.reload
+        rate2.save
+        # Rating now should return the value
+        expect(plan.calculate_list_of_costs(event)).to  match_array([[rate2.rate(event), rate2]])
+      end
+
+
       it 'calculates costs when more than one rate applies' do
         event.save
         event.reload
@@ -181,6 +199,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate2.save
         # Rating now should return the value
         expect(plan.calculate_total_cost(event)).to eq(rate.rate(event) + rate2.rate(event))
+      end
+
+      it 'return list of costs when more than one rate applies' do
+        event.save
+        event.reload
+        rate.save
+        rate2.save
+        # Rating now should return the value
+        expect(plan.calculate_list_of_costs(event)).to  match_array([[rate.rate(event), rate], [rate2.rate(event), rate2]])
       end
 
     end

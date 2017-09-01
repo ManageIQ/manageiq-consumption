@@ -14,10 +14,18 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   # Returns the total accumulated costs for all rates that apply
   ###################################################################
   def calculate_total_cost(event, cycle_duration = nil)
+    total = 0
+    calculate_list_of_costs(event,  cycle_duration).each do |x|
+      total += x[0]
+    end
+    total
+  end
+
+  def calculate_list_of_costs(event, cycle_duration = nil)
     cycle_duration ||= event.month_duration
     resource_type = event.resource&.type || event.resource_type
     # Accumulator
-    tc = Money.new(0)
+    tc = []
     # For each measure type in ShowbackUsageType, I need to find the rates applying to the different dimensions
     # If there is a rate associated to it, we call it with a measure (that can be 0)
     ManageIQ::Consumption::ShowbackUsageType.where(category: resource_type).each do |usage|
@@ -25,12 +33,13 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
         rates = showback_rates.where(category: usage.category, measure: usage.measure, dimension: dim)
         rates.each do |r|
           next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, r.screener)
-          tc += r.rate(event, cycle_duration)
+          tc << [r.rate(event, cycle_duration), r]
         end
       end
     end
     tc
   end
+
 
   # Calculate total costs using input data instead of an event
   def calculate_total_cost_input(resource_type, data, context = nil, start_time = nil, end_time = nil, cycle_duration = nil)
