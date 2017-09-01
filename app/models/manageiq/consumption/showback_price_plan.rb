@@ -38,8 +38,8 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     event.resource_type = resource_type
     event.data = data
     event.context = context || {}
-    event.start_time = start_time || Time.zone.beginning_of_month
-    event.end_time = end_time || Time.zone.end_of_month
+    event.start_time = start_time || Time.current.beginning_of_month
+    event.end_time = end_time || Time.current.end_of_month
     calculate_total_cost(event, cycle_duration)
   end
 

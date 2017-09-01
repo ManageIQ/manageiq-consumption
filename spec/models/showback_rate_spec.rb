@@ -271,7 +271,7 @@ module ManageIQ::Consumption
 
         it 'should charge an event by duration' do
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 * proration) + Money.new(7 * 2 * proration))
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * 2) * proration)
         end
 
         it 'should charge an event by quantity' do
