@@ -103,6 +103,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
       self.end_time = @metrics.last.timestamp
     end
     collect_tags
+    update_charges
   end
 
   def generate_metric(key,dim)
@@ -194,6 +195,12 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
         tag_child = t.classification.children.detect{|c| c.name == child_category}
         find_pool(tag_child.tag)&.add_event(self)
       end
+    end
+  end
+
+  def update_charges
+    ManageIQ::Consumption::ShowbackCharge.where(:showback_event=>self).each do |charge|
+      charge.update_stored_data unless !charge.is_open?
     end
   end
 end

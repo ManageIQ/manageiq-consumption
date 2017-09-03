@@ -74,11 +74,63 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     it "fails if snapshot of charge is not the event data after create" do
       event.save
       charge.save
-      expect(charge.stored_data).to eq(event.data)
+      expect(charge.stored_data.first[1]).to eq(event.data)
       event.data = {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}
       event.save
       charge.save
-      expect(charge.stored_data).not_to eq(event.data)
+      expect(charge.stored_data.first[1]).not_to eq(event.data)
+    end
+
+    it "Return the stored data at start" do
+      event.save
+      charge.save
+      expect(charge.stored_data_start).to eq(event.data)
+    end
+
+    it "Return the last stored data" do
+      event.save
+      charge.save
+      expect(charge.stored_data.length).to eq(1)
+      event.data = {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}
+      charge.update_stored_data
+      expect(charge.stored_data_last).to eq(event.data)
+    end
+
+    it "Return the last stored data key" do
+      event.save
+      charge.stored_data = { 3.hours.ago => {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}},
+                             Time.now.utc => {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}}
+      t = charge.stored_data.keys.sort.last
+      expect(charge.stored_data_last_key).to eq(t)
+    end
+  end
+
+  context '#stored data' do
+    let(:charge_data) { FactoryGirl.build(:showback_charge, :with_stored_data) }
+    let(:event_for_charge) { FactoryGirl.create(:showback_event) }
+    let(:pool_of_event) { FactoryGirl.create(:showback_pool,
+                                             :resource => event_for_charge.resource) }
+
+    it "stored event" do
+      event_for_charge.data = {"CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mib"]}, "FLAVOR"=>{}}
+      charge_1 = FactoryGirl.create(:showback_charge,
+                                    :showback_pool => pool_of_event,
+                                    :showback_event => event_for_charge)
+      expect(charge_1.stored_data_start).to eq(event_for_charge.data)
+      charge_1.stored_data_event
+      expect(charge_1.stored_data_start).to eq(event_for_charge.data)
+    end
+
+    it "get measure" do
+      expect(charge_data.get_measure("CPU","number")).to eq([2.0, "cores"])
+    end
+
+    it "get last measure" do
+      expect(charge_data.get_last_measure("CPU","number")).to eq([4.0, "cores"])
+    end
+
+    it "get pool measure" do
+      expect(charge_data.get_pool_measure("CPU","number")).to eq([[2.0, "cores"],[4.0, "cores"]])
     end
   end
   context '#calculate_cost' do
