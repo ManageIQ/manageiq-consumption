@@ -14,16 +14,20 @@
 - :category: "Vm"
   :description: "Template Showback of VM"
   :measure: "FLAVOR"
-  :dimensions: ["cpu_reserved","memory_reserve"]
+  :dimensions: ["cpu_reserved","memory_reserved"]
 - :category: "Container"
   :description: "Calculate CPU Showback of Container"
   :measure: "CPU"
-  :dimensions: ["numvcpus"]
+  :dimensions: ["numvcpus","total_cpu"]
 - :category: "Container"
   :description: "Calculate MEM Showback of Container"
   :measure: "MEM"
-  :dimensions: ["max_mem"]
+  :dimensions: ["total_mem"]
+- :category: "Container"
+  :description: "Calculate STORAGE Showback of Container"
+  :measure: "STORAGE"
+  :dimensions: ["vm_allocated_disk_storage","vm_used_disk_storage","allocated_disk_types"]
 - :category: "Container"
   :description: "Template Showback of VM"
   :measure: "FLAVOR"
-  :dimensions: ["cpu_reserved","memory_reserve"]
+  :dimensions: ["cpu_reserved","memory_reserved"]

@@ -2,7 +2,7 @@ module ManageIQ::Consumption::ShowbackEvent::COMMON
 
   def get_metric(type)
     if is_container?
-      resource.vim_performance_states.last.state_data[type.to_sym] || 0
+      resource.vim_performance_states.last.try(type.to_sym) || 0
     else
       resource.try(type.to_sym) || 0
     end
@@ -10,7 +10,7 @@ module ManageIQ::Consumption::ShowbackEvent::COMMON
 
   def is_metric?(type)
     if is_container?
-      resource.vim_performance_states.last.state_data.key?(type.to_sym)
+      resource.vim_performance_states.last.methods.include?(type.to_sym)
     else
       resource.methods.include?(type.to_sym)
     end

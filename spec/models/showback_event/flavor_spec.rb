@@ -21,6 +21,10 @@ describe ManageIQ::Consumption::ShowbackEvent::FLAVOR do
                                                   :cpu_ready_delta_summation  => v * 1000,
                                                   :sys_uptime_absolute_latest => v)
       end
+      @vm_metrics.vim_performance_states << FactoryGirl.create(:vim_performance_state,
+                                                               :timestamp       => "2016-04-16T00:00:00Z",
+                                                               :image_tag_names => "environment/prod",
+                                                               :state_data      => {:numvcpus => 2, :total_mem => 4096})
       event.resource     = @vm_metrics
       event.start_time   = "2010-04-13T00:00:00Z"
       event.end_time     = "2010-04-14T00:00:00Z"
@@ -30,28 +34,40 @@ describe ManageIQ::Consumption::ShowbackEvent::FLAVOR do
     end
 
     it "Calculate FLAVOR_number" do
-      event.FLAVOR_cpu_reserved
+      puts event.data
+      event.FLAVOR("cpu_reserved")
+      puts event.data
       expect(event.data["FLAVOR"]).not_to be_empty
-      expect(event.data["FLAVOR"].length).to eq(1)
+      expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["cores"]).to eq([2,"cores"])
       event.resource.hardware = FactoryGirl.create(:hardware, :cpu4x2, :memory_mb => 8192)
-      event.FLAVOR_cpu_reserved
+      event.resource.vim_performance_states << FactoryGirl.create(:vim_performance_state,
+                                                                  :timestamp       => "2016-04-14T00:00:00Z",
+                                                                  :image_tag_names => "environment/prod",
+                                                                  :state_data      => {:numvcpus => 8, :total_mem => 8192})
+      event.FLAVOR("cpu_reserved")
       expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["cores"]).not_to eq(event.data["FLAVOR"].values.last["cores"])
       expect(event.data["FLAVOR"].values.last["cores"]).to eq([8,"cores"])
     end
 
+=begin
     it "Calculate FLAVOR_memory_reserve" do
-      event.FLAVOR_memory_reserve
+      event.FLAVOR("memory_reserved")
       expect(event.data["FLAVOR"]).not_to be_empty
-      expect(event.data["FLAVOR"].length).to eq(1)
+      expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["memory"]).to eq([4096,"Mb"])
       event.resource.hardware = FactoryGirl.create(:hardware, :cpu4x2, :memory_mb => 8192)
-      event.FLAVOR_memory_reserve
+      event.resource.vim_performance_states << FactoryGirl.create(:vim_performance_state,
+                                                                  :timestamp       => "2016-04-15T00:00:00Z",
+                                                                  :image_tag_names => "environment/prod",
+                                                                  :state_data      => {:numvcpus => 8, :total_mem => 8192})
+      event.FLAVOR("memory_reserved")
       expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["memory"]).not_to eq(event.data["FLAVOR"].values.last["memory"])
       expect(event.data["FLAVOR"].values.last["memory"]).to eq([8192,"Mb"])
     end
+=end
   end
 
   context "FLAVOR in container" do
@@ -73,34 +89,38 @@ describe ManageIQ::Consumption::ShowbackEvent::FLAVOR do
       event.generate_data
     end
 
+=begin
     it "Calculate FLAVOR_number" do
-      event.FLAVOR_cpu_reserved
+      puts event.data
+      event.FLAVOR("cpu_reserved")
+      puts event.data
       expect(event.data["FLAVOR"]).not_to be_empty
-      expect(event.data["FLAVOR"].length).to eq(1)
+      expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["cores"]).to eq([2,"cores"])
       event.resource.vim_performance_states << FactoryGirl.create(:vim_performance_state,
-                                                                  :timestamp       => "2016-04-13T00:00:00Z",
+                                                                  :timestamp       => "2016-04-16T00:00:00Z",
                                                                   :image_tag_names => "environment/prod",
                                                                   :state_data      => {:numvcpus => 8, :total_mem => 4096})
-      event.FLAVOR_cpu_reserved
+      event.FLAVOR("cpu_reserved")
       expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["cores"]).not_to eq(event.data["FLAVOR"].values.last["cores"])
       expect(event.data["FLAVOR"].values.last["cores"]).to eq([8,"cores"])
     end
 
     it "Calculate FLAVOR_memory_reserve" do
-      event.FLAVOR_memory_reserve
+      event.FLAVOR("cpu_reserved")
       expect(event.data["FLAVOR"]).not_to be_empty
-      expect(event.data["FLAVOR"].length).to eq(1)
+      expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["memory"]).to eq([4096,"Mb"])
       event.resource.vim_performance_states << FactoryGirl.create(:vim_performance_state,
-                                                                  :timestamp       => "2016-04-13T00:00:00Z",
+                                                                  :timestamp       => "2016-04-17T00:00:00Z",
                                                                   :image_tag_names => "environment/prod",
                                                                   :state_data      => {:numvcpus => 8, :total_mem => 8192})
-      event.FLAVOR_memory_reserve
+      event.FLAVOR("memory_reserved")
       expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["memory"]).not_to eq(event.data["FLAVOR"].values.last["memory"])
       expect(event.data["FLAVOR"].values.last["memory"]).to eq([8192,"Mb"])
     end
+=end
   end
 end

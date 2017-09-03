@@ -10,3 +10,5 @@
 :max_mem: "Mb"
 :memory_reserve: "Mb"
 :cpu_reserved: "cores"
+:reserve_cpu: "cores"
+:reserve_mem: "Mb"

@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackUsageType do
   before(:all) do
-    @expected_showback_usage_type_count = 6
+    @expected_showback_usage_type_count = 8
   end
 
   before(:each) do
@@ -57,12 +57,25 @@ describe ManageIQ::Consumption::ShowbackUsageType do
     it 'should return category::measure' do
       expect(showback_usage.name).to eq("Vm::CPU")
     end
+  end
+
+  context '#Validate method is defined for measure' do
+    let(:event) { FactoryGirl.build(:showback_event) }
+    @vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
 
     it 'should be a function to calculate this usage' do
       described_class.seed
       described_class.all.each do |usage|
         usage.dimensions.each do |dim|
-          expect(event).to respond_to("#{usage.measure}_#{dim}")
+          if dim.start_with?("sb_")
+            expect(event).to respond_to("#{usage.measure}_#{dim}")
+          else
+            if usage.category == "Vm"
+              expect(VmOrTemplate.instance_methods.include?(dim.to_sym)).to be_truthy
+            else
+              expect(VimPerformanceState.instance_methods.include?(dim.to_sym)).to be_truthy
+            end
+          end
         end
       end
     end

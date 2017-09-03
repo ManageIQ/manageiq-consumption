@@ -1,21 +1,17 @@
 module ManageIQ::Consumption::ShowbackEvent::FLAVOR
 
-  MEASURE_CONTAINER = {
+  MEASURE = {
       # DB            Displayed
       "cpu_reserved"     => "numvcpus",
-      "memory_reserve"   => "total_mem"
-  }
-
-  MEASURE_VM = {
-      # DB            Displayed
-      "cpu_reserved"     => "cpu_total_cores",
-      "memory_reserve"   => "ram_size"
+      "memory_reserved"   => "total_mem"
   }
   #
   # Return Number Ocurrences
   #
   def FLAVOR(type)
-    resource.class.name.ends_with?("Container") ? result = resource.vim_performance_states.last.state_data[MEASURE_CONTAINER[type].to_sym] : result = resource.try(MEASURE_VM[type].to_sym) || 0
+    puts resource.vim_performance_states.last.state_data
+    puts type
+    result = resource.vim_performance_states.last.state_data[ManageIQ::Consumption::ShowbackEvent::FLAVOR::MEASURE[type.to_sym]] || 0
     update_value_flavor(type,result)
   end
 
@@ -37,6 +33,6 @@ module ManageIQ::Consumption::ShowbackEvent::FLAVOR
   def add_flavor(k,v)
     t    = Time.now
     self.data["FLAVOR"][t] = {}
-    self.data["FLAVOR"][t][k] = [v,self.data["FLAVOR"].first[k][1]]
+    self.data["FLAVOR"][t][k] = [v,self.data["FLAVOR"].first[1][k][1]]
   end
 end

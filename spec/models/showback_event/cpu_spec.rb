@@ -29,22 +29,22 @@ describe ManageIQ::Consumption::ShowbackEvent::CPU do
       event.generate_data
     end
 
-    it "Calculate CPU average" do
+    it "Calculate CPU sb_usage_rate_average" do
       event.instance_variable_set(:@metrics, event.resource.metrics)
-      expect(event.CPU_average(50)).to eq(41.42857142857145)
+      expect(event.CPU_sb_usage_rate_average(50)).to eq(41.42857142857145)
     end
 
-    it "Calculate CPU average with no metrics" do
+    it "Calculate CPU sb_usage_rate_average with no metrics" do
       event.instance_variable_set(:@metrics, [])
-      expect(event.CPU_average(50)).to eq(50)
+      expect(event.CPU_sb_usage_rate_average(50)).to eq(50)
     end
 
-    it "Calculate CPU_number" do
-      expect(event.CPU_number(2)).to eq(2)
+    it "Calculate CPU_sb_max_cpu_total_cores" do
+      expect(event.CPU_sb_max_cpu_total_cores(2)).to eq(2)
     end
 
-    it "Calculate CPU_max_number_of_cpu" do
-      expect(event.CPU_max_number_of_cpu(3)).to eq(3)
+    it "Calculate CPU_sb_max_cpu_total_cores" do
+      expect(event.CPU_sb_max_cpu_total_cores(3)).to eq(3)
     end
   end
 
@@ -67,8 +67,8 @@ describe ManageIQ::Consumption::ShowbackEvent::CPU do
     end
 
     it "Calculate CPU_max_number_of_cpu" do
-      expect(event.CPU_max_number_of_cpu(3)).to eq(3)
-      expect(event.CPU_max_number_of_cpu(1)).to eq(2)
+      expect(event.CPU_sb_max_cpu_total_cores(3)).to eq(3)
+      expect(event.CPU_sb_max_cpu_total_cores(1)).to eq(2)
     end
   end
 end
