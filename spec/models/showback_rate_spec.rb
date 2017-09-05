@@ -246,17 +246,21 @@ module ManageIQ::Consumption
           showback_rate.step_unit = 'Gib'
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 4096))
 
-          showback_event_fm.data["MEM"]["max_mem"][0] = 512
+          # Modify the input data so the data is not a multiple
+          showback_event_fm.data["MEM"]["max_mem"][0] = 501
           showback_event_fm.data["MEM"]["max_mem"][1] = 'MiB'
           showback_rate.step_unit = 'MiB'
           showback_rate.step_value = 384
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 384 * 2))
-
-
         end
 
         pending 'step time moves half_month to full_month' do
-
+          showback_rate.step_unit = 'b'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = 1
+          showback_rate.step_time_unit = 'month'
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_hm)).to eq(showback_rate.rate(showback_event_fm))
         end
 
         pending 'step is not a subunit of the tier' do

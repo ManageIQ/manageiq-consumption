@@ -29,6 +29,8 @@ module ManageIQ::Consumption
     default_value_for :screener, { }
     validates :screener, :exclusion => { :in => [nil] }
 
+    validates :step_unit, :numericality => { :only_integer => true, :greater_than => 0, allow_nil: true}
+
     def name
       "#{category}:#{measure}:#{dimension}"
     end
@@ -39,13 +41,19 @@ module ManageIQ::Consumption
       # For each tier used, calculate costs
       duration = cycle_duration || event.month_duration
       # TODO event.resource.type should be eq to category
-      value, measurement = event.get_measure(measure, dimension)
-       # Convert step and value to the same unit (variable_rate_per_unit, and create the minimum step)
-      adjusted_step = UnitsConverterHelper.to_unit(step_value, step_unit, variable_rate_per_unit)
-      divmod = UnitsConverterHelper.to_unit(value, measurement, variable_rate_per_unit).divmod adjusted_step
-      adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
+      value, measurement = event.get_measure(measure, dimension)  # Returns measure and the unit
+      adjusted_value = value # Just in case we need to update it
+      # If there is a step defined, we use it to adjust input to it
+      unless step_value.nil? || step_unit.nil?
+        # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
+        adjusted_step = UnitsConverterHelper.to_unit(step_value, step_unit, variable_rate_per_unit)
+        divmod = UnitsConverterHelper.to_unit(value, measurement, variable_rate_per_unit).divmod adjusted_step
+        adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
+        measurement = variable_rate_per_unit # Updated value with new measurement as we have updated values
+      end
+      # If there is a step time defined, we use it to adjust input to it
       adjusted_time_span = event.time_span
-      rate_with_values(adjusted_value, variable_rate_per_unit,adjusted_time_span, duration)
+      rate_with_values(adjusted_value, measurement,adjusted_time_span, duration)
     end
 
     def rate_with_values(value, measure, time_span, cycle_duration, date = Time.current)
@@ -60,8 +68,8 @@ module ManageIQ::Consumption
       # fix_inter: number of intervals in the calculation => how many times do we need to apply the rate to get a monthly (cycle) rate (min = 1)
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
       # var_inter * variable_rate == interval_rate (i.e. monthly)
-      fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
-      var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
+      fix_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: fixed_rate_per_time, calculation_date: date)
+      var_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: variable_rate_per_time, calculation_date:date)
       fix_inter * fixed_rate + (value ? var_inter * variable_rate : 0) # fixed always, variable if value
     end
 
@@ -74,8 +82,8 @@ module ManageIQ::Consumption
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly from hourly)
       # var_inter * variable_rate == interval_rate (i.e. monthly variable from hourly)
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
-      fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
-      var_inter = TimeConverterHelper.number_of_intervals(cycle_duration, variable_rate_per_time, date)
+      fix_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: fixed_rate_per_time, calculation_date: date)
+      var_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: variable_rate_per_time, calculation_date: date)
       value_in_rate_units = UnitsConverterHelper.to_unit(value, measure, variable_rate_per_unit) || 0
       ((fix_inter * fixed_rate) + (var_inter * value_in_rate_units * variable_rate)) * time_span.to_f / cycle_duration
     end
@@ -88,7 +96,7 @@ module ManageIQ::Consumption
       # fix_inter: number of intervals in the calculation => how many time do we need to apply the rate to get a monthly rate
       # fix_inter * fixed_rate ==  interval_rate (i.e. monthly)
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
-      fix_inter = TimeConverterHelper.number_of_intervals(cycle_duration, fixed_rate_per_time, date)
+      fix_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: fixed_rate_per_time, calculation_date: date)
       value_in_rate_units = UnitsConverterHelper.to_unit(value, measure, variable_rate_per_unit) || 0
       (fix_inter * fixed_rate) + (value_in_rate_units * variable_rate)
     end
