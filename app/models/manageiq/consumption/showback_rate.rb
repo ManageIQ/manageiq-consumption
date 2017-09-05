@@ -40,7 +40,12 @@ module ManageIQ::Consumption
       duration = cycle_duration || event.month_duration
       # TODO event.resource.type should be eq to category
       value, measurement = event.get_measure(measure, dimension)
-      rate_with_values(value, measurement,event.time_span, duration)
+       # Convert step and value to the same unit (variable_rate_per_unit, and create the minimum step)
+      adjusted_step = UnitsConverterHelper.to_unit(step_value, step_unit, variable_rate_per_unit)
+      divmod = UnitsConverterHelper.to_unit(value, measurement, variable_rate_per_unit).divmod adjusted_step
+      adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
+      adjusted_time_span = event.time_span
+      rate_with_values(adjusted_value, variable_rate_per_unit,adjusted_time_span, duration)
     end
 
     def rate_with_values(value, measure, time_span, cycle_duration, date = Time.current)

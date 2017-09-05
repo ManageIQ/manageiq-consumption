@@ -15,7 +15,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   ###################################################################
   def calculate_total_cost(event, cycle_duration = nil)
     total = 0
-    calculate_list_of_costs(event,  cycle_duration).each do |x|
+    calculate_list_of_costs(event, cycle_duration).each do |x|
       total += x[0]
     end
     total
@@ -32,7 +32,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
       usage.dimensions.each do |dim|
         rates = showback_rates.where(category: usage.category, measure: usage.measure, dimension: dim)
         rates.each do |r|
-          next unless (ManageIQ::Consumption::DataUtilsHelper.is_included_in? event.context, r.screener)
+          next unless ManageIQ::Consumption::DataUtilsHelper.is_included_in?(event.context, r.screener)
           tc << [r.rate(event, cycle_duration), r]
         end
       end
@@ -42,7 +42,12 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
 
 
   # Calculate total costs using input data instead of an event
-  def calculate_total_cost_input(resource_type, data, context = nil, start_time = nil, end_time = nil, cycle_duration = nil)
+  def calculate_total_cost_input(resource_type:,
+                                 data:,
+                                 context: nil,
+                                 start_time: nil,
+                                 end_time: nil,
+                                 cycle_duration: nil)
     event = ManageIQ::Consumption::ShowbackEvent.new
     event.resource_type = resource_type
     event.data = data

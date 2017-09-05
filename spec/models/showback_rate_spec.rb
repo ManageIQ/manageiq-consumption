@@ -195,6 +195,83 @@ module ManageIQ::Consumption
         end
       end
 
+      context 'minimum step' do
+        let(:fixed_rate)    { Money.new(11) }
+        let(:variable_rate) { Money.new(7) }
+        let(:showback_rate) {
+          FactoryGirl.build(:showback_rate,
+                            :MEM_max_mem,
+                            :fixed_rate => fixed_rate,
+                            :variable_rate => variable_rate)
+        }
+        let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month, :with_vm_data) }
+        let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month, :with_vm_data) }
+        it 'nil step should behave like no step' do
+          showback_rate.step_unit = nil
+          showback_rate.step_value = nil
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2048))
+        end
+
+        it 'basic unit step should behave like no step' do
+          showback_rate.step_unit = 'b'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2048))
+        end
+
+        it 'when input is 0 it works' do
+          showback_rate.step_unit = 'b'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          showback_event_fm.data["MEM"]["max_mem"][0] = 0
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11))
+        end
+
+        it 'should work if step unit is a subunit of the tier' do
+          showback_rate.step_unit = 'Gib'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2048))
+
+          showback_rate.step_value = 4
+          showback_rate.step_unit = 'Gib'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 4096))
+
+          showback_event_fm.data["MEM"]["max_mem"][0] = 512
+          showback_event_fm.data["MEM"]["max_mem"][1] = 'MiB'
+          showback_rate.step_unit = 'MiB'
+          showback_rate.step_value = 384
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 384 * 2))
+
+
+        end
+
+        pending 'step time moves half_month to full_month' do
+
+        end
+
+        pending 'step is not a subunit of the tier' do
+          # Rate is using Vm:CPU:Number
+          showback_rate.step_unit = 'cores'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showbacK_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2))
+        end
+
+        pending 'step is higher than the tier'
+      end
+
       context 'empty #context, modified per_time' do
         it 'should charge an event by occurrence' do
           showback_rate.calculation = 'occurrence'

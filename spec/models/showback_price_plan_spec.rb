@@ -88,8 +88,12 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         start_time = event.start_time
         end_time = event.end_time
         context = event.context
-        expect(plan.calculate_total_cost_input(resource_type, data, context, start_time, end_time)).to eq(plan.calculate_total_cost(event))
-        expect(plan.calculate_total_cost_input(resource_type, data)).to eq(plan.calculate_total_cost(event))
+        expect(plan.calculate_total_cost_input(resource_type: resource_type,
+                                               data: data,
+                                               context: context,
+                                               start_time: start_time,
+                                               end_time: end_time)).to eq(plan.calculate_total_cost(event))
+        expect(plan.calculate_total_cost_input(resource_type: resource_type, data: data)).to eq(plan.calculate_total_cost(event))
       end
 
       it 'calculates costs when rate is not found and default event data' do
@@ -97,7 +101,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate.save
         resource_type = event.resource.type
         data = event.data
-        expect(plan.calculate_total_cost_input(resource_type, data)).to eq(plan.calculate_total_cost(event))
+        expect(plan.calculate_total_cost_input(resource_type: resource_type, data: data)).to eq(plan.calculate_total_cost(event))
       end
 
       it 'test that data is right' do
