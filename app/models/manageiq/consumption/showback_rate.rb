@@ -53,7 +53,7 @@ module ManageIQ::Consumption
       end
       # If there is a step time defined, we use it to adjust input to it
       adjusted_time_span = event.time_span
-      rate_with_values(adjusted_value, measurement,adjusted_time_span, duration)
+      rate_with_values(adjusted_value, measurement, adjusted_time_span, duration)
     end
 
     def rate_with_values(value, measure, time_span, cycle_duration, date = Time.current)
