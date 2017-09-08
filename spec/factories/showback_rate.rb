@@ -40,5 +40,11 @@ FactoryGirl.define do
       dimension 'max_number_of_cpu'
       variable_rate_per_unit 'cores'
     end
+
+    trait :MEM_max_mem do
+      measure 'MEM'
+      dimension 'max_mem'
+      variable_rate_per_unit 'Mib'
+    end
   end
 end

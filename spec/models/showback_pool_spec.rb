@@ -6,7 +6,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
   before(:all) do
     ManageIQ::Consumption::ShowbackUsageType.seed
   end
-  let(:resource)        { FactoryGirl.create(:vm)}
+  let(:resource)        { FactoryGirl.create(:vm) }
   let(:pool)            { FactoryGirl.build(:showback_pool) }
   let(:event)           { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, resource: resource) }
   let(:event2)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, resource: resource) }
@@ -62,7 +62,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'it only can be in approved states' do
       pool.state = 'ERROR'
       expect(pool).not_to be_valid
-      expect(pool.errors.details[:state]).to include({:error => :inclusion, :value => 'ERROR'})
+      expect(pool.errors.details[:state]).to include(:error => :inclusion, :value => 'ERROR')
     end
 
     it 'it can not be different of states open, processing, closed' do
@@ -82,7 +82,6 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
   context '.control lifecycle state' do
     let(:pool_lifecycle) { FactoryGirl.create(:showback_pool) }
-
 
     it 'it can transition from open to processing' do
       pool_lifecycle.state = 'PROCESSING'
@@ -230,16 +229,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       enterprise_plan
       FactoryGirl.create(:showback_rate,
                          :CPU_average,
-                         :fixed_rate => Money.new(67),
-                         :variable_rate => Money.new(12),
+                         :fixed_rate          => Money.new(67),
+                         :variable_rate       => Money.new(12),
                          :showback_price_plan => enterprise_plan)
       pool.add_event(event2)
       # event2.reload
       pool.showback_charges.reload
       charge = pool.showback_charges.find_by(:showback_event => event2)
       charge.cost = Money.new(0)
-      expect { pool.calculate_charge(charge) }.to change(charge, :cost).
-          from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU','average') * 12) + 67))
+      expect { pool.calculate_charge(charge) }.to change(charge, :cost)
+        .from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU', 'average') * 12) + 67))
     end
 
     it '#Add an event' do
@@ -290,8 +289,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       vm = FactoryGirl.create(:vm)
       FactoryGirl.create(:showback_rate,
                          :CPU_average,
-                         :fixed_rate => Money.new(67),
-                         :variable_rate => Money.new(12),
+                         :fixed_rate          => Money.new(67),
+                         :variable_rate       => Money.new(12),
                          :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
       ev = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
       ev2 = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)

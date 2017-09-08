@@ -143,13 +143,13 @@ module ManageIQ::Consumption
       end
 
       it 'is valid with a JSON screener' do
-        showback_rate.screener = JSON.generate({ 'tag' => { 'environment' => ['test'] } })
+        showback_rate.screener = JSON.generate('tag' => { 'environment' => ['test'] })
         showback_rate.valid?
         expect(showback_rate).to be_valid
       end
 
       pending 'is not valid with a wronly formatted screener' do
-        showback_rate.screener = JSON.generate({ 'tag' => { 'environment' => ['test'] } })
+        showback_rate.screener = JSON.generate('tag' => { 'environment' => ['test'] })
         showback_rate.valid?
         expect(showback_rate).not_to be_valid
       end
@@ -164,12 +164,12 @@ module ManageIQ::Consumption
     describe 'when the event lasts for the full month and the rates too' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate) {
+      let(:showback_rate) do
         FactoryGirl.build(:showback_rate,
                           :CPU_number,
-                          :fixed_rate => fixed_rate,
+                          :fixed_rate    => fixed_rate,
                           :variable_rate => variable_rate)
-                          }
+      end
       let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month, :with_vm_data) }
 
       context 'empty #context, default rate per_time and per_unit' do
@@ -193,6 +193,87 @@ module ManageIQ::Consumption
           showback_rate.calculation = 'quantity'
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2))
         end
+      end
+
+      context 'minimum step' do
+        let(:fixed_rate)    { Money.new(11) }
+        let(:variable_rate) { Money.new(7) }
+        let(:showback_rate) do
+          FactoryGirl.build(:showback_rate,
+                            :MEM_max_mem,
+                            :fixed_rate    => fixed_rate,
+                            :variable_rate => variable_rate)
+        end
+        let(:showback_event_fm) { FactoryGirl.build(:showback_event, :full_month, :with_vm_data) }
+        let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month, :with_vm_data) }
+        it 'nil step should behave like no step' do
+          showback_rate.step_unit = nil
+          showback_rate.step_value = nil
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2048))
+        end
+
+        it 'basic unit step should behave like no step' do
+          showback_rate.step_unit = 'b'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2048))
+        end
+
+        it 'when input is 0 it works' do
+          showback_rate.step_unit = 'b'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          showback_event_fm.data["MEM"]["max_mem"][0] = 0
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11))
+        end
+
+        it 'should work if step unit is a subunit of the tier' do
+          showback_rate.step_unit = 'Gib'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showback_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2048))
+
+          showback_rate.step_value = 4
+          showback_rate.step_unit = 'Gib'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 4096))
+
+          # Modify the input data so the data is not a multiple
+          showback_event_fm.data["MEM"]["max_mem"][0] = 501
+          showback_event_fm.data["MEM"]["max_mem"][1] = 'MiB'
+          showback_rate.step_unit = 'MiB'
+          showback_rate.step_value = 384
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 384 * 2))
+        end
+
+        pending 'step time moves half_month to full_month' do
+          showback_rate.step_unit = 'b'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = 1
+          showback_rate.step_time_unit = 'month'
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_hm)).to eq(showback_rate.rate(showback_event_fm))
+        end
+
+        pending 'step is not a subunit of the tier' do
+          # Rate is using Vm:CPU:Number
+          showback_rate.step_unit = 'cores'
+          showback_rate.step_value = 1
+          showback_rate.step_time_value = nil
+          showbacK_rate.step_time_unit = nil
+          showback_rate.calculation = 'duration'
+          expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + 7 * 2))
+        end
+
+        pending 'step is higher than the tier'
       end
 
       context 'empty #context, modified per_time' do
@@ -233,9 +314,7 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(showback_event_fm)).to eq(Money.new(11 + (2048 * 1024 * 7)))
         end
 
-        it 'should charge an event by quantity' do
-
-        end
+        pending 'should charge an event by quantity'
       end
 
       context 'tiered on input value' do
@@ -254,12 +333,12 @@ module ManageIQ::Consumption
     describe 'event lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:showback_rate) {
+      let(:showback_rate) do
         FactoryGirl.build(:showback_rate,
                           :CPU_number,
-                          :fixed_rate => fixed_rate,
+                          :fixed_rate    => fixed_rate,
                           :variable_rate => variable_rate)
-      }
+      end
       let(:showback_event_hm) { FactoryGirl.build(:showback_event, :first_half_month, :with_vm_data) }
       let(:proration)         { showback_event_hm.time_span.to_f / showback_event_hm.month_duration }
 
@@ -276,7 +355,7 @@ module ManageIQ::Consumption
 
         it 'should charge an event by quantity' do
           showback_rate.calculation = 'quantity'
-        # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
+          # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
           expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * 2))
         end
       end
