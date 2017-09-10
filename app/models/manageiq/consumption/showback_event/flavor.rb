@@ -9,7 +9,7 @@ module ManageIQ::Consumption::ShowbackEvent::FLAVOR
   #
   # Return Memory
   #
-  def FLAVOR_memory_reserve
+  def FLAVOR_memory_reserved
     resource.class.name.ends_with?("Container") ? tmem = resource.vim_performance_states.last.state_data[:total_mem] : tmem = resource.try(:ram_size) || 0
     update_value_flavor("memory",[tmem,"Mb"])
   end
@@ -17,6 +17,7 @@ module ManageIQ::Consumption::ShowbackEvent::FLAVOR
   private
 
   def update_value_flavor(k,v)
+    self.data["FLAVOR"]={} unless self.data.key?("FLAVOR")
     if self.data["FLAVOR"].empty?
       add_flavor({k => v})
     else

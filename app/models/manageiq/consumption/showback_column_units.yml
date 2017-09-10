@@ -8,5 +8,5 @@
 :average: "percent"
 :number: "cores"
 :max_mem: "Mb"
-:memory_reserve: "Mb"
+:memory_reserved: "Mb"
 :cpu_reserved: "cores"

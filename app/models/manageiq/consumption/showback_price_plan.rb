@@ -32,7 +32,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
       usage.dimensions.each do |dim|
         rates = showback_rates.where(category: usage.category, measure: usage.measure, dimension: dim)
         rates.each do |r|
-          next unless ManageIQ::Consumption::DataUtilsHelper.is_included_in?(event.context, r.screener)
+          next unless ManageIQ::Consumption::UtilsHelper.is_included_in?(event.context, r.screener)
           tc << [r.rate(event, cycle_duration), r]
         end
       end

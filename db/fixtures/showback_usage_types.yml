@@ -10,7 +10,7 @@
 - :category: "Vm"
   :description: "Template Showback of VM"
   :measure: "FLAVOR"
-  :dimensions: ["cpu_reserved","memory_reserve"]
+  :dimensions: ["cpu_reserved","memory_reserved"]
 - :category: "Container"
   :description: "Calculate CPU Showback of Container"
   :measure: "CPU"
@@ -22,4 +22,4 @@
 - :category: "Container"
   :description: "Template Showback of VM"
   :measure: "FLAVOR"
-  :dimensions: ["cpu_reserved","memory_reserve"]
+  :dimensions: ["cpu_reserved","memory_reserved"]

@@ -42,17 +42,39 @@ describe ManageIQ::Consumption::ShowbackEvent::FLAVOR do
     end
 
     it "Calculate FLAVOR_memory_reserve" do
-      event.FLAVOR_memory_reserve
+      event.FLAVOR_memory_reserved
       expect(event.data["FLAVOR"]).not_to be_empty
       expect(event.data["FLAVOR"].length).to eq(1)
       expect(event.data["FLAVOR"].values.first["memory"]).to eq([4096,"Mb"])
       event.resource.hardware = FactoryGirl.create(:hardware, :cpu4x2, :memory_mb => 8192)
-      event.FLAVOR_memory_reserve
+      event.FLAVOR_memory_reserved
+      expect(event.data["FLAVOR"].length).to eq(2)
+      expect(event.data["FLAVOR"].values.first["memory"]).not_to eq(event.data["FLAVOR"].values.last["memory"])
+      expect(event.data["FLAVOR"].values.last["memory"]).to eq([8192,"Mb"])
+    end
+
+    it "Calculate FLAVOR_memory_reserve and number" do
+      event.FLAVOR_memory_reserved
+      expect(event.data["FLAVOR"]).not_to be_empty
+      expect(event.data["FLAVOR"].length).to eq(1)
+      expect(event.data["FLAVOR"].values.first["memory"]).to eq([4096,"Mb"])
+      event.resource.hardware = FactoryGirl.create(:hardware, :cpu4x2, :memory_mb => 8192)
+      event.FLAVOR_memory_reserved
       expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["memory"]).not_to eq(event.data["FLAVOR"].values.last["memory"])
       expect(event.data["FLAVOR"].values.last["memory"]).to eq([8192,"Mb"])
     end
   end
+
+  context "FLAVOR methods" do
+    it "update_value_flavor" do
+      event.send(:update_value_flavor,"cores","2")
+      event.send(:update_value_flavor,"memory","2048")
+      expect(event.data["FLAVOR"].keys.length).to eq(1)
+      expect(event.data["FLAVOR"].first.second.values.length).to eq(2)
+    end
+  end
+
 
   context "FLAVOR in container" do
     before(:each) do
@@ -89,7 +111,7 @@ describe ManageIQ::Consumption::ShowbackEvent::FLAVOR do
     end
 
     it "Calculate FLAVOR_memory_reserve" do
-      event.FLAVOR_memory_reserve
+      event.FLAVOR_memory_reserved
       expect(event.data["FLAVOR"]).not_to be_empty
       expect(event.data["FLAVOR"].length).to eq(1)
       expect(event.data["FLAVOR"].values.first["memory"]).to eq([4096,"Mb"])
@@ -97,7 +119,7 @@ describe ManageIQ::Consumption::ShowbackEvent::FLAVOR do
                                                                   :timestamp       => "2016-04-13T00:00:00Z",
                                                                   :image_tag_names => "environment/prod",
                                                                   :state_data      => {:numvcpus => 8, :total_mem => 8192})
-      event.FLAVOR_memory_reserve
+      event.FLAVOR_memory_reserved
       expect(event.data["FLAVOR"].length).to eq(2)
       expect(event.data["FLAVOR"].values.first["memory"]).not_to eq(event.data["FLAVOR"].values.last["memory"])
       expect(event.data["FLAVOR"].values.last["memory"]).to eq([8192,"Mb"])

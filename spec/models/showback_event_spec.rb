@@ -89,6 +89,12 @@ describe ManageIQ::Consumption::ShowbackEvent do
       event = FactoryGirl.build(:showback_event, :data => ":-Invalid:\n-JSON")
       expect(event.validate_format).to be_nil
     end
+
+    it 'returns nil if ParserError' do
+      event = FactoryGirl.create(:showback_event)
+      event.data = "abc"
+      expect(event.validate_format).to be_nil
+    end
   end
 
   context '#engine' do
@@ -294,24 +300,6 @@ describe ManageIQ::Consumption::ShowbackEvent do
         vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
         pool = FactoryGirl.create(:showback_pool, :resource => vm)
         expect(event.find_pool(vm)).to eq(pool)
-      end
-
-      it "Return parent of resource" do
-        host = FactoryGirl.create(:host)
-        vm = FactoryGirl.create(:vm, :host => host)
-        expect(event.get_parent(vm, "Host")).to eq(host)
-      end
-
-      it "Should return nil if not parent" do
-        host = FactoryGirl.create(:host)
-        vm = FactoryGirl.create(:vm, :host => host)
-        expect(event.get_parent(vm, "Cluster")).to be_nil
-      end
-
-      it "Should return nil if error" do
-        host = FactoryGirl.create(:host)
-        vm = FactoryGirl.create(:vm, :host => host)
-        expect(event.get_parent(vm, "H3dt")).to be_nil
       end
 
       it "Should return value of CPU data" do
