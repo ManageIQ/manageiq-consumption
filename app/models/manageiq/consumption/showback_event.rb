@@ -157,33 +157,12 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
         :state    => "OPEN")
   end
 
-  #Get the parent of a respurce, we need ancestry here
-  def get_parent(res, look)
-    nil unless !res.methods.include?(look.tableize.singularize.to_sym)
-    begin
-      res.send(look.tableize.singularize)
-    rescue
-      nil
-    end
-  end
-
-  HARDWARE_RESOURCE = %w(Vm Host EmsCluster ExtManagementSystem ).freeze
-  CONTAINER_RESOURCE = %w(Container ContainerNode ContainerProject ExtManagementSystem).freeze
-
   def assign_resource
-    find_pool(resource)&.add_event(self)
-    resource_type = nil
-    resource_type = resource.type.split("::")[-1] unless resource.type.nil?
-    hierarchy = case
-                  when HARDWARE_RESOURCE.include?(resource_type) then HARDWARE_RESOURCE
-                  when CONTAINER_RESOURCE.include?(resource_type) then CONTAINER_RESOURCE
-                  else []
-                end
-    hierarchy.each do |hw_res|
-      next if resource.type.ends_with?(hw_res)
-      parent_resource = get_parent(resource, hw_res)
-      next if parent_resource.nil?
-      find_pool(parent_resource)&.add_event(self)
+    one_resource = resource
+    # While I have resource loop looking for the parent find the pool asssociate and add the event
+    while one_resource!= nil do
+      find_pool(one_resource)&.add_event(self)
+      one_resource = ManageIQ::Consumption::UtilsHelper.get_parent(one_resource)
     end
   end
 
