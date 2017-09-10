@@ -12,7 +12,7 @@ require 'spec_helper'
 
 RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
   let(:constants) {
-    [ManageIQ::Consumption::TimeConverterHelper::VALID_INTERVAL_UNITS]
+    [described_class::VALID_INTERVAL_UNITS]
   }
   context 'CONSTANTS' do
     it 'symbols should be constant' do
@@ -33,7 +33,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval)
         expect(conversion)
             .to eq(results[y]),
                 "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -48,7 +48,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval)
         expect(conversion)
           .to eq(results[y]),
               "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -63,7 +63,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval)
         expect(conversion)
           .to eq(results[y]),
               "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -78,7 +78,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval)
         expect(conversion)
             .to eq(results[y]),
                 "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -93,7 +93,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval)
         expect(conversion)
             .to eq(results[y]),
                 "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -108,7 +108,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval)
         expect(conversion)
             .to eq(results[y]),
                 "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -128,7 +128,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval, calculation_date: time)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval, calculation_date: time)
         expect(conversion)
             .to eq(results[y]),
                 "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
@@ -148,7 +148,7 @@ RSpec.describe ManageIQ::Consumption::TimeConverterHelper, type: :helper do
       time_values.each_with_index do |x, y|
         end_t =  start_t + x
         next unless start_t.month == end_t.month
-        conversion = ManageIQ::Consumption::TimeConverterHelper.number_of_intervals(period: end_t - start_t, interval: interval, days_in_month: days_in_month)
+        conversion = described_class.number_of_intervals(period: end_t - start_t, interval: interval, days_in_month: days_in_month)
         expect(conversion)
             .to eq(results[y]),
                 "Expected with #{interval} for #{x} s to match #{results[y]}, start: #{start_t}, end: #{end_t}, got #{conversion}"
