@@ -39,14 +39,7 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
         s_time = (start_time + 1.month).beginning_of_month
       end
       e_time = s_time.end_of_month
-      unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => resource, :start_time => s_time)
-        ManageIQ::Consumption::ShowbackPool.create(:name        => name,
-                                                   :description => description,
-                                                   :resource    => resource,
-                                                   :start_time  => s_time,
-                                                   :end_time    => e_time,
-                                                   :state       => 'OPEN')
-      end
+      generate_pool(s_time,e_time) unless ManageIQ::Consumption::ShowbackPool.exists?(:resource => resource, :start_time => s_time)
     when 'PROCESSING' then raise _("Pool can't change state to OPEN from PROCESSING") unless state != 'OPEN'
     when 'CLOSED' then raise _("Pool can't change state when it's CLOSED")
     end
@@ -169,6 +162,28 @@ class ManageIQ::Consumption::ShowbackPool < ApplicationRecord
       showback_charges.find_by :showback_event => input, :showback_pool => self
     elsif (input.kind_of? ManageIQ::Consumption::ShowbackCharge) && (input.showback_pool == self)
       input
+    end
+  end
+
+  private
+
+  def generate_pool(s_time,e_time)
+    pool = ManageIQ::Consumption::ShowbackPool.create(:name        => name,
+                                                      :description => description,
+                                                      :resource    => resource,
+                                                      :start_time  => s_time,
+                                                      :end_time    => e_time,
+                                                      :state       => 'OPEN')
+    showback_charges.each do |charge|
+      ManageIQ::Consumption::ShowbackCharge.create(
+          :stored_data => {
+              charge.stored_data_last_key => charge.stored_data_last
+          },
+          :showback_event => charge.showback_event,
+          :showback_pool => pool,
+          :cost_subunits => charge.cost_subunits,
+          :cost_currency => charge.cost_currency
+      )
     end
   end
 end

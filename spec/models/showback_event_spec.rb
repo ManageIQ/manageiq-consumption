@@ -403,7 +403,25 @@ describe ManageIQ::Consumption::ShowbackEvent do
         expect(event.context).to eq({"tag"=>{"environment"=>["test"]}})
       end
     end
+  end
+  context 'update charges' do
+    let(:event_to_charge) { FactoryGirl.create(:showback_event) }
+    let(:pool_of_event) { FactoryGirl.create(:showback_pool,
+                                            :resource => event_to_charge.resource) }
 
-    pending 'Resource type of showbackevent should be in RESOURCES_TYPES'
+    it "Call update charges" do
+      event_to_charge.data = {"CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mib"]}, "FLAVOR"=>{}}
+      event_to_charge.save
+      charge_1 = FactoryGirl.create(:showback_charge,
+                                    :showback_pool => pool_of_event,
+                                    :showback_event => event_to_charge,
+                                    :stored_data =>{Time.now.utc - 5.hours => event_to_charge.data})
+      data_1 = charge_1.stored_data_last
+      event_to_charge.data = {"CPU"=>{"average"=>[49.8571428571429, "percent"], "number"=>[4.0, "cores"], "max_number_of_cpu"=>[6, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mib"]}, "FLAVOR"=>{}}
+      event_to_charge.save
+      event_to_charge.update_charges
+      charge_1.reload
+      expect(charge_1.stored_data_last).not_to eq(data_1)
+    end
   end
 end
