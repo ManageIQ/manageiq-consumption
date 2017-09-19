@@ -40,23 +40,6 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     tc
   end
 
-
-  # Calculate total costs using input data instead of an event
-  def calculate_total_cost_input(resource_type:,
-                                 data:,
-                                 context: nil,
-                                 start_time: nil,
-                                 end_time: nil,
-                                 cycle_duration: nil)
-    event = ManageIQ::Consumption::ShowbackEvent.new
-    event.resource_type = resource_type
-    event.data = data
-    event.context = context || {}
-    event.start_time = start_time || Time.current.beginning_of_month
-    event.end_time = end_time || Time.current.end_of_month
-    calculate_total_cost(event, cycle_duration)
-  end
-
   # Calculate the list of costs using input data instead of an event
   def calculate_list_of_costs_input(resource_type:,
                                  data:,
