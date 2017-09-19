@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 module ManageIQ::Consumption
   describe ShowbackRate do
-    before(:all) do
+    before(:each) do
       ShowbackUsageType.seed
     end
     describe 'model validations' do

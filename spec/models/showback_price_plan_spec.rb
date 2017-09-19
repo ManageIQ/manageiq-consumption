@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
   # We need to ShowbackUsageType list to know what measures we should be looking for
-  before(:all) do
+  before(:each) do
     ManageIQ::Consumption::ShowbackUsageType.seed
   end
 
