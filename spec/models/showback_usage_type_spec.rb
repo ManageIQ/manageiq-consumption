@@ -2,10 +2,6 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Consumption::ShowbackUsageType do
-  before(:all) do
-    @expected_showback_usage_type_count = 6
-  end
-
   before(:each) do
     ManageIQ::Consumption::ShowbackUsageType.delete_all
   end
@@ -69,15 +65,17 @@ describe ManageIQ::Consumption::ShowbackUsageType do
   end
 
   context ".seed" do
+    let(:expected_showback_usage_type_count) { 6 }
+
     it "empty table" do
       described_class.seed
-      expect(described_class.count).to eq(@expected_showback_usage_type_count)
+      expect(described_class.count).to eq(expected_showback_usage_type_count)
     end
 
     it "run twice" do
       described_class.seed
       described_class.seed
-      expect(described_class.count).to eq(@expected_showback_usage_type_count)
+      expect(described_class.count).to eq(expected_showback_usage_type_count)
     end
   end
 end
