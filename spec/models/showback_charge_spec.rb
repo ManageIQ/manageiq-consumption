@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
 
-  before(:all) do
+  before(:each) do
     ManageIQ::Consumption::ShowbackUsageType.seed
   end
 

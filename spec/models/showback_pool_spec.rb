@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
-  before(:all) do
+  before(:each) do
     ManageIQ::Consumption::ShowbackUsageType.seed
   end
   let(:resource)        { FactoryGirl.create(:vm) }
