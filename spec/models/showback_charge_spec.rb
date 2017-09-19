@@ -145,27 +145,23 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     let(:rate1) do
       FactoryGirl.create(:showback_rate,
                          :CPU_average,
-                         :showback_price_plan => plan,
-                         :fixed_rate          => fixed_rate1,
-                         :variable_rate       => variable_rate1)
+                         :showback_price_plan => plan)
     end
-
+    let(:showback_tier1) {  rate1.showback_tiers.first}
     let(:rate2) do
       FactoryGirl.create(:showback_rate,
                          :CPU_average,
-                         :showback_price_plan => plan2,
-                         :fixed_rate          => fixed_rate2,
-                         :variable_rate       => variable_rate2)
+                         :showback_price_plan => plan2)
     end
-
+    let(:showback_tier2) {  rate2.showback_tiers.first}
     let(:event) do
-      FactoryGirl.build_stubbed(:showback_event,
+      FactoryGirl.create(:showback_event,
                         :with_vm_data,
                         :full_month)
     end
 
     let(:charge) do
-      FactoryGirl.build(:showback_charge,
+      FactoryGirl.create(:showback_charge,
                         :showback_pool  => pool,
                         :cost           => cost,
                         :showback_event => event)
@@ -174,8 +170,13 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     context 'without price_plan' do
       it 'calculates cost using default price plan' do
         rate1
-        event
+        event.reload
         charge.save
+        showback_tier1
+        showback_tier1.fixed_rate = fixed_rate1
+        showback_tier1.variable_rate = variable_rate1
+        showback_tier1.variable_rate_per_unit = "percent"
+        showback_tier1.save
         expect(event.data).not_to be_nil # making sure that the default is not empty
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
         expect(charge.showback_event).to eq(event)
@@ -184,12 +185,22 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
     end
     context 'with price_plan' do
       it 'calculates cost using price plan' do
-        rate1
-        rate2
-        event
+        rate1.reload
+        rate2.reload
+        event.reload
         charge.save
+        showback_tier1
+        showback_tier1.fixed_rate = fixed_rate1
+        showback_tier1.variable_rate = variable_rate1
+        showback_tier1.variable_rate_per_unit = "percent"
+        showback_tier1.save
+        showback_tier2
+        showback_tier2.fixed_rate = fixed_rate2
+        showback_tier2.variable_rate = variable_rate2
+        showback_tier2.variable_rate_per_unit = "percent"
+        showback_tier2.save
         expect(event.data).not_to be_nil
-        plan2
+        plan2.reload
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
@@ -201,7 +212,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
       it 'raises an error if the plan provider is not working' do
         rate1
         rate2
+        event.reload
         charge.save
+        showback_tier1
+        showback_tier1.fixed_rate = fixed_rate1
+        showback_tier1.variable_rate = variable_rate1
+        showback_tier1.variable_rate_per_unit = "percent"
+        showback_tier1.save
+        showback_tier2
+        showback_tier2.fixed_rate = fixed_rate2
+        showback_tier2.variable_rate = variable_rate2
+        showback_tier2.variable_rate_per_unit = "percent"
+        showback_tier2.save
         expect(event.data).not_to be_nil
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)

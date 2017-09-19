@@ -227,18 +227,22 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
 
     it '#calculate charge' do
       enterprise_plan
-      FactoryGirl.create(:showback_rate,
-                         :CPU_average,
-                         :fixed_rate          => Money.new(67),
-                         :variable_rate       => Money.new(12),
-                         :showback_price_plan => enterprise_plan)
+      sh = FactoryGirl.create(:showback_rate,
+                              :CPU_average,
+                              :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+      st = sh.showback_tiers.first
+      st.fixed_rate = Money.new(67)
+      st.variable_rate = Money.new(12)
+      st.variable_rate_per_unit = 'percent'
+      st.save
       pool.add_event(event2)
-      # event2.reload
+      event2.reload
       pool.showback_charges.reload
       charge = pool.showback_charges.find_by(:showback_event => event2)
       charge.cost = Money.new(0)
+      charge.save
       expect { pool.calculate_charge(charge) }.to change(charge, :cost)
-        .from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU', 'average') * 12) + 67))
+                                                      .from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU', 'average') * 12) + 67))
     end
 
     it '#Add an event' do
@@ -287,11 +291,13 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
     it 'calculate_all_charges' do
       enterprise_plan
       vm = FactoryGirl.create(:vm)
-      FactoryGirl.create(:showback_rate,
-                         :CPU_average,
+      sh = FactoryGirl.create(:showback_rate,
+                              :CPU_average,
+                              :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+      FactoryGirl.create(:showback_tier,
+                         :showback_rate => sh,
                          :fixed_rate          => Money.new(67),
-                         :variable_rate       => Money.new(12),
-                         :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
+                         :variable_rate       => Money.new(12))
       ev = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
       ev2 = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
       pool.add_event(ev)
