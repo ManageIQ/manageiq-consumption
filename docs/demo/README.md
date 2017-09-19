@@ -5,7 +5,7 @@
 Set in the Gemfile (for development, demos, you can use a .rb file in /bundler.d)
 
 ```ruby
-gem "manageiq-consumption",   :git => "https://github.com/miq-consumption/manageiq-consumption.git", :branch => "master"
+gem "manageiq-consumption",   :git => "https://github.com/ManageIQ/manageiq-consumption.git", :branch => "master"
 ```
 ## Set a play data
 
