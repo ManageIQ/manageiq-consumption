@@ -1,7 +1,7 @@
-# Miq-Consumption
+# ManageIQ-consumption
 [![Gem Version](https://badge.fury.io/rb/manageiq-consumption.svg)](https://badge.fury.io/rb/manageiq-consumption)
 [![Build Status](https://travis-ci.org/ManageIQ/manageiq-consumption.svg)](https://travis-ci.org/ManageIQ/manageiq-consumption)
-[![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=master)[![Dependency Status](https://gemnasium.com/badges/github.com/ManageIQ/manageiq-consumption.svg)](https://gemnasium.com/github.com/miq-consumption/manageiq-consumption)
+[![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=master)[![Dependency Status](https://gemnasium.com/badges/github.com/ManageIQ/manageiq-consumption.svg)](https://gemnasium.com/github.com/ManageIQ/manageiq-consumption)
 [![Gitter](https://badges.gitter.im/ManageIQ/manageiq/chargeback.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Build history for master branch](https://buildstats.info/travisci/chart/ManageIQ/manageiq-consumption?branch=master&buildCount=50)](https://travis-ci.org/ManageIQ/manageiq-consumption/branches)
 
@@ -22,7 +22,7 @@ The main reason for the effort is to make sure that ManageIQ is capable of under
 - **API oriented:** Every function should be available through an API. Parts of the system will be suceptible of being substitued by an external billing system via API.
 
 #### Concepts
-Please see the [wiki](https://github.com/miq-consumption/manageiq-consumption/wiki) for updated documentation on concepts, architecture and configuration.
+Please see the [wiki](https://github.com/ManageIQ/manageiq-consumption/wiki) for updated documentation on concepts, architecture and configuration.
 
 #### Overall project status
 All the project status can be followed in:
@@ -30,7 +30,7 @@ All the project status can be followed in:
 Pivotal tracker:
 [https://www.pivotaltracker.com/n/projects/1958459](https://www.pivotaltracker.com/n/projects/1958459)
 Github issues:
-[https://github.com/miq-consumption/manageiq-consumption/issues](https://github.com/miq-consumption/manageiq-consumption/issues)
+[https://github.com/ManageIQ/manageiq-consumption/issues](https://github.com/ManageIQ/manageiq-consumption/issues)
 
 
 ## Demo documentation
@@ -55,7 +55,7 @@ Development has been divided in phases:
 
 1. `cd manageiq`
 1. `mkdir plugins`
-1. `git clone git@github.com:miq-consumption/manageiq-consumption.git plugins/manageiq-consumption`
+1. `git clone git@github.com:ManageIQ/manageiq-consumption.git plugins/manageiq-consumption`
 1. `echo "gem 'manageiq-consumption', :path => File.expand_path('../plugins/manageiq-consumption', __dir__)
 " >> bundler.d/manageiq-consumption.rb`
 1. `bin/update`

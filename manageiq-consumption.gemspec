@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = "ManageIQ Consumption"
   spec.description   = "ManageIQ Consumption"
-  spec.homepage      = "https://github.com/miq-consumption/manageiq-consumption"
+  spec.homepage      = "https://github.com/ManageIQ/manageiq-consumption"
   spec.license       = "Apache-2.0"
 
   spec.files = Dir["{app,lib,spec}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
