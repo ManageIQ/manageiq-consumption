@@ -14,6 +14,12 @@ module ManageIQ::Consumption
     validates :measure, :presence => true
     default_value_for :measure, ''
 
+    default_value_for :uses_single_tier, true
+    default_value_for :tiers_use_full_value, true
+
+    alias_attribute :step_variable, :tier_unit
+    default_value_for :tier_unit, ''
+
     serialize :screener, JSON # Implement data column as a JSON
     default_value_for :screener, { }
     validates :screener, :exclusion => { :in => [nil] }
@@ -37,7 +43,9 @@ module ManageIQ::Consumption
         unless tier.step_value.nil? || tier.step_unit.nil?
           # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
           adjusted_step = UnitsConverterHelper.to_unit(tier.step_value, tier.step_unit, tier.variable_rate_per_unit)
-          divmod = UnitsConverterHelper.to_unit(value, measurement, tier.variable_rate_per_unit).divmod adjusted_step
+          tier_start_value = UnitsConverterHelper.to_unit(tier.tier_start_value, tier_unit, measurement)
+          tier_value = tiers_use_full_value ? value : value - tier_start_value
+          divmod = UnitsConverterHelper.to_unit(tier_value, measurement, tier.variable_rate_per_unit).divmod adjusted_step
           adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
           measurement = tier.variable_rate_per_unit # Updated value with new measurement as we have updated values
         end
