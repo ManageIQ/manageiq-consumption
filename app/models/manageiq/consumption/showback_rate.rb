@@ -27,21 +27,25 @@ module ManageIQ::Consumption
       # Calculate value within tier
       # For each tier used, calculate costs
       value, measurement = event.get_measure(measure, dimension)  # Returns measure and the unit
-      tier = get_tier(value || 0)
+      tiers = get_tiers(value || 0)
       duration = cycle_duration || event.month_duration
       # TODO event.resource.type should be eq to category
+      acc = 0
       adjusted_value = value # Just in case we need to update it
-      # If there is a step defined, we use it to adjust input to it
-      unless tier.step_value.nil? || tier.step_unit.nil?
-        # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
-        adjusted_step = UnitsConverterHelper.to_unit(tier.step_value, tier.step_unit, tier.variable_rate_per_unit)
-        divmod = UnitsConverterHelper.to_unit(value, measurement, tier.variable_rate_per_unit).divmod adjusted_step
-        adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
-        measurement = tier.variable_rate_per_unit # Updated value with new measurement as we have updated values
+      tiers.each do |tier|
+        # If there is a step defined, we use it to adjust input to it
+        unless tier.step_value.nil? || tier.step_unit.nil?
+          # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
+          adjusted_step = UnitsConverterHelper.to_unit(tier.step_value, tier.step_unit, tier.variable_rate_per_unit)
+          divmod = UnitsConverterHelper.to_unit(value, measurement, tier.variable_rate_per_unit).divmod adjusted_step
+          adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
+          measurement = tier.variable_rate_per_unit # Updated value with new measurement as we have updated values
+        end
+        # If there is a step time defined, we use it to adjust input to it
+        adjusted_time_span = event.time_span
+        acc += rate_with_values(tier, adjusted_value, measurement, adjusted_time_span, duration)
       end
-      # If there is a step time defined, we use it to adjust input to it
-      adjusted_time_span = event.time_span
-      rate_with_values(tier, adjusted_value, measurement, adjusted_time_span, duration)
+      acc
     end
 
     def rate_with_values(tier, value, measure, time_span, cycle_duration, date = Time.current)
@@ -50,8 +54,12 @@ module ManageIQ::Consumption
 
     private
 
-    def get_tier(value)
-      showback_tiers.where("tier_start_value <=  ? AND  tier_end_value > ?", value, value).first
+    def get_tiers(value)
+      if uses_single_tier
+        showback_tiers.where("tier_start_value <=  ? AND  tier_end_value > ?", value, value)
+      else
+        showback_tiers.where("tier_start_value <=  ?", value)
+      end
     end
 
     def occurrence(tier, value, _measure, _time_span, cycle_duration, date)
