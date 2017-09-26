@@ -43,6 +43,21 @@ MoneyRails.configure do |config|
                              default: 'USD'
                            }
 
+  config.register_currency = {
+      :priority            => 1,
+      :iso_code            => :us8,
+      :name                => "US Dollar with subunit of 8 digits",
+      :symbol              => "$",
+      :symbol_first        => true,
+      :subunit             => "Subcent",
+      :subunit_to_unit     => 100_000_000,
+      :thousands_separator => ",",
+      :decimal_mark        => "."
+  }
+
+  config.add_rate "USD", "US8", 1
+  config.add_rate "US8", "USD", 1
+
   # Register a custom currency
   #
   # Example:
