@@ -4,7 +4,6 @@ MoneyRails.configure do |config|
 
   # To set the default currency
   #
-  config.default_currency = :usd
 
   # Set default bank object
   #
@@ -40,7 +39,7 @@ MoneyRails.configure do |config|
                              type: :string,
                              present: true,
                              null: false,
-                             default: 'USD'
+                             default: 'US8'
                            }
 
   config.register_currency = {
@@ -57,6 +56,8 @@ MoneyRails.configure do |config|
 
   config.add_rate "USD", "US8", 1
   config.add_rate "US8", "USD", 1
+
+  config.default_currency = :us8
 
   # Register a custom currency
   #
