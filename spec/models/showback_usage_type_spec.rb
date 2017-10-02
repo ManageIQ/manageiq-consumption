@@ -65,7 +65,7 @@ describe ManageIQ::Consumption::ShowbackUsageType do
   end
 
   context ".seed" do
-    let(:expected_showback_usage_type_count) { 6 }
+    let(:expected_showback_usage_type_count) { 12 }
 
     it "empty table" do
       described_class.seed
