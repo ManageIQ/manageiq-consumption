@@ -23,16 +23,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackTier, :type => :model do
 
     it 'has a Money fixed_rate' do
       expect(described_class).to monetize(:fixed_rate)
-      ch = FactoryGirl.create(:showback_tier, :fixed_rate => Money.new(256, 'USD'))
+      ch = FactoryGirl.create(:showback_tier, :fixed_rate => Money.new(256_000_000, 'US8'))
       expect(ch).to be_valid
-      expect(ch.fixed_rate.format).to eq('$2.56')
+      expect(ch.fixed_rate.exchange_to('USD').format).to eq('$2.56')
     end
 
     it 'has a Money variable_rate' do
       expect(described_class).to monetize(:variable_rate)
-      ch = FactoryGirl.create(:showback_tier, :variable_rate => Money.new(675, 'USD'))
+      ch = FactoryGirl.create(:showback_tier, :variable_rate => Money.new(675_000_000, 'US8'))
       expect(ch).to be_valid
-      expect(ch.variable_rate.format).to eq('$6.75')
+      expect(ch.variable_rate.exchange_to('USD').format).to eq('$6.75')
     end
 
     it '#fixed_rate_per_time included in VALID_INTERVAL_UNITS is valid' do
