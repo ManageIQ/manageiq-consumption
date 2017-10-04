@@ -23,3 +23,28 @@
   :description: "Template Showback of VM"
   :measure: "FLAVOR"
   :dimensions: ["cpu_reserved","memory_reserved"]
+# For integration with old chargeback
+- :category: "Container"
+  :description: "TBD"
+  :measure: "cpu"
+  :dimensions: ["cpu_usagemhz_rate_average"]
+- :category: "Container"
+  :description: "TBD"
+  :measure: "cpu_cores"
+  :dimensions: ["v_derived_cpu_total_cores_used", "derived_vm_numvcpus"]
+- :category: "Container"
+  :description: "TBD"
+  :measure: "memory"
+  :dimensions: ["derived_memory_used", "derived_memory_available"]
+- :category: "Container"
+  :description: "TBD"
+  :measure: "net_io"
+  :dimensions: ["net_usage_rate_average"]
+- :category: "Container"
+  :description: "TBD"
+  :measure: "disk_io"
+  :dimensions: ["disk_usage_rate_average"]
+- :category: "Container"
+  :description: "TBD"
+  :measure: "fixed"
+  :dimensions: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2"]

@@ -28,4 +28,14 @@ module ManageIQ::Consumption::ShowbackEvent::CPU
     end
     [value, numcpus].max.to_i
   end
+
+  # for old chargeback integration
+  def cpu_cpu_usagemhz_rate_average
+  end
+
+  def cpu_cores_v_derived_cpu_total_cores_used
+  end
+
+  def cpu_cores_derived_vm_numvcpus
+  end
 end

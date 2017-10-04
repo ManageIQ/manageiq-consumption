@@ -10,4 +10,11 @@ module ManageIQ::Consumption::ShowbackEvent::MEM
     end
     return tmem
   end
+
+  # for old chargeback integration
+  def memory_derived_memory_used
+  end
+
+  def memory_derived_memory_available
+  end
 end
