@@ -298,6 +298,78 @@ module ManageIQ::Consumption
       end
     end
 
+    describe 'more than 1  tier in the rate' do
+      let(:fixed_rate)    { Money.new(11) }
+      let(:variable_rate) { Money.new(7) }
+      let(:showback_rate) { FactoryGirl.create(:showback_rate, :CPU_number, :calculation => 'quantity') }
+      let(:showback_event_hm) { FactoryGirl.create(:showback_event, :first_half_month, :with_vm_data) }
+      let(:showback_tier) {
+        tier = showback_rate.showback_tiers.first
+        tier.fixed_rate    = fixed_rate
+        tier.tier_end_value = 3.0
+        tier.step_unit = 'cores'
+        tier.step_value = 1
+        tier.variable_rate = variable_rate
+        tier.variable_rate_per_unit = "cores"
+        tier.save
+        tier
+
+      }
+      let(:showback_tier_second) {
+        FactoryGirl.create(:showback_tier,
+                           :showback_rate => showback_rate,
+                           :tier_start_value => 3.0,
+                           :tier_end_value => Float::INFINITY,
+                           :step_value => 1,
+                           :step_unit => 'cores',
+                           :fixed_rate   => Money.new(15),
+                           :variable_rate => Money.new(10),
+                           :variable_rate_per_unit => "cores")
+      }
+      context 'use only a single tier' do
+        it 'should charge an event by quantity with 1 tier with tiers_use_full_value' do
+          showback_event_hm.reload
+          showback_tier
+          showback_tier_second
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * 2))
+          showback_event_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(15 + 10 * 4))
+        end
+        it 'should charge an event by quantity with 1 tier with not tiers_use_full_value' do
+          showback_event_hm.reload
+          showback_tier
+          showback_tier_second
+          showback_rate.tiers_use_full_value = false
+          showback_rate.step_variable = 'cores'
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * (2 - 0) ) )
+          showback_event_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(15 + ( 10 * (4 - 3.0) ) ) )
+        end
+      end
+
+      context 'with all tiers' do
+        it 'should charge an event by quantity with 2 tiers with tiers_use_full_value' do
+          showback_event_hm.reload
+          showback_tier
+          showback_tier_second
+          showback_rate.uses_single_tier = false
+          showback_event_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * 4) + Money.new(15 + 10 * 4))
+        end
+
+        it 'should charge an event by quantity with 2 tiers with not tiers_use_full_value' do
+          showback_event_hm.reload
+          showback_tier
+          showback_tier_second
+          showback_rate.uses_single_tier = false
+          showback_rate.tiers_use_full_value = false
+          showback_rate.step_variable = 'cores'
+          showback_event_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(showback_event_hm)).to eq(Money.new(11 + 7 * (4 - 0) ) + Money.new(15 + 10 * (4 - 3.0) ) )
+        end
+      end
+
+    end
     describe 'event lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
