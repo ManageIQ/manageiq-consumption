@@ -8,10 +8,6 @@ FactoryGirl.define do
     calculation            'duration'
     showback_price_plan
 
-    after(:build) do |x|
-      create(:showback_tier,:with_rate_tests, :showback_rate => x)
-    end
-
     trait :occurrence do
       calculation 'occurrence'
     end

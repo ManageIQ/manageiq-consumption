@@ -294,11 +294,11 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       sh = FactoryGirl.create(:showback_rate,
                               :CPU_average,
                               :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
-      FactoryGirl.create(:showback_tier,
-                         :showback_rate => sh,
-                         :fixed_rate          => Money.new(67),
-                         :variable_rate       => Money.new(12))
-      ev = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
+      tier = sh.showback_tiers.first
+      tier.fixed_rate    = Money.new(67)
+      tier.variable_rate = Money.new(12)
+      tier.save
+      ev  = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
       ev2 = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
       pool.add_event(ev)
       pool.add_event(ev2)
