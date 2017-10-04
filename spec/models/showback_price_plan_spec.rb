@@ -35,7 +35,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     it 'is possible to add new rates to the price plan' do
       plan.save
-      expect { FactoryGirl.build(:showback_rate, :showback_price_plan => plan) }.to change(plan.showback_rates, :count).from(0).to(1)
+      expect { FactoryGirl.create(:showback_rate, :showback_price_plan => plan) }.to change(plan.showback_rates, :count).from(0).to(1)
     end
 
     it 'rates are deleted when deleting the plan' do
@@ -54,19 +54,33 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:variable_rate2) { Money.new(13) }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
-        FactoryGirl.build(:showback_rate,
+        FactoryGirl.create(:showback_rate,
                           :CPU_average,
                           :calculation         => 'occurrence',
                           :showback_price_plan => plan)
       end
-      let(:showback_tier) {rate.showback_tiers.first}
+      let(:showback_tier) {
+        tier = rate.showback_tiers.first
+        tier.fixed_rate = fixed_rate
+        tier.variable_rate = variable_rate
+        tier.variable_rate_per_unit = "percent"
+        tier.save
+        tier
+      }
       let(:rate2) do
-        FactoryGirl.build(:showback_rate,
+        FactoryGirl.create(:showback_rate,
                           :CPU_max_number_of_cpu,
                           :calculation         => 'duration',
                           :showback_price_plan => plan)
       end
-      let(:showback_tier2) {rate2.showback_tiers.first}
+      let(:showback_tier2) {
+        tier = rate2.showback_tiers.first
+        tier.fixed_rate = fixed_rate2
+        tier.variable_rate = variable_rate2
+        tier.variable_rate_per_unit = "cores"
+        tier.save
+        tier
+      }
 
       it 'calculates costs when rate is not found' do
         event.save
@@ -111,6 +125,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       end
 
       it 'calculates costs with one rate' do
+        showback_tier
         event.save
         event.reload
         rate.save

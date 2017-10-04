@@ -18,8 +18,14 @@ module ManageIQ::Consumption
     default_value_for :screener, { }
     validates :screener, :exclusion => { :in => [nil] }
 
+    after_create :create_zero_tier
+
     def name
       "#{category}:#{measure}:#{dimension}"
+    end
+
+    def create_zero_tier
+      ManageIQ::Consumption::ShowbackTier.create(:tier_start_value => 0,:tier_end_value => Float::INFINITY, :showback_rate => self)
     end
 
     def rate(event, cycle_duration = nil)
