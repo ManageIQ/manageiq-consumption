@@ -6,10 +6,16 @@ module ManageIQ::Consumption
       ShowbackUsageType.seed
     end
     describe 'model validations' do
-      let(:showback_rate) { FactoryGirl.build(:showback_rate) }
+      let(:showback_rate) { FactoryGirl.create(:showback_rate) }
 
       it 'has a valid factory' do
         expect(showback_rate).to be_valid
+      end
+
+      it 'has a zero tier' do
+        expect(showback_rate.showback_tiers.count).to eq(1)
+        expect(showback_rate.showback_tiers.first.tier_start_value).to eq(0)
+        expect(showback_rate.showback_tiers.first.tier_end_value).to eq(Float::INFINITY)
       end
 
       it 'has a tier after create' do
