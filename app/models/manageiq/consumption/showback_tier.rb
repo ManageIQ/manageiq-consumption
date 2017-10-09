@@ -1,20 +1,19 @@
 module ManageIQ::Consumption
   class ShowbackTier < ApplicationRecord
-
     self.table_name = 'showback_tiers'
     belongs_to :showback_rate, :inverse_of => :showback_tiers
 
     # Fixed rate costs
     # (defaults to `0`)
     # @return [Float] the subunits of a fixed rate
-    monetize :fixed_rate_subunits,    :with_model_currency => :currency
-    default_value_for :fixed_rate,  Money.new(0)
+    monetize(:fixed_rate_subunits, :with_model_currency => :currency)
+    default_value_for :fixed_rate, Money.new(0)
 
     # Variable rate costs
     # (defaults to `0`)
     # @return [Float] the subunits of a fixed rate
-    monetize :variable_rate_subunits, :with_model_currency => :currency
-    default_value_for :variable_rate,  Money.new(0)
+    monetize(:variable_rate_subunits, :with_model_currency => :currency)
+    default_value_for :variable_rate, Money.new(0)
 
     # Fixed rate time apply
     # (defaults to `monthly`)
@@ -34,7 +33,7 @@ module ManageIQ::Consumption
 
     # Variable tier_start_value is the start value of the tier interval
     # @return [Float]
-    validates :tier_start_value,  :numericality => {:greater_than_or_equal_to => 0, :less_than => Float::INFINITY}
+    validates :tier_start_value, :numericality => {:greater_than_or_equal_to => 0, :less_than => Float::INFINITY}
 
     # Variable tier_start_value is the end value of the tier interval
     # @return [Float]
@@ -55,15 +54,14 @@ module ManageIQ::Consumption
     def validate_interval
       raise _("Start value of interval is greater than end value") unless tier_start_value < tier_end_value
       ManageIQ::Consumption::ShowbackTier.where(:showback_rate => showback_rate).each do |tier|
-        #returns true == overlap, false == no overlap
+        # Returns true == overlap, false == no overlap
         next unless self != tier
-        if tier.tier_end_value == Float::INFINITY and (tier_start_value>tier.tier_start_value or tier_end_value>tier.tier_start_value)
+        if tier.tier_end_value == Float::INFINITY && (tier_start_value > tier.tier_start_value || tier_end_value > tier.tier_start_value)
           raise _("Interval or subinterval is in a tier with Infinity at the end")
         end
-        raise _("Interval or subinterval is in another tier") if included?(tier.tier_start_value,tier.tier_end_value)
+        raise _("Interval or subinterval is in another tier") if included?(tier.tier_start_value, tier.tier_end_value)
       end
     end
-
 
     # Get the range of the tier in appropiate format
     #
@@ -97,7 +95,6 @@ module ManageIQ::Consumption
       new_tier.tier_end_value = old
       new_tier.tier_start_value = value
       new_tier.save
-
     end
 
     # Method to convert to float the value
@@ -170,7 +167,7 @@ module ManageIQ::Consumption
     # True if is included
     # False is not
     #
-    def included?(start_value,end_value)
+    def included?(start_value, end_value)
       return false if tier_end_value < start_value
       return false if tier_start_value >= end_value
       true

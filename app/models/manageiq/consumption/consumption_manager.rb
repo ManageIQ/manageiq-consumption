@@ -1,5 +1,4 @@
 class ManageIQ::Consumption::ConsumptionManager
-
   def self.name
     "Consumption"
   end
@@ -28,8 +27,8 @@ class ManageIQ::Consumption::ConsumptionManager
   def self.generate_new_month
     events = ManageIQ::Consumption::ShowbackEvent.events_past_month
     events.each do |ev|
-      next unless !ManageIQ::Consumption::ShowbackEvent.where(["start_time >= ?",self.init_month]).exists?({:resource=> ev.resource})
-      generate_event_resource(ev.resource, DateTime.now.utc.beginning_of_month,load_column_units)
+      next if ManageIQ::Consumption::ShowbackEvent.where(["start_time >= ?", init_month]).exists?(:resource=> ev.resource)
+      generate_event_resource(ev.resource, DateTime.now.utc.beginning_of_month, load_column_units)
     end
     events
   end
@@ -39,7 +38,7 @@ class ManageIQ::Consumption::ConsumptionManager
   def self.generate_events
     RESOURCES_TYPES.each do |resource|
       resource.constantize.all.each do |one_resource|
-        next unless !ManageIQ::Consumption::ShowbackEvent.where(["start_time >= ?",self.init_month]).exists?({:resource => one_resource})
+        next if ManageIQ::Consumption::ShowbackEvent.where(["start_time >= ?", init_month]).exists?(:resource => one_resource)
         generate_event_resource(one_resource, DateTime.now.utc, load_column_units)
       end
     end
@@ -47,11 +46,9 @@ class ManageIQ::Consumption::ConsumptionManager
 
   def self.generate_event_resource(resource, date, data_units)
     e = ManageIQ::Consumption::ShowbackEvent.new(
-        {
-            :resource   => resource,
-            :start_time => date,
-            :end_time   => date
-        }
+      :resource   => resource,
+      :start_time => date,
+      :end_time   => date
     )
     e.generate_data(data_units)
     e.collect_tags
@@ -65,13 +62,12 @@ class ManageIQ::Consumption::ConsumptionManager
     ManageIQ::Consumption::ShowbackPricePlan.seed
   end
 
-  private
-
   def self.load_column_units
     File.exist?(seed_file_name) ? YAML.load_file(seed_file_name) : []
   end
 
   def self.seed_file_name
-    @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("app/models/manageiq/consumption","showback_column_units.yml")
+    @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("app/models/manageiq/consumption", "showback_column_units.yml")
   end
+  private_class_method :seed_file_name
 end

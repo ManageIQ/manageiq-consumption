@@ -47,7 +47,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     context 'rating with no context' do
       let(:resource)       { FactoryGirl.create(:vm) }
-      let(:event)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, resource: resource) }
+      let(:event)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :resource => resource) }
       let(:fixed_rate)     { Money.new(11) }
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
@@ -55,32 +55,32 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
       let(:rate)  do
         FactoryGirl.create(:showback_rate,
-                          :CPU_average,
-                          :calculation         => 'occurrence',
-                          :showback_price_plan => plan)
+                           :CPU_average,
+                           :calculation         => 'occurrence',
+                           :showback_price_plan => plan)
       end
-      let(:showback_tier) {
+      let(:showback_tier) do
         tier = rate.showback_tiers.first
         tier.fixed_rate = fixed_rate
         tier.variable_rate = variable_rate
         tier.variable_rate_per_unit = "percent"
         tier.save
         tier
-      }
+      end
       let(:rate2) do
         FactoryGirl.create(:showback_rate,
-                          :CPU_max_number_of_cpu,
-                          :calculation         => 'duration',
-                          :showback_price_plan => plan)
+                           :CPU_max_number_of_cpu,
+                           :calculation         => 'duration',
+                           :showback_price_plan => plan)
       end
-      let(:showback_tier2) {
+      let(:showback_tier2) do
         tier = rate2.showback_tiers.first
         tier.fixed_rate = fixed_rate2
         tier.variable_rate = variable_rate2
         tier.variable_rate_per_unit = "cores"
         tier.save
         tier
-      }
+      end
 
       it 'calculates costs when rate is not found' do
         event.save
@@ -96,7 +96,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         rate.save
         resource_type = event.resource.type
         data = event.data
-        expect(plan.calculate_list_of_costs_input(resource_type: resource_type, data: data)).to eq(plan.calculate_list_of_costs(event))
+        expect(plan.calculate_list_of_costs_input(:resource_type => resource_type, :data => data)).to eq(plan.calculate_list_of_costs(event))
       end
 
       it 'calculates costs when rate is not found and event data' do
@@ -107,12 +107,12 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         start_time = event.start_time
         end_time = event.end_time
         context = event.context
-        expect(plan.calculate_list_of_costs_input(resource_type: resource_type,
-                                                  data: data,
-                                                  context: context,
-                                                  start_time: start_time,
-                                                  end_time: end_time)).to eq(plan.calculate_list_of_costs(event))
-        expect(plan.calculate_list_of_costs_input(resource_type: resource_type, data: data)).to eq(plan.calculate_list_of_costs(event))
+        expect(plan.calculate_list_of_costs_input(:resource_type => resource_type,
+                                                  :data          => data,
+                                                  :context       => context,
+                                                  :start_time    => start_time,
+                                                  :end_time      => end_time)).to eq(plan.calculate_list_of_costs(event))
+        expect(plan.calculate_list_of_costs_input(:resource_type => resource_type, :data => data)).to eq(plan.calculate_list_of_costs(event))
       end
 
       it 'test that data is right' do
@@ -154,13 +154,13 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
                           :CPU_average,
                           :showback_price_plan => plan)
       end
-      let(:showback_tier1) {rate.showback_tiers.first}
+      let(:showback_tier1) { rate.showback_tiers.first }
       let(:rate2) do
         FactoryGirl.build(:showback_rate,
                           :CPU_max_number_of_cpu,
                           :showback_price_plan => plan)
       end
-      let(:showback_tier2) {rate2.showback_tiers.first}
+      let(:showback_tier2) { rate2.showback_tiers.first }
 
       it 'test that data is right' do
         event.save

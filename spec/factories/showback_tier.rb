@@ -10,8 +10,8 @@ FactoryGirl.define do
     showback_rate
 
     trait :daily do
-      fixed_rate_per_time {'daily'}
-      variable_rate_per_time {'daily'}
+      fixed_rate_per_time { 'daily' }
+      variable_rate_per_time { 'daily' }
     end
 
     trait :with_rate_tests do

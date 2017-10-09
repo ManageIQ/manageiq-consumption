@@ -23,8 +23,6 @@ class ManageIQ::Consumption::ShowbackUsageType < ApplicationRecord
     end
   end
 
-  private
-
   def self.seed_file_name
     @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("db", "fixtures", "#{table_name}.yml")
   end
