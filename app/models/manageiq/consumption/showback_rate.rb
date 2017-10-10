@@ -16,6 +16,19 @@ module ManageIQ::Consumption
 
     serialize :screener, JSON # Implement data column as a JSON
     default_value_for :screener, { }
+
+    # Variable uses_single_tier to indicate if the rate only apply in the tier where the value is included
+    # (defaults to `true`)
+    # @return [Boolean]
+    default_value_for :uses_single_tier, true
+
+    # Variable tiers_use_full_value
+    # (defaults to `true`)
+    # @return [Boolean]
+    default_value_for :tiers_use_full_value, true
+
+    default_value_for :step_variable, ''
+
     validates :screener, :exclusion => { :in => [nil] }
 
     after_create :create_zero_tier
@@ -24,6 +37,12 @@ module ManageIQ::Consumption
       "#{category}:#{measure}:#{dimension}"
     end
 
+    # Create a Zero tier when the rate is create
+    # (defaults to `:html`)
+    #
+    # == Returns:
+    # A Tier created with interval 0 - Infinity
+    #
     def create_zero_tier
       ManageIQ::Consumption::ShowbackTier.create(:tier_start_value => 0,:tier_end_value => Float::INFINITY, :showback_rate => self)
     end
@@ -33,21 +52,28 @@ module ManageIQ::Consumption
       # Calculate value within tier
       # For each tier used, calculate costs
       value, measurement = event.get_measure(measure, dimension)  # Returns measure and the unit
-      tier = get_tier(value || 0)
+      tiers = get_tiers(value || 0)
       duration = cycle_duration || event.month_duration
       # TODO event.resource.type should be eq to category
+      acc = 0
       adjusted_value = value # Just in case we need to update it
       # If there is a step defined, we use it to adjust input to it
-      unless tier.step_value.nil? || tier.step_unit.nil?
-        # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
-        adjusted_step = UnitsConverterHelper.to_unit(tier.step_value, tier.step_unit, tier.variable_rate_per_unit)
-        divmod = UnitsConverterHelper.to_unit(value, measurement, tier.variable_rate_per_unit).divmod adjusted_step
-        adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
-        measurement = tier.variable_rate_per_unit # Updated value with new measurement as we have updated values
+      tiers.each do |tier|
+        # If there is a step defined, we use it to adjust input to it
+        unless tier.step_value.nil? || tier.step_unit.nil?
+          # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
+          adjusted_step = UnitsConverterHelper.to_unit(tier.step_value, tier.step_unit, tier.variable_rate_per_unit)
+          tier_start_value = UnitsConverterHelper.to_unit(tier.tier_start_value, step_variable, measurement)
+          tier_value = tiers_use_full_value ? value : value - tier_start_value
+          divmod = UnitsConverterHelper.to_unit(tier_value, measurement, tier.variable_rate_per_unit).divmod adjusted_step
+          adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
+          measurement = tier.variable_rate_per_unit # Updated value with new measurement as we have updated values
+        end
+        # If there is a step time defined, we use it to adjust input to it
+        adjusted_time_span = event.time_span
+        acc += rate_with_values(tier, adjusted_value, measurement, adjusted_time_span, duration)
       end
-      # If there is a step time defined, we use it to adjust input to it
-      adjusted_time_span = event.time_span
-      rate_with_values(tier, adjusted_value, measurement, adjusted_time_span, duration)
+      acc
     end
 
     def rate_with_values(tier, value, measure, time_span, cycle_duration, date = Time.current)
@@ -56,8 +82,12 @@ module ManageIQ::Consumption
 
     private
 
-    def get_tier(value)
-      showback_tiers.where("tier_start_value <=  ? AND  tier_end_value > ?", value, value).first
+    def get_tiers(value)
+      if uses_single_tier
+        showback_tiers.where("tier_start_value <=  ? AND  tier_end_value > ?", value, value)
+      else
+        showback_tiers.where("tier_start_value <=  ?", value)
+      end
     end
 
     def occurrence(tier, value, _measure, _time_span, cycle_duration, date)

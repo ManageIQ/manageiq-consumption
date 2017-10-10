@@ -124,7 +124,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         expect(event.data['CPU']['max_number_of_cpu']).not_to be_nil
       end
 
-      it 'calculates costs with one rate' do
+      it 'calculates costs with one rate2' do
         showback_tier
         event.save
         event.reload
