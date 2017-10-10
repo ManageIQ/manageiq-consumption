@@ -82,7 +82,7 @@ module ManageIQ::Consumption
       return Money.new(0) unless value # If value is null, the event is not present and thus we return 0
       fix_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: tier.fixed_rate_per_time, calculation_date: date)
       var_inter = TimeConverterHelper.number_of_intervals(period: cycle_duration, interval: tier.variable_rate_per_time, calculation_date: date)
-      value_in_rate_units = UnitsConverterHelper.to_unit(value, measure, tier.variable_rate_per_unit) || 0
+      value_in_rate_units = UnitsConverterHelper.to_unit(value.to_f, measure, tier.variable_rate_per_unit) || 0
       ((fix_inter * tier.fixed_rate) + (var_inter * value_in_rate_units * tier.variable_rate)) * time_span.to_f / cycle_duration
     end
 
