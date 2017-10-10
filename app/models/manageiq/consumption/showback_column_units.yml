@@ -22,3 +22,6 @@
 :fixed_compute_2: ""
 :fixed_storage_1: ""
 :fixed_storage_2: ""
+:metering_used_hours: ""
+:derived_vm_allocated_disk_storage: "Gi"
+:derived_vm_used_disk_storage: "Gi"

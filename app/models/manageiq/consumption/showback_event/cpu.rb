@@ -38,4 +38,10 @@ module ManageIQ::Consumption::ShowbackEvent::CPU
 
   def cpu_cores_derived_vm_numvcpus
   end
+
+  def cpu_cores_cpu_usage_rate_average
+  end
+
+  def cpu_derived_vm_numvcpus
+  end
 end

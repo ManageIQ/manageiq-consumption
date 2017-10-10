@@ -31,7 +31,7 @@
 - :category: "Container"
   :description: "TBD"
   :measure: "cpu_cores"
-  :dimensions: ["v_derived_cpu_total_cores_used", "derived_vm_numvcpus"]
+  :dimensions: ["v_derived_cpu_total_cores_used", "derived_vm_numvcpus", "cpu_usage_rate_average"]
 - :category: "Container"
   :description: "TBD"
   :measure: "memory"
@@ -48,3 +48,69 @@
   :description: "TBD"
   :measure: "fixed"
   :dimensions: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2"]
+  
+- :category: "Container"
+  :description: "TBD"
+  :measure: "metering"
+  :dimensions: ["metering_used_hours"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "cpu"
+  :dimensions: ["cpu_usagemhz_rate_average"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "cpu_cores"
+  :dimensions: ["v_derived_cpu_total_cores_used", "derived_vm_numvcpus", "cpu_usage_rate_average"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "memory"
+  :dimensions: ["derived_memory_used", "derived_memory_available"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "net_io"
+  :dimensions: ["net_usage_rate_average"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "disk_io"
+  :dimensions: ["disk_usage_rate_average"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "fixed"
+  :dimensions: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2"]
+- :category: "ContainerImage"
+  :description: "TBD"
+  :measure: "metering"
+  :dimensions: ["metering_used_hours"]
+
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "cpu"
+  :dimensions: ["derived_vm_numvcpus", "cpu_usagemhz_rate_average"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "cpu_cores"
+  :dimensions: ["v_derived_cpu_total_cores_used", "cpu_usage_rate_average"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "memory"
+  :dimensions: ["derived_memory_used", "derived_memory_available"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "net_io"
+  :dimensions: ["net_usage_rate_average"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "disk_io"
+  :dimensions: ["disk_usage_rate_average"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "fixed"
+  :dimensions: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2", "fixed_storage_2", "fixed_storage_1"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "metering"
+  :dimensions: ["metering_used_hours"]
+- :category: "Vm"
+  :description: "TBD"
+  :measure: "storage"
+  :dimensions: ["derived_vm_allocated_disk_storage", "derived_vm_used_disk_storage"]
