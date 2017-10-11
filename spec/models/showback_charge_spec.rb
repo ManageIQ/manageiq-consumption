@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
-
   before(:each) do
     ManageIQ::Consumption::ShowbackUsageType.seed
   end
@@ -75,7 +74,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
       event.save
       charge.save
       expect(charge.stored_data.first[1]).to eq(event.data)
-      event.data = {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}
+      event.data = {"CPU" => {"average" => [2, "percent"], "max_number_of_cpu" => [40, "cores"]}}
       event.save
       charge.save
       expect(charge.stored_data.first[1]).not_to eq(event.data)
@@ -91,15 +90,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
       event.save
       charge.save
       expect(charge.stored_data.length).to eq(1)
-      event.data = {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}
+      event.data = {"CPU" => {"average" => [2, "percent"], "max_number_of_cpu" => [40, "cores"]}}
       charge.update_stored_data
       expect(charge.stored_data_last).to eq(event.data)
     end
 
     it "Return the last stored data key" do
       event.save
-      charge.stored_data = { 3.hours.ago => {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}},
-                             Time.now.utc => {"CPU"=>{"average":[2,"percent"],"max_number_of_cpu":[40,"cores"]}}}
+      charge.stored_data = { 3.hours.ago  => {"CPU" => {"average" => [2, "percent"], "max_number_of_cpu" => [40, "cores"]}},
+                             Time.now.utc => {"CPU" => {"average" => [2, "percent"], "max_number_of_cpu" => [40, "cores"]}}}
       t = charge.stored_data.keys.sort.last
       expect(charge.stored_data_last_key).to eq(t)
     end
@@ -108,29 +107,41 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
   context '#stored data' do
     let(:charge_data) { FactoryGirl.build(:showback_charge, :with_stored_data) }
     let(:event_for_charge) { FactoryGirl.create(:showback_event) }
-    let(:pool_of_event) { FactoryGirl.create(:showback_pool,
-                                             :resource => event_for_charge.resource) }
+    let(:pool_of_event) do
+      FactoryGirl.create(:showback_pool,
+                         :resource => event_for_charge.resource)
+    end
 
     it "stored event" do
-      event_for_charge.data = {"CPU"=>{"average"=>[29.8571428571429, "percent"], "number"=>[2.0, "cores"], "max_number_of_cpu"=>[2, "cores"]}, "MEM"=>{"max_mem"=>[2048, "Mib"]}, "FLAVOR"=>{}}
-      charge_1 = FactoryGirl.create(:showback_charge,
-                                    :showback_pool => pool_of_event,
-                                    :showback_event => event_for_charge)
-      expect(charge_1.stored_data_start).to eq(event_for_charge.data)
-      charge_1.stored_data_event
-      expect(charge_1.stored_data_start).to eq(event_for_charge.data)
+      event_for_charge.data = {
+        "CPU"    => {
+          "average"           => [29.8571428571429, "percent"],
+          "number"            => [2.0, "cores"],
+          "max_number_of_cpu" => [2, "cores"]
+        },
+        "MEM"    => {
+          "max_mem" => [2048, "Mib"]
+        },
+        "FLAVOR" => {}
+      }
+      charge1 = FactoryGirl.create(:showback_charge,
+                                   :showback_pool  => pool_of_event,
+                                   :showback_event => event_for_charge)
+      expect(charge1.stored_data_start).to eq(event_for_charge.data)
+      charge1.stored_data_event
+      expect(charge1.stored_data_start).to eq(event_for_charge.data)
     end
 
     it "get measure" do
-      expect(charge_data.get_measure("CPU","number")).to eq([2.0, "cores"])
+      expect(charge_data.get_measure("CPU", "number")).to eq([2.0, "cores"])
     end
 
     it "get last measure" do
-      expect(charge_data.get_last_measure("CPU","number")).to eq([4.0, "cores"])
+      expect(charge_data.get_last_measure("CPU", "number")).to eq([4.0, "cores"])
     end
 
     it "get pool measure" do
-      expect(charge_data.get_pool_measure("CPU","number")).to eq([[2.0, "cores"],[4.0, "cores"]])
+      expect(charge_data.get_pool_measure("CPU", "number")).to eq([[2.0, "cores"], [4.0, "cores"]])
     end
   end
   context '#calculate_cost' do
@@ -147,24 +158,24 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
                          :CPU_average,
                          :showback_price_plan => plan)
     end
-    let(:showback_tier1) {  rate1.showback_tiers.first}
+    let(:showback_tier1) { rate1.showback_tiers.first }
     let(:rate2) do
       FactoryGirl.create(:showback_rate,
                          :CPU_average,
                          :showback_price_plan => plan2)
     end
-    let(:showback_tier2) {  rate2.showback_tiers.first}
+    let(:showback_tier2) { rate2.showback_tiers.first }
     let(:event) do
       FactoryGirl.create(:showback_event,
-                        :with_vm_data,
-                        :full_month)
+                         :with_vm_data,
+                         :full_month)
     end
 
     let(:charge) do
       FactoryGirl.create(:showback_charge,
-                        :showback_pool  => pool,
-                        :cost           => cost,
-                        :showback_event => event)
+                         :showback_pool  => pool,
+                         :cost           => cost,
+                         :showback_event => event)
     end
 
     context 'without price_plan' do
@@ -204,9 +215,9 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_measure_value('CPU','average'))
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_measure_value('CPU', 'average'))
         # Test that it changes if you provide a plan
-        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.get_measure_value('CPU','average'))
+        expect(charge.calculate_cost(plan2)).to eq(fixed_rate2 + variable_rate2 * event.get_measure_value('CPU', 'average'))
       end
 
       it 'raises an error if the plan provider is not working' do
@@ -228,10 +239,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackCharge, :type => :model do
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
         expect(charge.showback_event).to eq(event)
         # Test that it works without a plan
-        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_measure_value('CPU','average'))
+        expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_measure_value('CPU', 'average'))
         # Test that it changes if you provide a plan
         expect(charge.calculate_cost('ERROR')).to eq(Money.new(0))
-        expect(charge.errors.details[:showback_price_plan]).to include({ :error => 'not found' })
+        expect(charge.errors.details[:showback_price_plan]).to include(:error => 'not found')
       end
     end
   end

@@ -4,4 +4,3 @@ if ENV['CI']
 end
 
 FactoryGirl.definition_file_paths << ManageIQ::Consumption::Engine.root.join('spec', 'factories')
-

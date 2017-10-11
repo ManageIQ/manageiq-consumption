@@ -10,41 +10,41 @@ require 'spec_helper'
 #   end
 # end
 
-RSpec.describe ManageIQ::Consumption::UtilsHelper, type: :helper do
+RSpec.describe ManageIQ::Consumption::UtilsHelper, :type => :helper do
   let(:json_1) { JSON.parse '{ "tag": { "uno": 1, "dos": 2, "tres": 3, "cuatro": { "cinco": 5, "seis": 6} } }' }
   let(:json_2) { JSON.parse '{ "tag": { "cuatro": { "cinco": 5, "seis": 6 } } }' }
   let(:json_3) { JSON.parse '{ "cuatro": { "cinco": 5, "seis": 6, "siete": 7 } }' }
   let(:json_4) { JSON.parse '{ "siete": { "ocho": 8, "nueve": 9 } }' }
 
-  context "#is_included_in?" do
+  context "#included_in?" do
     it "returns false if nil context or test" do
-      expect(described_class.is_included_in?nil, "").to be false
-      expect(described_class.is_included_in? "", nil).to be false
-      expect(described_class.is_included_in? nil, nil).to be false
+      expect(described_class.included_in?(nil, "")).to be false
+      expect(described_class.included_in?("", nil)).to be false
+      expect(described_class.included_in?(nil, nil)).to be false
     end
 
     it "context and test are independent" do
-      expect(described_class.is_included_in?json_1, json_4).to be false
+      expect(described_class.included_in?(json_1, json_4)).to be false
     end
 
     it "context includes the test fully" do
-      expect(described_class.is_included_in?json_1, json_2).to be true
+      expect(described_class.included_in?(json_1, json_2)).to be true
     end
 
     it "content includes half of the test" do
-      expect(described_class.is_included_in?json_1, json_3).to be false
+      expect(described_class.included_in?(json_1, json_3)).to be false
     end
 
     it "content is empty" do
-      expect(described_class.is_included_in?"", json_3).to be false
+      expect(described_class.included_in?("", json_3)).to be false
     end
 
     it "test is empty" do
-      expect(described_class.is_included_in?json_1, "").to be true
+      expect(described_class.included_in?(json_1, "")).to be true
     end
 
     it "contest and test are emtpy" do
-      expect(described_class.is_included_in?json_1, "").to be true
+      expect(described_class.included_in?(json_1, "")).to be true
     end
   end
 
