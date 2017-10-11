@@ -18,7 +18,13 @@ FactoryGirl.define do
       calculation 'quantity'
     end
     trait :with_screener do
-      screener { { 'tag' => { 'environment' => ['test'] } } }
+      screener do
+        {
+          'tag' => {
+            'environment' => ['test']
+          }
+        }
+      end
     end
     trait :CPU_average do
       measure 'CPU'

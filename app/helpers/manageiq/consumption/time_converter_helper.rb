@@ -10,7 +10,7 @@ module ManageIQ::Consumption
   module TimeConverterHelper
     VALID_INTERVAL_UNITS = %w(hourly daily weekly monthly yearly).freeze
 
-    def self.number_of_intervals(period:, interval:, calculation_date: Time.now, days_in_month: nil, days_in_year: nil)
+    def self.number_of_intervals(period:, interval:, calculation_date: Time.current, days_in_month: nil, days_in_year: nil)
       # Period: time period as input (end_time - start_time)
       # interval: base interval to calculate against (i.e 'daily', 'monthly', default: 'monthly')
       # Calculation_date: used to calculate taking into account the #days in month
@@ -26,6 +26,5 @@ module ManageIQ::Consumption
                   end
       period.div(time_span) + (period.modulo(time_span).zero? ? 0 : 1)
     end
-
   end
 end

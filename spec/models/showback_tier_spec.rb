@@ -94,18 +94,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackTier, :type => :model do
         expect { showback_tier.valid? }.to raise_error(RuntimeError, _("Start value of interval is greater than end value"))
       end
       it '#there is a showbackTier just defined with Float::INFINITY you cant add another in this interval' do
-        st = FactoryGirl.build(:showback_tier,:showback_rate => showback_tier.showback_rate, :tier_start_value => 5, :tier_end_value => 10)
+        st = FactoryGirl.build(:showback_tier, :showback_rate => showback_tier.showback_rate, :tier_start_value => 5, :tier_end_value => 10)
         expect { st.valid? }.to raise_error(RuntimeError, _("Interval or subinterval is in a tier with Infinity at the end"))
       end
       it '#there is a showbackTier with Infinity' do
-        st = FactoryGirl.build(:showback_tier,:showback_rate => showback_tier.showback_rate, :tier_start_value => 5, :tier_end_value => Float::INFINITY)
+        st = FactoryGirl.build(:showback_tier, :showback_rate => showback_tier.showback_rate, :tier_start_value => 5, :tier_end_value => Float::INFINITY)
         expect { st.valid? }.to raise_error(RuntimeError, _("Interval or subinterval is in a tier with Infinity at the end"))
       end
       it '#there is a showbackTier just defined in this interval' do
         showback_tier.tier_start_value = 2
         showback_tier.tier_end_value = 7
         showback_tier.save
-        st = FactoryGirl.build(:showback_tier,:showback_rate => showback_tier.showback_rate, :tier_start_value => 5, :tier_end_value => 10)
+        st = FactoryGirl.build(:showback_tier, :showback_rate => showback_tier.showback_rate, :tier_start_value => 5, :tier_end_value => 10)
         expect { st.valid? }.to raise_error(RuntimeError, _("Interval or subinterval is in another tier"))
       end
     end

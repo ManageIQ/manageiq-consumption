@@ -2,14 +2,13 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
-
   before(:each) do
     ManageIQ::Consumption::ShowbackUsageType.seed
   end
   let(:resource)        { FactoryGirl.create(:vm) }
   let(:pool)            { FactoryGirl.build(:showback_pool) }
-  let(:event)           { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, resource: resource) }
-  let(:event2)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, resource: resource) }
+  let(:event)           { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :resource => resource) }
+  let(:event2)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :resource => resource) }
   let(:enterprise_plan) { FactoryGirl.create(:showback_price_plan) }
 
   context '#basic lifecycle' do
@@ -242,7 +241,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       charge.cost = Money.new(0)
       charge.save
       expect { pool.calculate_charge(charge) }.to change(charge, :cost)
-                                                      .from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU', 'average') * 12) + 67))
+        .from(Money.new(0)).to(Money.new((event2.reload.get_measure_value('CPU', 'average') * 12) + 67))
     end
 
     it '#Add an event' do
@@ -298,8 +297,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPool, :type => :model do
       tier.fixed_rate    = Money.new(67)
       tier.variable_rate = Money.new(12)
       tier.save
-      ev  = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
-      ev2 = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, resource: vm)
+      ev  = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, :resource => vm)
+      ev2 = FactoryGirl.create(:showback_event, :with_vm_data, :full_month, :resource => vm)
       pool.add_event(ev)
       pool.add_event(ev2)
       pool.showback_charges.reload

@@ -10,13 +10,13 @@ require 'spec_helper'
 #   end
 # end
 
-RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, type: :helper do
-  let(:constants) {
+RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, :type => :helper do
+  let(:constants) do
     [described_class::SYMBOLS,
      described_class::SI_PREFIX,
      described_class::BINARY_PREFIX,
      described_class::ALL_PREFIXES]
-  }
+  end
   context 'CONSTANTS' do
     it 'symbols should be constant' do
       constants.each do |x|
@@ -83,8 +83,8 @@ RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, type: :helper do
       units = described_class::SI_PREFIX
       origin.each do |x|
         finish.each do |y|
-          expect(described_class.distance(x, y)).
-              to eq(units[x.to_sym][:value].to_r / units[y.to_sym][:value])
+          expect(described_class.distance(x, y))
+            .to eq(units[x][:value].to_r / units[y][:value])
         end
       end
     end
@@ -94,8 +94,8 @@ RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, type: :helper do
       units = described_class::BINARY_PREFIX
       origin.each do |x|
         finish.each do |y|
-          expect(described_class.distance(x, y, 'BINARY_PREFIX')).
-              to eq(units[x.to_sym][:value].to_r / units[y.to_sym][:value])
+          expect(described_class.distance(x, y, 'BINARY_PREFIX'))
+            .to eq(units[x][:value].to_r / units[y][:value])
         end
       end
     end
@@ -106,8 +106,8 @@ RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, type: :helper do
       units = described_class::ALL_PREFIXES
       origin.each do |x|
         finish.each do |y|
-          expect(described_class.distance(x, y)).
-              to eq(units[x.to_sym][:value].to_r / units[y.to_sym][:value])
+          expect(described_class.distance(x, y))
+            .to eq(units[x][:value].to_r / units[y][:value])
         end
       end
     end
@@ -115,30 +115,30 @@ RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, type: :helper do
 
   context '#to_unit' do
     it 'SI symbol returns value in base unit' do
-      expect(described_class.to_unit(7)).
-          to eq(7)
-      expect(described_class.to_unit(7, 'KB')).
-          to eq(7000)
+      expect(described_class.to_unit(7))
+        .to eq(7)
+      expect(described_class.to_unit(7, 'KB'))
+        .to eq(7000)
     end
 
     it 'BINARY symbol returns value in base unit' do
-      expect(described_class.to_unit(7, 'KiB', '', 'BINARY_PREFIX')).
-          to eq(7168)
+      expect(described_class.to_unit(7, 'KiB', '', 'BINARY_PREFIX'))
+        .to eq(7168)
     end
 
     it 'SI symbol returns value in destination unit' do
-      expect(described_class.to_unit(7, 'MB', 'KB')).
-          to eq(7000)
+      expect(described_class.to_unit(7, 'MB', 'KB'))
+        .to eq(7000)
     end
 
     it 'BINARY symbol returns value in destination unit' do
-      expect(described_class.to_unit(7, 'PiB', 'TiB', 'BINARY_PREFIX')).
-          to eq(7168)
+      expect(described_class.to_unit(7, 'PiB', 'TiB', 'BINARY_PREFIX'))
+        .to eq(7168)
     end
 
     it 'SI symbol returns value in destination unit' do
-      expect(described_class.to_unit(7, 'PB', 'TiB')).
-          to eq(6366.462912410498)
+      expect(described_class.to_unit(7, 'PB', 'TiB'))
+        .to eq(6366.462912410498)
     end
   end
 end
