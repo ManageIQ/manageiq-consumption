@@ -17,8 +17,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir["{app,lib,spec}/**/*", "LICENSE.txt", "Rakefile", "README.md"]
 
-
-  spec.add_dependency "money-rails", "~>1"
+  spec.add_dependency "money-rails", "~> 1.9"
 
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "codeclimate-test-reporter", "~> 1.0.0"
