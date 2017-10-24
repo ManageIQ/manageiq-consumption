@@ -1,8 +1,8 @@
 FactoryGirl.define do
   factory :showback_rate, :class => ManageIQ::Consumption::ShowbackRate do
-    category               'Vm'
-    dimension              'max_number_of_cpu'
-    measure                'CPU'
+    entity                 'Vm'
+    field                  'max_number_of_cpu'
+    group                  'CPU'
     sequence(:concept)     { |n| "Concept #{n}" }
     screener               { {} }
     calculation            'duration'
@@ -27,21 +27,21 @@ FactoryGirl.define do
       end
     end
     trait :CPU_average do
-      measure 'CPU'
-      dimension 'average'
+      group 'CPU'
+      field 'average'
     end
     trait :CPU_number do
-      measure 'CPU'
-      dimension 'number'
+      group 'CPU'
+      field 'number'
     end
     trait :CPU_max_number_of_cpu do
-      measure 'CPU'
-      dimension 'max_number_of_cpu'
+      group 'CPU'
+      field 'max_number_of_cpu'
     end
 
     trait :MEM_max_mem do
-      measure 'MEM'
-      dimension 'max_mem'
+      group 'MEM'
+      field 'max_mem'
     end
   end
 end

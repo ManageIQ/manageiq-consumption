@@ -1,79 +1,79 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-describe ManageIQ::Consumption::ShowbackEvent do
-  let(:showback_event) { FactoryGirl.build(:showback_event) }
+describe ManageIQ::Consumption::ShowbackDataRollup do
+  let(:data_rollup) { FactoryGirl.build(:showback_data_rollup) }
   context "validations" do
     it "has a valid factory" do
-      expect(showback_event).to be_valid
+      expect(data_rollup).to be_valid
     end
 
     it "should ensure presence of start_time" do
-      showback_event.start_time = nil
-      showback_event.valid?
-      expect(showback_event.errors[:start_time]).to include "can't be blank"
+      data_rollup.start_time = nil
+      data_rollup.valid?
+      expect(data_rollup.errors[:start_time]).to include "can't be blank"
     end
 
     it "should ensure presence of end_time" do
-      showback_event.end_time = nil
-      showback_event.valid?
-      expect(showback_event.errors[:end_time]).to include "can't be blank"
+      data_rollup.end_time = nil
+      data_rollup.valid?
+      expect(data_rollup.errors[:end_time]).to include "can't be blank"
     end
 
     it "should fails start time is after of end time" do
-      showback_event.start_time = 1.hour.ago
-      showback_event.end_time = 4.hours.ago
-      showback_event.valid?
-      expect(showback_event.errors[:start_time]).to include "Start time should be before end time"
+      data_rollup.start_time = 1.hour.ago
+      data_rollup.end_time = 4.hours.ago
+      data_rollup.valid?
+      expect(data_rollup.errors[:start_time]).to include "Start time should be before end time"
     end
 
     it "should valid if start time is equal to end time" do
-      showback_event.start_time = 1.hour.ago
-      showback_event.end_time = showback_event.start_time
-      expect(showback_event).to be_valid
+      data_rollup.start_time = 1.hour.ago
+      data_rollup.end_time = data_rollup.start_time
+      expect(data_rollup).to be_valid
     end
 
     it "should ensure presence of resource" do
-      showback_event.resource = nil
-      expect(showback_event).not_to be_valid
+      data_rollup.resource = nil
+      expect(data_rollup).not_to be_valid
     end
 
     it "should ensure resource exists" do
       vm = FactoryGirl.create(:vm)
-      showback_event.resource = vm
-      expect(showback_event).to be_valid
+      data_rollup.resource = vm
+      expect(data_rollup).to be_valid
     end
 
     it 'should generate data' do
-      showback_event.data = {}
-      showback_event.resource = FactoryGirl.create(:vm)
+      data_rollup.data = {}
+      data_rollup.resource = FactoryGirl.create(:vm)
       hash = {}
-      ManageIQ::Consumption::ShowbackUsageType.seed
+      ManageIQ::Consumption::ShowbackInputMeasure.seed
       data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
-      ManageIQ::Consumption::ShowbackUsageType.all.each do |measure_type|
-        next unless showback_event.resource.type.ends_with?(measure_type.category)
-        hash[measure_type.measure] = {}
-        measure_type.dimensions.each do |dim|
-          hash[measure_type.measure][dim] = [0, data_units[dim.to_sym] || ""] unless measure_type.measure == "FLAVOR"
+      ManageIQ::Consumption::ShowbackInputMeasure.all.each do |group_type|
+        next unless data_rollup.resource.type.ends_with?(group_type.entity)
+        hash[group_type.group] = {}
+        group_type.fields.each do |dim|
+          hash[group_type.group][dim] = [0, data_units[dim.to_sym] || ""] unless group_type.group == "FLAVOR"
         end
       end
-      showback_event.generate_data
-      expect(showback_event.data).to eq(hash)
-      expect(showback_event.data).not_to be_empty
-      expect(showback_event.start_time).not_to eq("")
+      data_rollup.generate_data
+      expect(data_rollup.data).to eq(hash)
+      expect(data_rollup.data).not_to be_empty
+      expect(data_rollup.start_time).not_to eq("")
     end
 
     it "should clean data " do
-      showback_event.data = { "cores" => 2}
-      expect(showback_event.data).not_to be_empty
-      showback_event.clean_data
-      expect(showback_event.data).to be_empty
+      data_rollup.data = { "cores" => 2}
+      expect(data_rollup.data).not_to be_empty
+      data_rollup.clean_data
+      expect(data_rollup.data).to be_empty
     end
   end
 
   context '#flavor functions' do
     it 'should return last flavor' do
-      showback_event.data = {
+      data_rollup.data = {
         "FLAVOR" => {
           1_501_545_600 => {"cores" => 4,  "memory" => 16},
           1_501_632_000 => {"cores" => 8,  "memory" => 32},
@@ -82,25 +82,25 @@ describe ManageIQ::Consumption::ShowbackEvent do
         }
       }
 
-      expect(showback_event.last_flavor).to eq("cores" => 4, "memory" => 16)
-      expect(showback_event.get_key_flavor("cores")).to eq(4)
-      expect(showback_event.get_key_flavor("memory")).to eq(16)
+      expect(data_rollup.last_flavor).to eq("cores" => 4, "memory" => 16)
+      expect(data_rollup.get_key_flavor("cores")).to eq(4)
+      expect(data_rollup.get_key_flavor("memory")).to eq(16)
     end
   end
 
   context '#validate_format' do
     it 'passes validation with correct JSON data' do
-      event = FactoryGirl.create(:showback_event)
+      event = FactoryGirl.create(:showback_data_rollup)
       expect(event.validate_format).to be_nil
     end
 
     it 'fails validations with incorrect JSON data' do
-      event = FactoryGirl.build(:showback_event, :data => ":-Invalid:\n-JSON")
+      event = FactoryGirl.build(:showback_data_rollup, :data => ":-Invalid:\n-JSON")
       expect(event.validate_format).to be_nil
     end
 
     it 'returns nil if ParserError' do
-      event = FactoryGirl.create(:showback_event)
+      event = FactoryGirl.create(:showback_data_rollup)
       event.data = "abc"
       expect(event.validate_format).to be_nil
     end
@@ -108,15 +108,15 @@ describe ManageIQ::Consumption::ShowbackEvent do
 
   context '#engine' do
     let(:vm)               { FactoryGirl.create(:vm) }
-    let(:event)            { FactoryGirl.build(:showback_event, :full_month) }
-    let(:vm_event)         { FactoryGirl.build(:showback_event, :with_vm_data, :first_half_month) }
+    let(:event)            { FactoryGirl.build(:showback_data_rollup, :full_month) }
+    let(:vm_event)         { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :first_half_month) }
     describe 'Basic' do
       it 'should return the object' do
         event.resource = vm
         expect(event.resource).to eq(vm)
       end
       it 'trait #full_month should have a valid factory' do
-        myevent = FactoryGirl.build(:showback_event, :full_month)
+        myevent = FactoryGirl.build(:showback_data_rollup, :full_month)
         myevent.valid?
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
@@ -124,7 +124,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       end
 
       it 'trait #with_vm_data should have a valid factory' do
-        myevent = FactoryGirl.build(:showback_event, :with_vm_data)
+        myevent = FactoryGirl.build(:showback_data_rollup, :with_vm_data)
         myevent.valid?
         expect(myevent.data).to eq(
           "CPU"    => {
@@ -141,7 +141,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       end
 
       it 'trait #first_half_month should have a valid factory' do
-        myevent = FactoryGirl.build(:showback_event, :first_half_month)
+        myevent = FactoryGirl.build(:showback_data_rollup, :first_half_month)
         myevent.valid?
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
@@ -149,7 +149,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       end
 
       it 'trait #with_vm_datra and full_month has a valid factory' do
-        myevent = FactoryGirl.build(:showback_event, :with_vm_data, :full_month)
+        myevent = FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month)
         myevent.valid?
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
@@ -168,7 +168,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       end
 
       it 'trait #with_vm_datra and half_month has a valid factory' do
-        myevent = FactoryGirl.build(:showback_event, :with_vm_data, :first_half_month)
+        myevent = FactoryGirl.build(:showback_data_rollup, :with_vm_data, :first_half_month)
         myevent.valid?
         expect(myevent).to be_valid
         expect(myevent.start_time).to eq(myevent.start_time.beginning_of_month)
@@ -212,41 +212,41 @@ describe ManageIQ::Consumption::ShowbackEvent do
         event.resource     = @vm_metrics
         event.start_time   = "2010-04-13T00:00:00Z"
         event.end_time     = "2010-04-14T00:00:00Z"
-        measure = FactoryGirl.build(:showback_usage_type)
-        measure.save
+        group = FactoryGirl.build(:showback_input_measure)
+        group.save
       end
 
-      it 'should return value of the measure with dimension' do
+      it 'should return value of the group with field' do
         event.data = {
           'CPU' => {
             'average' => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average), "percent"]
           }
         }
         expect(event.start_time.month).to eq(event.end_time.month)
-        expect(event.get_measure('CPU', 'average')).to eq([event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average).to_s, "percent"])
+        expect(event.get_group('CPU', 'average')).to eq([event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average).to_s, "percent"])
       end
 
-      it 'return nil if dimension is not found' do
+      it 'return nil if field is not found' do
         event.data = {
           'CPU' => {
             'average' => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average), "percent"]
           }
         }
-        expect(event.get_measure('CPU', 'not there')).to be_nil
+        expect(event.get_group('CPU', 'not there')).to be_nil
       end
 
-      it 'return nil if category is not found' do
+      it 'return nil if entity is not found' do
         event.data = {
           'CPU' => {
             'average' => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average), "percent"]
           }
         }
-        expect(event.get_measure('not there', 'average')).to be_nil
+        expect(event.get_group('not there', 'average')).to be_nil
       end
 
       it 'should return [value,unit]n' do
         event.data = {"CPU" => { "average" => [52.67, "percent"]}}
-        expect(event.get_measure('CPU', 'average')).to eq([52.67, "percent"])
+        expect(event.get_group('CPU', 'average')).to eq([52.67, "percent"])
       end
 
       it 'should return metrics time range' do
@@ -262,15 +262,15 @@ describe ManageIQ::Consumption::ShowbackEvent do
       end
 
       it 'should return events of past month' do
-        5.times { FactoryGirl.create(:showback_event, :full_month) }
-        2.times { FactoryGirl.create(:showback_event, :start_time => DateTime.now.utc.beginning_of_month - 1.month, :end_time => DateTime.now.utc.end_of_month - 1.month) }
+        5.times { FactoryGirl.create(:showback_data_rollup, :full_month) }
+        2.times { FactoryGirl.create(:showback_data_rollup, :start_time => DateTime.now.utc.beginning_of_month - 1.month, :end_time => DateTime.now.utc.end_of_month - 1.month) }
         expect(described_class.events_past_month.count).to eq(2)
       end
 
       it 'should return events of actual month' do
-        5.times { FactoryGirl.create(:showback_event, :full_month) }
+        5.times { FactoryGirl.create(:showback_data_rollup, :full_month) }
         2.times do
-          FactoryGirl.create(:showback_event,
+          FactoryGirl.create(:showback_data_rollup,
                              :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                              :end_time   => DateTime.now.utc.end_of_month - 1.month)
         end
@@ -279,12 +279,12 @@ describe ManageIQ::Consumption::ShowbackEvent do
 
       it 'should return events between months' do
         3.times do
-          FactoryGirl.create(:showback_event,
+          FactoryGirl.create(:showback_data_rollup,
                              :start_time => DateTime.now.utc.beginning_of_month.change(:month =>2),
                              :end_time   => DateTime.now.utc.end_of_month.change(:month =>2))
         end
         2.times do
-          FactoryGirl.create(:showback_event,
+          FactoryGirl.create(:showback_data_rollup,
                              :start_time => DateTime.now.utc.beginning_of_month.change(:month =>4),
                              :end_time   => DateTime.now.utc.end_of_month.change(:month =>4))
         end
@@ -306,7 +306,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
             "average" => [event.resource.metrics.for_time_range(event.start_time, event.end_time).average(:cpu_usage_rate_average), "percent"]
           }
         }
-        new_average = (event.get_measure_value("CPU", "average").to_d * event.event_days +
+        new_average = (event.get_group_value("CPU", "average").to_d * event.event_days +
             event.resource.metrics.for_time_range(event.end_time, nil).average(:cpu_usage_rate_average)) / (event.event_days + 1)
         event.update_event
         expect(event.start_time.month).to eq(event.end_time.month)
@@ -324,129 +324,116 @@ describe ManageIQ::Consumption::ShowbackEvent do
         }
         event.update_event
         expect(event.start_time.month).to eq(event.end_time.month)
-        expect(event.get_measure("CPU", "max_number_of_cpu")).to eq([3, "cores"])
+        expect(event.get_group("CPU", "max_number_of_cpu")).to eq([3, "cores"])
       end
     end
 
     context 'assign event to pool' do
       it "Return nil if not pool" do
         vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-        FactoryGirl.create(:showback_pool, :resource => FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096)))
+        FactoryGirl.create(:showback_envelope, :resource => FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096)))
         expect(event.find_pool(vm)).to be_nil
       end
 
       it "Return the correct pool" do
         vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-        pool = FactoryGirl.create(:showback_pool, :resource => vm)
+        pool = FactoryGirl.create(:showback_envelope, :resource => vm)
         expect(event.find_pool(vm)).to eq(pool)
       end
 
       it "Should return value of CPU data" do
         event.data = {"CPU" => { "average" => [52.67, "percent"]}}
-        expect(event.get_measure_value('CPU', 'average')).to eq(52.67)
+        expect(event.get_group_value('CPU', 'average')).to eq(52.67)
       end
 
       it "Should return unit of CPU data" do
         event.data = {"CPU" => { "average" => [52.67, "percent"]}}
-        expect(event.get_measure_unit('CPU', 'average')).to eq("percent")
+        expect(event.get_group_unit('CPU', 'average')).to eq("percent")
       end
 
       it "Assign resource to pool" do
         vm = FactoryGirl.create(:vm)
-        pool = FactoryGirl.create(:showback_pool, :resource => vm)
-        event = FactoryGirl.create(:showback_event,
+        pool = FactoryGirl.create(:showback_envelope, :resource => vm)
+        event = FactoryGirl.create(:showback_data_rollup,
                                    :start_time => DateTime.now.utc.beginning_of_month,
                                    :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                    :resource   => vm)
 
-        expect(pool.showback_events.count).to eq(0)
+        expect(pool.showback_data_rollups.count).to eq(0)
         event.assign_resource
-        expect(pool.showback_events.count).to eq(1)
-        expect(pool.showback_events.include?(event)).to be_truthy
+        expect(pool.showback_data_rollups.count).to eq(1)
+        expect(pool.showback_data_rollups.include?(event)).to be_truthy
       end
 
       it "Assign container resource to pool" do
         con = FactoryGirl.create(:container)
         con.type = "Container"
-        pool = FactoryGirl.create(:showback_pool, :resource => con)
-        event = FactoryGirl.create(:showback_event,
+        pool = FactoryGirl.create(:showback_envelope, :resource => con)
+        event = FactoryGirl.create(:showback_data_rollup,
                                    :start_time => DateTime.now.utc.beginning_of_month,
                                    :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                    :resource   => con)
 
-        expect(pool.showback_events.count).to eq(0)
+        expect(pool.showback_data_rollups.count).to eq(0)
         event.assign_resource
-        expect(pool.showback_events.count).to eq(1)
-        expect(pool.showback_events.include?(event)).to be_truthy
+        expect(pool.showback_data_rollups.count).to eq(1)
+        expect(pool.showback_data_rollups.include?(event)).to be_truthy
       end
 
       it "Assign resource to all relational pool" do
         host = FactoryGirl.create(:host)
         vm = FactoryGirl.create(:vm, :host => host)
-        pool_vm = FactoryGirl.create(:showback_pool, :resource => vm)
-        pool_host = FactoryGirl.create(:showback_pool, :resource => host)
-        event = FactoryGirl.create(:showback_event,
+        pool_vm = FactoryGirl.create(:showback_envelope, :resource => vm)
+        pool_host = FactoryGirl.create(:showback_envelope, :resource => host)
+        event = FactoryGirl.create(:showback_data_rollup,
                                    :start_time => DateTime.now.utc.beginning_of_month,
                                    :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                    :resource   => vm)
         event.assign_resource
-        expect(pool_vm.showback_events.include?(event)).to be_truthy
-        expect(pool_host.showback_events.include?(event)).to be_truthy
+        expect(pool_vm.showback_data_rollups.include?(event)).to be_truthy
+        expect(pool_host.showback_data_rollups.include?(event)).to be_truthy
       end
 
+=begin
       it "Assign a pool tag" do
-        @file = StringIO.new("name,category,entry\nJD-C-T4.0.1.44,Environment,Test")
+        @file = StringIO.new("name,entity,entry\nJD-C-T4.0.1.44,Environment,Test")
         vm = FactoryGirl.create(:vm, :name => "JD-C-T4.0.1.44")
-        event = FactoryGirl.create(:showback_event,
+        event = FactoryGirl.create(:showback_data_rollup,
                                    :start_time => DateTime.now.utc.beginning_of_month,
                                    :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                    :resource   => vm)
-        category = FactoryGirl.create(:classification, :name => 'environment', :description => 'Environment')
-        entry = FactoryGirl.create(:classification, :parent_id => category.id, :name => 'test', :description => 'Test')
-        pool_cat = FactoryGirl.create(:showback_pool, :resource => category.tag)
-        pool_ent = FactoryGirl.create(:showback_pool, :resource => entry.tag)
+        entity = FactoryGirl.create(:classification, :name => 'environment', :description => 'Environment')
+        entry = FactoryGirl.create(:classification, :parent_id => entity.id, :name => 'test', :description => 'Test')
+        pool_cat = FactoryGirl.create(:showback_envelope, :resource => entity.tag)
+        pool_ent = FactoryGirl.create(:showback_envelope, :resource => entry.tag)
         ci = ClassificationImport.upload(@file)
         ci.apply
         vm.reload
         event.collect_tags
+        expect(event.context).to eq("tag" => {"environment" => ["test"]})
         event.assign_by_tag
-        expect(pool_ent.showback_events.include?(event)).to be_truthy
-        expect(pool_cat.showback_events.include?(event)).to be_truthy
+        expect(pool_ent.showback_data_rollups.include?(event)).to be_truthy
+        expect(pool_cat.showback_data_rollups.include?(event)).to be_truthy
       end
+=end
     end
 
     context 'collect tags' do
       it "Set an empty tags in context" do
         vm = FactoryGirl.create(:vm)
-        event = FactoryGirl.create(:showback_event,
+        event = FactoryGirl.create(:showback_data_rollup,
                                    :start_time => DateTime.now.utc.beginning_of_month,
                                    :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                    :resource   => vm)
         event.collect_tags
         expect(event.context).to eq("tag" => {})
       end
-
-      it "Set a tags in context" do
-        @file = StringIO.new("name,category,entry\nJD-C-T4.0.1.44,Environment,Test")
-        vm = FactoryGirl.create(:vm, :name => "JD-C-T4.0.1.44")
-        event = FactoryGirl.create(:showback_event,
-                                   :start_time => DateTime.now.utc.beginning_of_month,
-                                   :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
-                                   :resource   => vm)
-        category = FactoryGirl.create(:classification, :name => 'environment', :description => 'Environment')
-        FactoryGirl.create(:classification, :parent_id => category.id, :name => 'test', :description => 'Test')
-        ci = ClassificationImport.upload(@file)
-        ci.apply
-        vm.reload
-        event.collect_tags
-        expect(event.context).to eq("tag" => {"environment" => ["test"]})
-      end
     end
   end
   context 'update charges' do
-    let(:event_to_charge) { FactoryGirl.create(:showback_event) }
+    let(:event_to_charge) { FactoryGirl.create(:showback_data_rollup) }
     let(:pool_of_event) do
-      FactoryGirl.create(:showback_pool,
+      FactoryGirl.create(:showback_envelope,
                          :resource => event_to_charge.resource)
     end
 
@@ -463,11 +450,11 @@ describe ManageIQ::Consumption::ShowbackEvent do
         "FLAVOR" => {}
       }
       event_to_charge.save
-      charge1 = FactoryGirl.create(:showback_charge,
-                                   :showback_pool  => pool_of_event,
-                                   :showback_event => event_to_charge,
-                                   :stored_data    => {Time.now.utc - 5.hours => event_to_charge.data})
-      data1 = charge1.stored_data_last
+      charge1 = FactoryGirl.create(:showback_data_view,
+                                   :showback_envelope    => pool_of_event,
+                                   :showback_data_rollup => event_to_charge,
+                                   :data_snapshot        => {Time.now.utc - 5.hours => event_to_charge.data})
+      data1 = charge1.data_snapshot_last
       event_to_charge.data = {
         "CPU"    => {
           "average"           => [49.8571428571429, "percent"],
@@ -482,7 +469,7 @@ describe ManageIQ::Consumption::ShowbackEvent do
       event_to_charge.save
       event_to_charge.update_charges
       charge1.reload
-      expect(charge1.stored_data_last).not_to eq(data1)
+      expect(charge1.data_snapshot_last).not_to eq(data1)
     end
   end
 end

@@ -2,9 +2,9 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
-  # We need to ShowbackUsageType list to know what measures we should be looking for
+  # We need to ShowbackInputgroup list to know what groups we should be looking for
   before(:each) do
-    ManageIQ::Consumption::ShowbackUsageType.seed
+    ManageIQ::Consumption::ShowbackInputMeasure.seed
   end
 
   context 'basic tests' do
@@ -47,7 +47,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     context 'rating with no context' do
       let(:resource)       { FactoryGirl.create(:vm) }
-      let(:event)          { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :resource => resource) }
+      let(:event)          { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month, :resource => resource) }
       let(:fixed_rate)     { Money.new(11) }
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
@@ -85,14 +85,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       it 'calculates costs when rate is not found' do
         event.save
         event.reload
-        # Make rate category not found
-        rate.category = 'not-found'
+        # Make rate entity not found
+        rate.entity = 'not-found'
         rate.save
         expect(plan.calculate_total_cost(event)).to(eq(Money.new(0)))
       end
 
       it 'calculates list of costs when rate is not found and default event data' do
-        rate.category = 'not-found'
+        rate.entity = 'not-found'
         rate.save
         resource_type = event.resource.type
         data = event.data
@@ -100,7 +100,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       end
 
       it 'calculates costs when rate is not found and event data' do
-        rate.category = 'not-found'
+        rate.entity = 'not-found'
         rate.save
         resource_type = event.resource.type
         data = event.data
@@ -145,7 +145,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     context 'rating with context' do
       let(:resource)      { FactoryGirl.create(:vm) }
-      let(:event)         { FactoryGirl.build(:showback_event, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
+      let(:event)         { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }
@@ -174,8 +174,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       it 'returns list of costs when no rate is found' do
         event.save
         event.reload
-        # Make rate category not found
-        rate.category = 'not-found'
+        # Make rate entity not found
+        rate.entity = 'not-found'
         rate.save
         expect(plan.calculate_list_of_costs(event)).to be_empty
       end
@@ -183,8 +183,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       it 'calculates costs when rate is not found' do
         event.save
         event.reload
-        # Make rate category not found
-        rate.category = 'not-found'
+        # Make rate entity not found
+        rate.entity = 'not-found'
         rate.save
         expect(plan.calculate_total_cost(event)).to eq(Money.new(0))
       end

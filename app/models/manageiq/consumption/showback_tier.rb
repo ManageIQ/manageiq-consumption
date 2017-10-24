@@ -45,7 +45,7 @@ module ManageIQ::Consumption
     #
     # @return [String] the definition of the object
     def name
-      "#{showback_rate.category}:#{showback_rate.measure}:#{showback_rate.dimension}:Tier:#{tier_start_value}-#{tier_end_value}"
+      "#{showback_rate.entity}:#{showback_rate.group}:#{showback_rate.field}:Tier:#{tier_start_value}-#{tier_end_value}"
     end
 
     # Validate the interval bvefore save

@@ -7,12 +7,12 @@ module ManageIQ::Consumption
     has_many :showback_tiers, :inverse_of => :showback_rate
 
     validates :calculation, :presence => true, :inclusion => { :in => VALID_RATE_CALCULATIONS }
-    validates :category,    :presence => true
-    validates :dimension,   :presence => true
+    validates :entity, :presence => true
+    validates :field, :presence => true
 
     # There is no fixed_rate unit (only presence or not, and time), TODO: change column name in a migration
-    validates :measure, :presence => true
-    default_value_for :measure, ''
+    validates :group, :presence => true
+    default_value_for :group, ''
 
     serialize :screener, JSON # Implement data column as a JSON
     default_value_for :screener, { }
@@ -27,14 +27,14 @@ module ManageIQ::Consumption
     # @return [Boolean]
     default_value_for :tiers_use_full_value, true
 
-    default_value_for :step_variable, ''
+    default_value_for :tier_input_variable, ''
 
     validates :screener, :exclusion => { :in => [nil] }
 
     after_create :create_zero_tier
 
     def name
-      "#{category}:#{measure}:#{dimension}"
+      "#{entity}:#{group}:#{field}"
     end
 
     # Create a Zero tier when the rate is create
@@ -51,10 +51,10 @@ module ManageIQ::Consumption
       # Find tier (use context)
       # Calculate value within tier
       # For each tier used, calculate costs
-      value, measurement = event.get_measure(measure, dimension) # Returns measure and the unit
+      value, groupment = event.get_group(group, field) # Returns group and the unit
       tiers = get_tiers(value || 0)
       duration = cycle_duration || event.month_duration
-      # To do event.resource.type should be eq to category
+      # To do event.resource.type should be eq to entity
       acc = 0
       adjusted_value = value # Just in case we need to update it
       # If there is a step defined, we use it to adjust input to it
@@ -63,21 +63,21 @@ module ManageIQ::Consumption
         unless tier.step_value.nil? || tier.step_unit.nil?
           # Convert step and value to the same unit (variable_rate_per_unit)  and calculate real values with the minimum step)
           adjusted_step = UnitsConverterHelper.to_unit(tier.step_value, tier.step_unit, tier.variable_rate_per_unit)
-          tier_start_value = UnitsConverterHelper.to_unit(tier.tier_start_value, step_variable, measurement)
+          tier_start_value = UnitsConverterHelper.to_unit(tier.tier_start_value, tier_input_variable, groupment)
           tier_value = tiers_use_full_value ? value : value - tier_start_value
-          divmod = UnitsConverterHelper.to_unit(tier_value, measurement, tier.variable_rate_per_unit).divmod(adjusted_step)
+          divmod = UnitsConverterHelper.to_unit(tier_value, groupment, tier.variable_rate_per_unit).divmod(adjusted_step)
           adjusted_value = (divmod[0] + (divmod[1].zero? ? 0 : 1)) * adjusted_step
-          measurement = tier.variable_rate_per_unit # Updated value with new measurement as we have updated values
+          groupment = tier.variable_rate_per_unit # Updated value with new groupment as we have updated values
         end
         # If there is a step time defined, we use it to adjust input to it
         adjusted_time_span = event.time_span
-        acc += rate_with_values(tier, adjusted_value, measurement, adjusted_time_span, duration)
+        acc += rate_with_values(tier, adjusted_value, groupment, adjusted_time_span, duration)
       end
       acc
     end
 
-    def rate_with_values(tier, value, measure, time_span, cycle_duration, date = Time.current)
-      send(calculation.downcase, tier, value, measure, time_span, cycle_duration, date)
+    def rate_with_values(tier, value, group, time_span, cycle_duration, date = Time.current)
+      send(calculation.downcase, tier, value, group, time_span, cycle_duration, date)
     end
 
     private
@@ -90,7 +90,7 @@ module ManageIQ::Consumption
       end
     end
 
-    def occurrence(tier, value, _measure, _time_span, cycle_duration, date)
+    def occurrence(tier, value, _group, _time_span, cycle_duration, date)
       # Returns fixed_cost always + variable_cost sometimes
       # Fixed cost are always added fully, variable costs are only added if value is not nil
       # fix_inter: number of intervals in the calculation => how many times do we need to apply the rate to get a monthly (cycle) rate (min = 1)
@@ -109,7 +109,7 @@ module ManageIQ::Consumption
       fix_inter * tier.fixed_rate + (value ? var_inter * tier.variable_rate : 0) # fixed always, variable if value
     end
 
-    def duration(tier, value, measure, time_span, cycle_duration, date)
+    def duration(tier, value, group, time_span, cycle_duration, date)
       # Returns fixed_cost + variable costs taking into account value and duration
       # Fixed cost and variable costs are prorated on time
       # time_span = end_time - start_time (duration of the event)
@@ -128,11 +128,11 @@ module ManageIQ::Consumption
         :interval         => tier.variable_rate_per_time,
         :calculation_date => date
       )
-      value_in_rate_units = UnitsConverterHelper.to_unit(value.to_f, measure, tier.variable_rate_per_unit) || 0
+      value_in_rate_units = UnitsConverterHelper.to_unit(value.to_f, group, tier.variable_rate_per_unit) || 0
       ((fix_inter * tier.fixed_rate) + (var_inter * value_in_rate_units * tier.variable_rate)) * time_span.to_f / cycle_duration
     end
 
-    def quantity(tier, value, measure, _time_span, cycle_duration, date)
+    def quantity(tier, value, group, _time_span, cycle_duration, date)
       # Returns costs based on quantity (independently of duration).
       # Fixed cost are calculated per period (i.e. 5&euro;/month). You could use occurrence or duration
       # time_span = end_time - start_time
@@ -145,7 +145,7 @@ module ManageIQ::Consumption
         :interval         => tier.fixed_rate_per_time,
         :calculation_date => date
       )
-      value_in_rate_units = UnitsConverterHelper.to_unit(value, measure, tier.variable_rate_per_unit) || 0
+      value_in_rate_units = UnitsConverterHelper.to_unit(value, group, tier.variable_rate_per_unit) || 0
       (fix_inter * tier.fixed_rate) + (value_in_rate_units * tier.variable_rate)
     end
   end

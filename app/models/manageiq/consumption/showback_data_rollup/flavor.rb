@@ -1,4 +1,4 @@
-module ManageIQ::Consumption::ShowbackEvent::FLAVOR
+module ManageIQ::Consumption::ShowbackDataRollup::FLAVOR
   #
   # Return Number Ocurrences
   #

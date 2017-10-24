@@ -14,7 +14,7 @@ class ManageIQ::Consumption::ConsumptionManager
   def self.update_events
     data_units = load_column_units
     generate_new_month unless Time.now.utc.strftime("%d").to_i != 1
-    ManageIQ::Consumption::ShowbackEvent.events_actual_month.each do |event|
+    ManageIQ::Consumption::ShowbackDataRollup.events_actual_month.each do |event|
       event.update_event(data_units)
       event.save
     end
@@ -25,9 +25,9 @@ class ManageIQ::Consumption::ConsumptionManager
   end
 
   def self.generate_new_month
-    events = ManageIQ::Consumption::ShowbackEvent.events_past_month
+    events = ManageIQ::Consumption::ShowbackDataRollup.events_past_month
     events.each do |ev|
-      next if ManageIQ::Consumption::ShowbackEvent.where(["start_time >= ?", init_month]).exists?(:resource=> ev.resource)
+      next if ManageIQ::Consumption::ShowbackDataRollup.where(["start_time >= ?", init_month]).exists?(:resource=> ev.resource)
       generate_event_resource(ev.resource, DateTime.now.utc.beginning_of_month, load_column_units)
     end
     events
@@ -38,14 +38,14 @@ class ManageIQ::Consumption::ConsumptionManager
   def self.generate_events
     RESOURCES_TYPES.each do |resource|
       resource.constantize.all.each do |one_resource|
-        next if ManageIQ::Consumption::ShowbackEvent.where(["start_time >= ?", init_month]).exists?(:resource => one_resource)
+        next if ManageIQ::Consumption::ShowbackDataRollup.where(["start_time >= ?", init_month]).exists?(:resource => one_resource)
         generate_event_resource(one_resource, DateTime.now.utc, load_column_units)
       end
     end
   end
 
   def self.generate_event_resource(resource, date, data_units)
-    e = ManageIQ::Consumption::ShowbackEvent.new(
+    e = ManageIQ::Consumption::ShowbackDataRollup.new(
       :resource   => resource,
       :start_time => date,
       :end_time   => date
@@ -58,7 +58,7 @@ class ManageIQ::Consumption::ConsumptionManager
   end
 
   def self.seed
-    ManageIQ::Consumption::ShowbackUsageType.seed
+    ManageIQ::Consumption::ShowbackInputMeasure.seed
     ManageIQ::Consumption::ShowbackPricePlan.seed
   end
 

@@ -1,4 +1,4 @@
-module ManageIQ::Consumption::ShowbackEvent::MEM
+module ManageIQ::Consumption::ShowbackDataRollup::MEM
   #
   #  Return the average acumulated with the new one
   #
