@@ -1,4 +1,4 @@
-module ManageIQ::Consumption::ShowbackDataRollup::FIXED
+module ManageIQ::Consumption::DataRollup::FIXED
   def fixed_fixed_compute_1
   end
 

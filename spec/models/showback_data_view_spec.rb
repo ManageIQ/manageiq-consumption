@@ -52,14 +52,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
 
   context '#validate price_plan_missing and snapshot' do
     let(:event) do
-      FactoryGirl.build(:showback_data_rollup,
+      FactoryGirl.build(:data_rollup,
                         :with_vm_data,
                         :full_month)
     end
 
     let(:charge) do
       FactoryGirl.build(:showback_data_view,
-                        :showback_data_rollup => event)
+                        :data_rollup => event)
     end
 
     it "fails if can't find a price plan" do
@@ -106,7 +106,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
 
   context '#stored data' do
     let(:charge_data) { FactoryGirl.build(:showback_data_view, :with_data_snapshot) }
-    let(:event_for_charge) { FactoryGirl.create(:showback_data_rollup) }
+    let(:event_for_charge) { FactoryGirl.create(:data_rollup) }
     let(:pool_of_event) do
       FactoryGirl.create(:showback_envelope,
                          :resource => event_for_charge.resource)
@@ -125,10 +125,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
         "FLAVOR" => {}
       }
       charge1 = FactoryGirl.create(:showback_data_view,
-                                   :showback_envelope    => pool_of_event,
-                                   :showback_data_rollup => event_for_charge)
+                                   :showback_envelope => pool_of_event,
+                                   :data_rollup       => event_for_charge)
       expect(charge1.data_snapshot_start).to eq(event_for_charge.data)
-      charge1.snapshot_event
+      charge1.snapshot_data_rollup
       expect(charge1.data_snapshot_start).to eq(event_for_charge.data)
     end
 
@@ -166,16 +166,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
     end
     let(:showback_tier2) { rate2.showback_tiers.first }
     let(:event) do
-      FactoryGirl.create(:showback_data_rollup,
+      FactoryGirl.create(:data_rollup,
                          :with_vm_data,
                          :full_month)
     end
 
     let(:charge) do
       FactoryGirl.create(:showback_data_view,
-                         :showback_envelope    => pool,
-                         :cost                 => cost,
-                         :showback_data_rollup => event)
+                         :showback_envelope => pool,
+                         :cost              => cost,
+                         :data_rollup       => event)
     end
 
     context 'without price_plan' do
@@ -190,7 +190,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
         showback_tier1.save
         expect(event.data).not_to be_nil # making sure that the default is not empty
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
-        expect(charge.showback_data_rollup).to eq(event)
+        expect(charge.data_rollup).to eq(event)
         expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'].first)
       end
     end
@@ -213,7 +213,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
         expect(event.data).not_to be_nil
         plan2.reload
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
-        expect(charge.showback_data_rollup).to eq(event)
+        expect(charge.data_rollup).to eq(event)
         # Test that it works without a plan
         expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_group_value('CPU', 'average'))
         # Test that it changes if you provide a plan
@@ -237,7 +237,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
         showback_tier2.save
         expect(event.data).not_to be_nil
         expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
-        expect(charge.showback_data_rollup).to eq(event)
+        expect(charge.data_rollup).to eq(event)
         # Test that it works without a plan
         expect(charge.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_group_value('CPU', 'average'))
         # Test that it changes if you provide a plan

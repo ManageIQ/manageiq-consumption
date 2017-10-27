@@ -5,20 +5,20 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
 
   default_value_for :cost, 0
 
-  belongs_to :showback_data_rollup, :inverse_of => :showback_data_views
-  belongs_to :showback_envelope,  :inverse_of => :showback_data_views
+  belongs_to :data_rollup,       :inverse_of => :showback_data_views, :foreign_key => :showback_data_rollup_id
+  belongs_to :showback_envelope, :inverse_of => :showback_data_views, :foreign_key => :showback_envelope_id
 
   validates :showback_envelope,  :presence => true, :allow_nil => false
-  validates :showback_data_rollup, :presence => true, :allow_nil => false
+  validates :data_rollup,        :presence => true, :allow_nil => false
 
   serialize :cost, JSON # Implement cost column as a JSON
   serialize :data_snapshot, JSON # Implement data_snapshot column as a JSON
   serialize :context_snapshot, JSON # Implement context_snapshot column as a JSON
-  before_create :snapshot_event
+  before_create :snapshot_data_rollup
   default_value_for :data_snapshot, {}
   default_value_for :context_snapshot, {}
 
-
+  #
   # Set the cost to 0
   #
   def clean_cost
@@ -43,9 +43,9 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
   #   A timestamp of the snapshot. This
   #   can be a timestamp or `Time.now.utc`.
   #
-  def snapshot_event(t = Time.now.utc)
-    data_snapshot[t] = showback_data_rollup.data unless data_snapshot != {}
-    context_snapshot = showback_data_rollup.context
+  def snapshot_data_rollup(t = Time.now.utc)
+    data_snapshot[t] = data_rollup.data unless data_snapshot != {}
+    self.context_snapshot = data_rollup.context
   end
 
   # This returns the data information at the start of the pool
@@ -78,7 +78,7 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
   # This update the last snapshoot of the event
   def update_data_snapshot(t = Time.now.utc)
     data_snapshot.delete(data_snapshot_last_key) unless data_snapshot.keys.length == 1
-    data_snapshot[t] = showback_data_rollup.data
+    data_snapshot[t] = data_rollup.data
     save
   end
 
@@ -100,7 +100,7 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
     # Find the price plan, there should always be one as it is seeded(Enterprise)
     price_plan ||= showback_envelope.find_price_plan
     if price_plan.class == ManageIQ::Consumption::ShowbackPricePlan
-      cost = price_plan.calculate_total_cost(showback_data_rollup)
+      cost = price_plan.calculate_total_cost(data_rollup)
       save
       cost
     else

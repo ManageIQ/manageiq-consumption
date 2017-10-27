@@ -11,11 +11,11 @@ class ManageIQ::Consumption::ConsumptionManager
     @description ||= "Consumption Manager".freeze
   end
 
-  def self.update_events
+  def self.update_data_rollups
     data_units = load_column_units
     generate_new_month unless Time.now.utc.strftime("%d").to_i != 1
-    ManageIQ::Consumption::ShowbackDataRollup.events_actual_month.each do |event|
-      event.update_event(data_units)
+    ManageIQ::Consumption::DataRollup.data_rollups_actual_month.each do |event|
+      event.update_data_rollup(data_units)
       event.save
     end
   end
@@ -25,36 +25,36 @@ class ManageIQ::Consumption::ConsumptionManager
   end
 
   def self.generate_new_month
-    events = ManageIQ::Consumption::ShowbackDataRollup.events_past_month
-    events.each do |ev|
-      next if ManageIQ::Consumption::ShowbackDataRollup.where(["start_time >= ?", init_month]).exists?(:resource=> ev.resource)
-      generate_event_resource(ev.resource, DateTime.now.utc.beginning_of_month, load_column_units)
+    data_rollups = ManageIQ::Consumption::DataRollup.data_rollups_past_month
+    data_rollups.each do |dr|
+      next if ManageIQ::Consumption::DataRollup.where(["start_time >= ?", init_month]).exists?(:resource=> dr.resource)
+      generate_data_rollup_resource(dr.resource, DateTime.now.utc.beginning_of_month, load_column_units)
     end
-    events
+    data_rollups
   end
 
   RESOURCES_TYPES = %w(Vm Container Service).freeze
 
-  def self.generate_events
+  def self.generate_data_rollups
     RESOURCES_TYPES.each do |resource|
       resource.constantize.all.each do |one_resource|
-        next if ManageIQ::Consumption::ShowbackDataRollup.where(["start_time >= ?", init_month]).exists?(:resource => one_resource)
-        generate_event_resource(one_resource, DateTime.now.utc, load_column_units)
+        next if ManageIQ::Consumption::DataRollup.where(["start_time >= ?", init_month]).exists?(:resource => one_resource)
+        generate_data_rollup_resource(one_resource, DateTime.now.utc, load_column_units)
       end
     end
   end
 
-  def self.generate_event_resource(resource, date, data_units)
-    e = ManageIQ::Consumption::ShowbackDataRollup.new(
+  def self.generate_data_rollup_resource(resource, date, data_units)
+    data_rollup = ManageIQ::Consumption::DataRollup.new(
       :resource   => resource,
       :start_time => date,
       :end_time   => date
     )
-    e.generate_data(data_units)
-    e.collect_tags
-    e.assign_resource
-    e.assign_by_tag
-    e.save!
+    data_rollup.generate_data(data_units)
+    data_rollup.collect_tags
+    data_rollup.assign_resource
+    data_rollup.assign_by_tag
+    data_rollup.save!
   end
 
   def self.seed
