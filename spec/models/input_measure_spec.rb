@@ -1,13 +1,13 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-describe ManageIQ::Consumption::ShowbackInputMeasure do
+describe ManageIQ::Consumption::InputMeasure do
   before(:each) do
-    ManageIQ::Consumption::ShowbackInputMeasure.delete_all
+    ManageIQ::Consumption::InputMeasure.delete_all
   end
 
   context "validations" do
-    let(:input_measure) { FactoryGirl.build(:showback_input_measure) }
+    let(:input_measure) { FactoryGirl.build(:input_measure) }
     let(:data_rollup) { FactoryGirl.build(:showback_data_rollup) }
 
     it "has a valid factory" do
@@ -29,18 +29,18 @@ describe ManageIQ::Consumption::ShowbackInputMeasure do
       expect(input_measure.errors[:description]).to include "can't be blank"
     end
 
-    it "should ensure presence of usage type" do
+    it "should ensure presence of group measure" do
       input_measure.group = nil
       input_measure.valid?
       expect(input_measure.errors.messages[:group]).to include "can't be blank"
     end
 
-    it "should invalidate incorrect usage type" do
+    it "should invalidate incorrect group measure" do
       input_measure.group = "AA"
       expect(input_measure).to be_valid
     end
 
-    it "should validate correct usage type" do
+    it "should validate correct group measure" do
       input_measure.group = "CPU"
       expect(input_measure).to be_valid
     end
@@ -65,17 +65,17 @@ describe ManageIQ::Consumption::ShowbackInputMeasure do
   end
 
   context ".seed" do
-    let(:expected_showback_input_measure_count) { 28 }
+    let(:expected_input_measure_count) { 28 }
 
     it "empty table" do
       described_class.seed
-      expect(described_class.count).to eq(expected_showback_input_measure_count)
+      expect(described_class.count).to eq(expected_input_measure_count)
     end
 
     it "run twice" do
       described_class.seed
       described_class.seed
-      expect(described_class.count).to eq(expected_showback_input_measure_count)
+      expect(described_class.count).to eq(expected_input_measure_count)
     end
   end
 end

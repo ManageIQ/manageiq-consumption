@@ -48,9 +48,9 @@ describe ManageIQ::Consumption::ShowbackDataRollup do
       data_rollup.data = {}
       data_rollup.resource = FactoryGirl.create(:vm)
       hash = {}
-      ManageIQ::Consumption::ShowbackInputMeasure.seed
+      ManageIQ::Consumption::InputMeasure.seed
       data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
-      ManageIQ::Consumption::ShowbackInputMeasure.all.each do |group_type|
+      ManageIQ::Consumption::InputMeasure.all.each do |group_type|
         next unless data_rollup.resource.type.ends_with?(group_type.entity)
         hash[group_type.group] = {}
         group_type.fields.each do |dim|
@@ -212,7 +212,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup do
         event.resource     = @vm_metrics
         event.start_time   = "2010-04-13T00:00:00Z"
         event.end_time     = "2010-04-14T00:00:00Z"
-        group = FactoryGirl.build(:showback_input_measure)
+        group = FactoryGirl.build(:input_measure)
         group.save
       end
 

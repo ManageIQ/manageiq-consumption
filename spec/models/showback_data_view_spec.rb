@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Consumption::ShowbackDataView, :type => :model do
   before(:each) do
-    ManageIQ::Consumption::ShowbackInputMeasure.seed
+    ManageIQ::Consumption::InputMeasure.seed
   end
 
   context 'basic life cycle' do

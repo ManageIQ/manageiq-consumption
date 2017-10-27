@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 module ManageIQ::Consumption
   describe ShowbackRate do
     before(:each) do
-      ShowbackInputMeasure.seed
+      InputMeasure.seed
     end
     describe 'model validations' do
       let(:showback_rate) { FactoryGirl.build(:showback_rate) }
