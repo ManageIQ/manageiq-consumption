@@ -16,50 +16,50 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
 
   it "generate new month for actual events" do
     vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-    FactoryGirl.create(:showback_event,
+    FactoryGirl.create(:showback_data_rollup,
                        :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                        :end_time   => DateTime.now.utc.end_of_month - 1.month,
                        :resource   => vm)
-    expect(ManageIQ::Consumption::ShowbackEvent.where(:resource =>vm).count).to eq(1)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.where(:resource =>vm).count).to eq(1)
     described_class.generate_new_month
-    expect(ManageIQ::Consumption::ShowbackEvent.where(:resource =>vm).count).to eq(2)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.where(:resource =>vm).count).to eq(2)
   end
 
   it "should generate events for new resources" do
     FactoryGirl.create(:vm)
-    expect(ManageIQ::Consumption::ShowbackEvent.all.count).to eq(0)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.all.count).to eq(0)
     described_class.generate_events
-    expect(ManageIQ::Consumption::ShowbackEvent.all.count).to eq(1)
-    expect(ManageIQ::Consumption::ShowbackEvent.first.start_time.month).to eq(ManageIQ::Consumption::ShowbackEvent.first.end_time.month)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.all.count).to eq(1)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.first.start_time.month).to eq(ManageIQ::Consumption::ShowbackDataRollup.first.end_time.month)
   end
 
   it "should not generate the same ShowbackEvent 2 times of the same resource" do
     FactoryGirl.create(:vm)
     described_class.generate_events
     described_class.generate_events
-    expect(ManageIQ::Consumption::ShowbackEvent.all.count).to eq(1)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.all.count).to eq(1)
   end
 
   it "should generate new Showbackevent of resource if not has an event for actual month" do
     vm = FactoryGirl.create(:vm)
-    FactoryGirl.create(:showback_event,
+    FactoryGirl.create(:showback_data_rollup,
                        :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                        :end_time   => DateTime.now.utc.end_of_month - 1.month,
                        :resource   => vm)
-    count = ManageIQ::Consumption::ShowbackEvent.all.count
+    count = ManageIQ::Consumption::ShowbackDataRollup.all.count
     described_class.generate_events
-    expect(ManageIQ::Consumption::ShowbackEvent.all.count).to eq(count + 1)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.all.count).to eq(count + 1)
   end
 
   it "should generate a showbackevent of service" do
     serv = FactoryGirl.create(:service)
     described_class.generate_events
-    expect(ManageIQ::Consumption::ShowbackEvent.first.resource).to eq(serv)
-    expect(ManageIQ::Consumption::ShowbackEvent.first.context).not_to be_nil
+    expect(ManageIQ::Consumption::ShowbackDataRollup.first.resource).to eq(serv)
+    expect(ManageIQ::Consumption::ShowbackDataRollup.first.context).not_to be_nil
   end
 
   it "should update the events" do
-    event_metric = FactoryGirl.create(:showback_event, :start_time => DateTime.now.utc.beginning_of_month, :end_time => DateTime.now.utc.beginning_of_month + 2.days)
+    event_metric = FactoryGirl.create(:showback_data_rollup, :start_time => DateTime.now.utc.beginning_of_month, :end_time => DateTime.now.utc.beginning_of_month + 2.days)
     event_metric.data = {
       "CPU" => {
         "average"           => [52.67, "percent"],
@@ -95,7 +95,7 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
     event_metric.resource_id = @vm_metrics.id
     event_metric.resource_type = @vm_metrics.class.name
     event_metric.save!
-    new_average = (event_metric.get_measure_value("CPU", "average").to_d * event_metric.event_days +
+    new_average = (event_metric.get_group_value("CPU", "average").to_d * event_metric.event_days +
         event_metric.resource.metrics.for_time_range(event_metric.end_time, nil).average(:cpu_usage_rate_average)) / (event_metric.event_days + 1)
     data_new["CPU"]["average"][0] = new_average.to_s
     described_class.update_events
@@ -104,18 +104,18 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
     expect(event_metric.end_time).to eq(@vm_metrics.metrics.last.timestamp)
   end
 
-  it "Make the seed of ShowbackUsageType and ShowbackPricePlan" do
+  it "Make the seed of ShowbackInputgroup and ShowbackPricePlan" do
     expect(ManageIQ::Consumption::ShowbackPricePlan).to receive(:seed)
-    expect(ManageIQ::Consumption::ShowbackUsageType).to receive(:seed)
+    expect(ManageIQ::Consumption::ShowbackInputMeasure).to receive(:seed)
     described_class.seed
   end
 
   context 'Units' do
     it "Should be the unit defined in YAML" do
-      ManageIQ::Consumption::ShowbackUsageType.seed
+      ManageIQ::Consumption::ShowbackInputMeasure.seed
       data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
-      ManageIQ::Consumption::ShowbackUsageType.all.each do |usage|
-        usage.dimensions.each do |dim|
+      ManageIQ::Consumption::ShowbackInputMeasure.all.each do |usage|
+        usage.fields.each do |dim|
           expect(data_units).to include(dim.to_sym)
         end
       end

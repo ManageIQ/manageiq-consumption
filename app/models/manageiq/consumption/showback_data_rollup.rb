@@ -1,12 +1,12 @@
-class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
+class ManageIQ::Consumption::ShowbackDataRollup < ApplicationRecord
   belongs_to :resource, :polymorphic => true
 
-  has_many :showback_charges,
+  has_many :showback_data_views,
            :dependent  => :destroy,
-           :inverse_of => :showback_event
-  has_many :showback_pools,
-           :through    => :showback_charges,
-           :inverse_of => :showback_events
+           :inverse_of => :showback_data_rollup
+  has_many :showback_envelopes,
+           :through    => :showback_data_views,
+           :inverse_of => :showback_data_rollups
 
   validates :start_time, :end_time, :resource, :presence => true
   validate :start_time_before_end_time
@@ -22,9 +22,9 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   extend ActiveSupport::Concern
 
-  Dir.glob(Pathname.new(File.dirname(__dir__)).join("consumption/showback_event/*")).each { |lib| include_concern lib.split("consumption/showback_event/")[1].split(".rb")[0].upcase }
+  Dir.glob(Pathname.new(File.dirname(__dir__)).join("consumption/showback_data_rollup/*")).each { |lib| include_concern lib.split("consumption/showback_data_rollup/")[1].split(".rb")[0].upcase }
 
-  self.table_name = 'showback_events'
+  self.table_name = 'showback_data_rollups'
 
   def start_time_before_end_time
     errors.add(:start_time, "Start time should be before end time") unless end_time.to_i >= start_time.to_i
@@ -44,43 +44,43 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   def generate_data(data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units)
     clean_data
-    ManageIQ::Consumption::ShowbackUsageType.all.each do |measure_type|
-      next unless resource_type.include?(measure_type.category)
-      data[measure_type.measure] = {}
-      measure_type.dimensions.each do |dim|
-        data[measure_type.measure][dim] = [0, data_units[dim.to_sym] || ""] unless measure_type.measure == "FLAVOR"
+    ManageIQ::Consumption::ShowbackInputMeasure.all.each do |group_type|
+      next unless resource_type.include?(group_type.entity)
+      data[group_type.group] = {}
+      group_type.fields.each do |dim|
+        data[group_type.group][dim] = [0, data_units[dim.to_sym] || ""] unless group_type.group == "FLAVOR"
       end
     end
   end
 
   def self.events_between_month(start_of_month, end_of_month)
-    ManageIQ::Consumption::ShowbackEvent.where("start_time >= ? AND end_time <= ?",
-                                               DateTime.now.utc.beginning_of_month.change(:month => start_of_month),
-                                               DateTime.now.utc.end_of_month.change(:month => end_of_month))
+    ManageIQ::Consumption::ShowbackDataRollup.where("start_time >= ? AND end_time <= ?",
+                                                    DateTime.now.utc.beginning_of_month.change(:month => start_of_month),
+                                                    DateTime.now.utc.end_of_month.change(:month => end_of_month))
   end
 
   def self.events_actual_month
-    ManageIQ::Consumption::ShowbackEvent.where("start_time >= ? AND end_time <= ?",
-                                               DateTime.now.utc.beginning_of_month,
-                                               DateTime.now.utc.end_of_month)
+    ManageIQ::Consumption::ShowbackDataRollup.where("start_time >= ? AND end_time <= ?",
+                                                    DateTime.now.utc.beginning_of_month,
+                                                    DateTime.now.utc.end_of_month)
   end
 
   def self.events_past_month
-    ManageIQ::Consumption::ShowbackEvent.where("start_time >= ? AND end_time <= ?",
-                                               DateTime.now.utc.beginning_of_month - 1.month,
-                                               DateTime.now.utc.end_of_month - 1.month)
+    ManageIQ::Consumption::ShowbackDataRollup.where("start_time >= ? AND end_time <= ?",
+                                                    DateTime.now.utc.beginning_of_month - 1.month,
+                                                    DateTime.now.utc.end_of_month - 1.month)
   end
 
-  def get_measure(category, dimension)
-    data[category][dimension] if data && data[category]
+  def get_group(entity, field)
+    data[entity][field] if data && data[entity]
   end
 
-  def get_measure_unit(category, dimension)
-    get_measure(category, dimension).last
+  def get_group_unit(entity, field)
+    get_group(entity, field).last
   end
 
-  def get_measure_value(category, dimension)
-    get_measure(category, dimension).first
+  def get_group_value(entity, field)
+    get_group(entity, field).first
   end
 
   def last_flavor
@@ -94,8 +94,8 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   def update_event(data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units)
     generate_data(data_units) unless data.present?
     @metrics = resource.methods.include?(:metrics) ? metrics_time_range(end_time, start_time.end_of_month) : []
-    data.each do |key, dimensions|
-      dimensions.keys.each do |dim|
+    data.each do |key, fields|
+      fields.keys.each do |dim|
         data[key][dim] = [generate_metric(key, dim), data_units[dim.to_sym] || ""]
       end
     end
@@ -107,7 +107,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
   end
 
   def generate_metric(key, dim)
-    key == "FLAVOR" ? send("#{key}_#{dim}") : send("#{key}_#{dim}", get_measure_value(key, dim).to_d)
+    key == "FLAVOR" ? send("#{key}_#{dim}") : send("#{key}_#{dim}", get_group_value(key, dim).to_d)
   end
 
   def collect_tags
@@ -117,9 +117,9 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
       self.context["tag"] = {} unless self.context.key?("tag")
     end
     resource.tagged_with(:ns => '/managed').each do |tag|
-      category = tag.classification.category
-      self.context["tag"][category] = [] unless self.context["tag"].key?(category)
-      self.context["tag"][category] << tag.classification.name unless self.context["tag"][category].include?(tag.classification.name)
+      entity = tag.classification.entity
+      self.context["tag"][entity] = [] unless self.context["tag"].key?(entity)
+      self.context["tag"][entity] << tag.classification.name unless self.context["tag"][entity].include?(tag.classification.name)
     end
   end
 
@@ -151,7 +151,7 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   # Find a pool
   def find_pool(res)
-    ManageIQ::Consumption::ShowbackPool.find_by(
+    ManageIQ::Consumption::ShowbackEnvelope.find_by(
       :resource => res,
       :state    => "OPEN"
     )
@@ -168,20 +168,20 @@ class ManageIQ::Consumption::ShowbackEvent < ApplicationRecord
 
   def assign_by_tag
     return unless context.key?("tag")
-    context["tag"].each do |category, array_children|
-      t = Tag.find_by_classification_name(category)
+    context["tag"].each do |entity, array_children|
+      t = Tag.find_by_classification_name(entity)
       find_pool(t)&.add_event(self)
-      array_children.each do |child_category|
-        tag_child = t.classification.children.detect { |c| c.name == child_category }
+      array_children.each do |child_entity|
+        tag_child = t.classification.children.detect { |c| c.name == child_entity }
         find_pool(tag_child.tag)&.add_event(self)
       end
     end
   end
 
   def update_charges
-    ManageIQ::Consumption::ShowbackCharge.where(:showback_event=>self).each do |charge|
+    ManageIQ::Consumption::ShowbackDataView.where(:showback_data_rollup=>self).each do |charge|
       if charge.open?
-        charge.update_stored_data
+        charge.update_data_snapshot
       end
     end
   end

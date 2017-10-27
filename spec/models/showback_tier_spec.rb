@@ -11,7 +11,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackTier, :type => :model do
     end
 
     it 'returns a name' do
-      expect(showback_tier.name).to eq("#{showback_rate.category}:#{showback_rate.measure}:#{showback_rate.dimension}:Tier:#{showback_tier.tier_start_value}-#{showback_tier.tier_end_value}")
+      expect(showback_tier.name).to eq("#{showback_rate.entity}:#{showback_rate.group}:#{showback_rate.field}:Tier:#{showback_tier.tier_start_value}-#{showback_tier.tier_end_value}")
     end
 
     it 'is not valid with a nil fixed_rate' do

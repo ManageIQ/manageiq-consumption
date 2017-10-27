@@ -1,0 +1,116 @@
+---
+- :entity: "Vm"
+  :description: "Calculate CPU Showback of VM"
+  :group: "CPU"
+  :fields: ["average", "number", "max_number_of_cpu"]
+- :entity: "Vm"
+  :description: "Calculate MEM Showback of VM"
+  :group: "MEM"
+  :fields: ["max_mem"]
+- :entity: "Vm"
+  :description: "Template Showback of VM"
+  :group: "FLAVOR"
+  :fields: ["cpu_reserved","memory_reserved"]
+- :entity: "Container"
+  :description: "Calculate CPU Showback of Container"
+  :group: "CPU"
+  :fields: ["max_number_of_cpu"]
+- :entity: "Container"
+  :description: "Calculate MEM Showback of Container"
+  :group: "MEM"
+  :fields: ["max_mem"]
+- :entity: "Container"
+  :description: "Template Showback of VM"
+  :group: "FLAVOR"
+  :fields: ["cpu_reserved","memory_reserved"]
+# For integration with old chargeback
+- :entity: "Container"
+  :description: "TBD"
+  :group: "cpu"
+  :fields: ["cpu_usagemhz_rate_average"]
+- :entity: "Container"
+  :description: "TBD"
+  :group: "cpu_cores"
+  :fields: ["v_derived_cpu_total_cores_used", "derived_vm_numvcpus", "cpu_usage_rate_average"]
+- :entity: "Container"
+  :description: "TBD"
+  :group: "memory"
+  :fields: ["derived_memory_used", "derived_memory_available"]
+- :entity: "Container"
+  :description: "TBD"
+  :group: "net_io"
+  :fields: ["net_usage_rate_average"]
+- :entity: "Container"
+  :description: "TBD"
+  :group: "disk_io"
+  :fields: ["disk_usage_rate_average"]
+- :entity: "Container"
+  :description: "TBD"
+  :group: "fixed"
+  :fields: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2"]
+  
+- :entity: "Container"
+  :description: "TBD"
+  :group: "metering"
+  :fields: ["metering_used_hours"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "cpu"
+  :fields: ["cpu_usagemhz_rate_average"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "cpu_cores"
+  :fields: ["v_derived_cpu_total_cores_used", "derived_vm_numvcpus", "cpu_usage_rate_average"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "memory"
+  :fields: ["derived_memory_used", "derived_memory_available"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "net_io"
+  :fields: ["net_usage_rate_average"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "disk_io"
+  :fields: ["disk_usage_rate_average"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "fixed"
+  :fields: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2"]
+- :entity: "ContainerImage"
+  :description: "TBD"
+  :group: "metering"
+  :fields: ["metering_used_hours"]
+
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "cpu"
+  :fields: ["derived_vm_numvcpus", "cpu_usagemhz_rate_average"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "cpu_cores"
+  :fields: ["v_derived_cpu_total_cores_used", "cpu_usage_rate_average"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "memory"
+  :fields: ["derived_memory_used", "derived_memory_available"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "net_io"
+  :fields: ["net_usage_rate_average"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "disk_io"
+  :fields: ["disk_usage_rate_average"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "fixed"
+  :fields: ["fixed_compute_1", "fixed_compute_2", "fixed_storage_1", "fixed_storage_2", "fixed_storage_2", "fixed_storage_1"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "metering"
+  :fields: ["metering_used_hours"]
+- :entity: "Vm"
+  :description: "TBD"
+  :group: "storage"
+  :fields: ["derived_vm_allocated_disk_storage", "derived_vm_used_disk_storage"]

@@ -1,12 +1,13 @@
 FactoryGirl.define do
-  factory :showback_charge, :class => ManageIQ::Consumption::ShowbackCharge do
-    showback_pool
-    showback_event
+  factory :showback_data_view, :class => ManageIQ::Consumption::ShowbackDataView do
+    showback_envelope
+    showback_data_rollup
     cost 0
-    stored_data { { } }
+    data_snapshot { { } }
+    context_snapshot { { } }
 
-    trait :with_stored_data do
-      stored_data do
+    trait :with_data_snapshot do
+      data_snapshot do
         {
           Time.now.utc.beginning_of_month           => {
             "CPU"    => {

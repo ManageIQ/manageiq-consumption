@@ -25,11 +25,11 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     resource_type = event.resource&.type || event.resource_type
     # Accumulator
     tc = []
-    # For each measure type in ShowbackUsageType, I need to find the rates applying to the different dimensions
-    # If there is a rate associated to it, we call it with a measure (that can be 0)
-    ManageIQ::Consumption::ShowbackUsageType.where(:category => resource_type).each do |usage|
-      usage.dimensions.each do |dim|
-        rates = showback_rates.where(:category => usage.category, :measure => usage.measure, :dimension => dim)
+    # For each group type in ShowbackUsageType, I need to find the rates applying to the different fields
+    # If there is a rate associated to it, we call it with a group (that can be 0)
+    ManageIQ::Consumption::ShowbackInputMeasure.where(:entity => resource_type).each do |usage|
+      usage.fields.each do |dim|
+        rates = showback_rates.where(:entity => usage.entity, :group => usage.group, :field => dim)
         rates.each do |r|
           next unless ManageIQ::Consumption::UtilsHelper.included_in?(event.context, r.screener)
           tc << [r.rate(event, cycle_duration), r]
@@ -46,7 +46,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
                                     start_time: nil,
                                     end_time: nil,
                                     cycle_duration: nil)
-    event = ManageIQ::Consumption::ShowbackEvent.new
+    event = ManageIQ::Consumption::ShowbackDataRollup.new
     event.resource_type = resource_type
     event.data = data
     event.context = context || {}
