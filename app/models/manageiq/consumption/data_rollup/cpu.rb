@@ -1,10 +1,10 @@
-module ManageIQ::Consumption::ShowbackDataRollup::CPU
+module ManageIQ::Consumption::DataRollup::CPU
   #
   #  Return the average acumulated with the new one
   #
   def CPU_average(value)
     if @metrics.count.positive?
-      ((value * event_days + @metrics.average(:cpu_usage_rate_average)) / (event_days + 1))
+      ((value * data_rollup_days + @metrics.average(:cpu_usage_rate_average)) / (data_rollup_days + 1))
     else
       value
     end

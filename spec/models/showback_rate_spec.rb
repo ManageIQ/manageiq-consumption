@@ -94,7 +94,7 @@ module ManageIQ::Consumption
       end
     end
 
-    describe 'when the event lasts for the full month and the rates too' do
+    describe 'when the data_rollup lasts for the full month and the rates too' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:showback_rate) { FactoryGirl.create(:showback_rate, :CPU_number) }
@@ -106,36 +106,36 @@ module ManageIQ::Consumption
         tier.save
         tier
       end
-      let(:showback_data_rollup_fm) { FactoryGirl.create(:showback_data_rollup, :full_month, :with_vm_data) }
+      let(:data_rollup_fm) { FactoryGirl.create(:data_rollup, :full_month, :with_vm_data) }
 
       context 'empty #context, default rate per_time and per_unit' do
-        it 'should charge an event by occurrence when event exists' do
+        it 'should charge an data_rollup by occurrence when data_rollup exists' do
           showback_tier
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_rate.calculation = 'occurrence'
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(fixed_rate + variable_rate)
+          expect(showback_rate.rate(data_rollup_fm)).to eq(fixed_rate + variable_rate)
         end
 
-        it 'should charge an event by occurrence only the fixed rate when value is nil' do
+        it 'should charge an data_rollup by occurrence only the fixed rate when value is nil' do
           showback_tier
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_rate.calculation = 'occurrence'
-          showback_data_rollup_fm.data = {} # There is no data for this rate in the event
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(fixed_rate)
+          data_rollup_fm.data = {} # There is no data for this rate in the data_rollup
+          expect(showback_rate.rate(data_rollup_fm)).to eq(fixed_rate)
         end
 
-        it 'should charge an event by duration' do
+        it 'should charge an data_rollup by duration' do
           showback_tier
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
         end
 
-        it 'should charge an event by quantity' do
+        it 'should charge an data_rollup by quantity' do
           showback_tier
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_rate.calculation = 'quantity'
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
         end
       end
 
@@ -151,29 +151,29 @@ module ManageIQ::Consumption
           tier.save
           tier
         end
-        let(:showback_data_rollup_fm) { FactoryGirl.create(:showback_data_rollup, :full_month, :with_vm_data) }
-        let(:showback_data_rollup_hm) { FactoryGirl.create(:showback_data_rollup, :first_half_month, :with_vm_data) }
+        let(:data_rollup_fm) { FactoryGirl.create(:data_rollup, :full_month, :with_vm_data) }
+        let(:data_rollup_hm) { FactoryGirl.create(:data_rollup, :first_half_month, :with_vm_data) }
 
         it 'nil step should behave like no step' do
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_tier.step_unit = nil
           showback_tier.step_value = nil
           showback_tier.step_time_value = nil
           showback_tier.step_time_unit = nil
           showback_tier.save
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 2048))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2048))
         end
 
         it 'basic unit step should behave like no step' do
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_tier.step_unit = 'b'
           showback_tier.step_value = 1
           showback_tier.step_time_value = nil
           showback_tier.step_time_unit = nil
           showback_tier.save
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 2048))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2048))
         end
 
         it 'when input is 0 it works' do
@@ -182,33 +182,33 @@ module ManageIQ::Consumption
           showback_tier.step_time_value = nil
           showback_tier.step_time_unit = nil
           showback_rate.calculation = 'duration'
-          showback_data_rollup_fm.data["MEM"]["max_mem"][0] = 0
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11))
+          data_rollup_fm.data["MEM"]["max_mem"][0] = 0
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11))
         end
 
         it 'should work if step unit is a subunit of the tier' do
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_tier.step_unit = 'Gib'
           showback_tier.step_value = 1
           showback_tier.step_time_value = nil
           showback_tier.step_time_unit = nil
           showback_rate.calculation = 'duration'
           showback_tier.save
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 2048))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2048))
 
           showback_tier.step_value = 4
           showback_tier.step_unit = 'Gib'
           showback_tier.save
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 4096))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 4096))
 
           # Modify the input data so the data is not a multiple
-          showback_data_rollup_fm.data["MEM"]["max_mem"][0] = 501
-          showback_data_rollup_fm.data["MEM"]["max_mem"][1] = 'MiB'
+          data_rollup_fm.data["MEM"]["max_mem"][0] = 501
+          data_rollup_fm.data["MEM"]["max_mem"][1] = 'MiB'
 
           showback_tier.step_unit = 'MiB'
           showback_tier.step_value = 384
           showback_tier.save
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 384 * 2))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 384 * 2))
         end
 
         pending 'step time moves half_month to full_month' do
@@ -217,7 +217,7 @@ module ManageIQ::Consumption
           showback_tier.step_time_value = 1
           showback_tier.step_time_unit = 'month'
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(showback_rate.rate(showback_data_rollup_fm))
+          expect(showback_rate.rate(data_rollup_hm)).to eq(showback_rate.rate(data_rollup_fm))
         end
 
         pending 'step is not a subunit of the tier' do
@@ -227,73 +227,73 @@ module ManageIQ::Consumption
           showback_tier.step_time_value = nil
           showback_tier.step_time_unit = nil
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
         end
 
         pending 'step is higher than the tier'
       end
 
       context 'empty #context, modified per_time' do
-        it 'should charge an event by occurrence' do
-          showback_data_rollup_fm.reload
+        it 'should charge an data_rollup by occurrence' do
+          data_rollup_fm.reload
           showback_rate.calculation = 'occurrence'
           showback_tier.fixed_rate_per_time    = 'daily'
           showback_tier.variable_rate_per_time = 'daily'
           showback_tier.save
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(days_in_month * (11 + 7)))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(days_in_month * (11 + 7)))
         end
 
-        it 'should charge an event by duration' do
+        it 'should charge an data_rollup by duration' do
           showback_tier
-          showback_data_rollup_fm.reload
+          data_rollup_fm.reload
           showback_rate.calculation = 'duration'
           showback_tier.fixed_rate_per_time    = 'daily'
           showback_tier.variable_rate_per_time = 'daily'
           showback_tier.save
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(days_in_month * (11 + 7 * 2)))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(days_in_month * (11 + 7 * 2)))
         end
 
-        it 'should charge an event by quantity' do
-          showback_data_rollup_fm.reload
+        it 'should charge an data_rollup by quantity' do
+          data_rollup_fm.reload
           showback_rate.calculation = 'quantity'
           showback_tier.fixed_rate_per_time    = 'daily'
           showback_tier.variable_rate_per_time = 'daily'
           showback_tier.save
           days_in_month = Time.days_in_month(Time.current.month)
-          # Fixed is 11 per day, variable is 7 per CPU, event has average of 2 CPU
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new((days_in_month * 11) + (7 * 2)))
+          # Fixed is 11 per day, variable is 7 per CPU, data_rollup has average of 2 CPU
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new((days_in_month * 11) + (7 * 2)))
         end
       end
 
       context 'empty context, modified per unit' do
-        it 'should charge an event by duration' do
-          showback_data_rollup_fm.reload
+        it 'should charge an data_rollup by duration' do
+          data_rollup_fm.reload
           showback_rate.calculation = 'duration'
           showback_rate.field = 'max_mem'
           showback_rate.group = 'MEM'
           showback_tier.variable_rate_per_unit = 'b'
           showback_tier.save
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + (2048 * 1024 * 1024 * 7)))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + (2048 * 1024 * 1024 * 7)))
           showback_tier.variable_rate_per_unit = 'Kib'
           showback_tier.save
-          expect(showback_rate.rate(showback_data_rollup_fm)).to eq(Money.new(11 + (2048 * 1024 * 7)))
+          expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + (2048 * 1024 * 7)))
         end
 
-        pending 'should charge an event by quantity'
+        pending 'should charge an data_rollup by quantity'
       end
 
       context 'tiered on input value' do
-        pending 'it should charge an event by occurrence'
-        pending 'it should charge an event by duration'
-        pending 'it should charge an event by quantity'
+        pending 'it should charge an data_rollup by occurrence'
+        pending 'it should charge an data_rollup by duration'
+        pending 'it should charge an data_rollup by quantity'
       end
 
       context 'tiered on non-input value in #context' do
-        pending 'it should charge an event by occurrence'
-        pending 'it should charge an event by duration'
-        pending 'it should charge an event by quantity'
+        pending 'it should charge an data_rollup by occurrence'
+        pending 'it should charge an data_rollup by duration'
+        pending 'it should charge an data_rollup by quantity'
       end
     end
 
@@ -301,7 +301,7 @@ module ManageIQ::Consumption
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:showback_rate) { FactoryGirl.create(:showback_rate, :CPU_number, :calculation => 'quantity') }
-      let(:showback_data_rollup_hm) { FactoryGirl.create(:showback_data_rollup, :first_half_month, :with_vm_data) }
+      let(:data_rollup_hm) { FactoryGirl.create(:data_rollup, :first_half_month, :with_vm_data) }
       let(:showback_tier) do
         tier = showback_rate.showback_tiers.first
         tier.fixed_rate = fixed_rate
@@ -325,54 +325,54 @@ module ManageIQ::Consumption
                            :variable_rate_per_unit => "cores")
       end
       context 'use only a single tier' do
-        it 'should charge an event by quantity with 1 tier with tiers_use_full_value' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by quantity with 1 tier with tiers_use_full_value' do
+          data_rollup_hm.reload
           showback_tier
           showback_tier_second
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11 + 7 * 2))
-          showback_data_rollup_hm.data['CPU']['number'][0] = 4.0
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(15 + 10 * 4))
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * 2))
+          data_rollup_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(15 + 10 * 4))
         end
-        it 'should charge an event by quantity with 1 tier with not tiers_use_full_value' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by quantity with 1 tier with not tiers_use_full_value' do
+          data_rollup_hm.reload
           showback_tier
           showback_tier_second
           showback_rate.tiers_use_full_value = false
           showback_rate.tier_input_variable = 'cores'
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11 + 7 * (2 - 0)))
-          showback_data_rollup_hm.data['CPU']['number'][0] = 4.0
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(15 + (10 * (4 - 3.0))))
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * (2 - 0)))
+          data_rollup_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(15 + (10 * (4 - 3.0))))
         end
       end
 
       context 'with all tiers' do
-        it 'should charge an event by quantity with 2 tiers with tiers_use_full_value' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by quantity with 2 tiers with tiers_use_full_value' do
+          data_rollup_hm.reload
           showback_tier
           showback_tier_second
           showback_rate.uses_single_tier = false
-          showback_data_rollup_hm.data['CPU']['number'][0] = 4.0
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11 + 7 * 4) + Money.new(15 + 10 * 4))
+          data_rollup_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * 4) + Money.new(15 + 10 * 4))
         end
 
-        it 'should charge an event by quantity with 2 tiers with not tiers_use_full_value' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by quantity with 2 tiers with not tiers_use_full_value' do
+          data_rollup_hm.reload
           showback_tier
           showback_tier_second
           showback_rate.uses_single_tier = false
           showback_rate.tiers_use_full_value = false
           showback_rate.tier_input_variable = 'cores'
-          showback_data_rollup_hm.data['CPU']['number'][0] = 4.0
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11 + 7 * (4 - 0)) + Money.new(15 + 10 * (4 - 3.0)))
+          data_rollup_hm.data['CPU']['number'][0] = 4.0
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * (4 - 0)) + Money.new(15 + 10 * (4 - 3.0)))
         end
       end
     end
-    describe 'event lasts the first 15 days and the rate is monthly' do
+    describe 'data_rollup lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:showback_rate) { FactoryGirl.create(:showback_rate, :CPU_number) }
-      let(:showback_data_rollup_hm) { FactoryGirl.create(:showback_data_rollup, :first_half_month, :with_vm_data) }
-      let(:proration)     { showback_data_rollup_hm.time_span.to_f / showback_data_rollup_hm.month_duration }
+      let(:data_rollup_hm) { FactoryGirl.create(:data_rollup, :first_half_month, :with_vm_data) }
+      let(:proration)     { data_rollup_hm.time_span.to_f / data_rollup_hm.month_duration }
       let(:showback_tier) do
         tier = showback_rate.showback_tiers.first
         tier.fixed_rate    = fixed_rate
@@ -383,84 +383,84 @@ module ManageIQ::Consumption
       end
 
       context 'empty #context' do
-        it 'should charge an event by occurrence' do
+        it 'should charge an data_rollup by occurrence' do
           showback_tier
           showback_rate.calculation = 'occurrence'
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11) + Money.new(7))
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11) + Money.new(7))
         end
 
-        it 'should charge an event by duration' do
+        it 'should charge an data_rollup by duration' do
           showback_tier
-          showback_data_rollup_hm.reload
+          data_rollup_hm.reload
           showback_rate.calculation = 'duration'
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11 + 7 * 2) * proration)
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * 2) * proration)
         end
 
-        it 'should charge an event by quantity' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by quantity' do
+          data_rollup_hm.reload
           showback_tier
           showback_rate.calculation = 'quantity'
-          # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(11 + 7 * 2))
+          # Fixed is 11 per day, variable is 7 per CPU, data_rollup has 2 CPU
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * 2))
         end
       end
 
       context 'empty #context, modified per_time' do
-        it 'should charge an event by occurrence' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by occurrence' do
+          data_rollup_hm.reload
           showback_rate.calculation = 'occurrence'
           showback_tier.fixed_rate_per_time = 'daily'
           showback_tier.variable_rate_per_time = 'daily'
           showback_tier.save
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(days_in_month * (11 + 7)))
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(days_in_month * (11 + 7)))
         end
 
-        it 'should charge an event by duration' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by duration' do
+          data_rollup_hm.reload
           showback_rate.calculation = 'duration'
           showback_tier.fixed_rate_per_time    = 'daily'
           showback_tier.variable_rate_per_time = 'daily'
           showback_tier.save
           days_in_month = Time.days_in_month(Time.current.month)
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new(days_in_month * proration * (11 + 7 * 2)))
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(days_in_month * proration * (11 + 7 * 2)))
         end
 
-        it 'should charge an event by quantity' do
-          showback_data_rollup_hm.reload
+        it 'should charge an data_rollup by quantity' do
+          data_rollup_hm.reload
           showback_rate.calculation = 'quantity'
           showback_tier.fixed_rate_per_time    = 'daily'
           showback_tier.variable_rate_per_time = 'daily'
           showback_tier.save
           days_in_month = Time.days_in_month(Time.current.month)
-          # Fixed is 11 per day, variable is 7 per CPU, event has 2 CPU
-          expect(showback_rate.rate(showback_data_rollup_hm)).to eq(Money.new((days_in_month * 11) + (7 * 2)))
+          # Fixed is 11 per day, variable is 7 per CPU, data_rollup has 2 CPU
+          expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new((days_in_month * 11) + (7 * 2)))
         end
       end
 
       context 'tiered on input value' do
-        pending 'it should charge an event by occurrence'
-        pending 'it should charge an event by duration'
-        pending 'it should charge an event by quantity'
+        pending 'it should charge an data_rollup by occurrence'
+        pending 'it should charge an data_rollup by duration'
+        pending 'it should charge an data_rollup by quantity'
       end
 
       context 'tiered on non-input value in #context' do
-        pending 'it should charge an event by occurrence'
-        pending 'it should charge an event by duration'
-        pending 'it should charge an event by quantity'
+        pending 'it should charge an data_rollup by occurrence'
+        pending 'it should charge an data_rollup by duration'
+        pending 'it should charge an data_rollup by quantity'
       end
     end
 
-    describe 'event lasts 1 day for a weekly rate' do
-      pending 'should charge an event by occurrence'
-      pending 'should charge an event by duration'
-      pending 'should charge an event by quantity'
+    describe 'data_rollup lasts 1 day for a weekly rate' do
+      pending 'should charge an data_rollup by occurrence'
+      pending 'should charge an data_rollup by duration'
+      pending 'should charge an data_rollup by quantity'
     end
 
-    describe 'event lasts 1 week for a daily rate' do
-      pending 'should charge an event by occurrence'
-      pending 'should charge an event by duration'
-      pending 'should charge an event by quantity'
+    describe 'data_rollup lasts 1 week for a daily rate' do
+      pending 'should charge an data_rollup by occurrence'
+      pending 'should charge an data_rollup by duration'
+      pending 'should charge an data_rollup by quantity'
     end
   end
 end

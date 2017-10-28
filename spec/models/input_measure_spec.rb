@@ -8,7 +8,7 @@ describe ManageIQ::Consumption::InputMeasure do
 
   context "validations" do
     let(:input_measure) { FactoryGirl.build(:input_measure) }
-    let(:data_rollup) { FactoryGirl.build(:showback_data_rollup) }
+    let(:data_rollup) { FactoryGirl.build(:data_rollup) }
 
     it "has a valid factory" do
       expect(input_measure).to be_valid

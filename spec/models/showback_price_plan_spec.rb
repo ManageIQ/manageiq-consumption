@@ -47,7 +47,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     context 'rating with no context' do
       let(:resource)       { FactoryGirl.create(:vm) }
-      let(:event)          { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month, :resource => resource) }
+      let(:event)          { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
       let(:fixed_rate)     { Money.new(11) }
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
@@ -145,7 +145,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     context 'rating with context' do
       let(:resource)      { FactoryGirl.create(:vm) }
-      let(:event)         { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
+      let(:event)         { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
       let(:plan)  { FactoryGirl.create(:showback_price_plan) }

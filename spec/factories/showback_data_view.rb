@@ -1,7 +1,7 @@
 FactoryGirl.define do
   factory :showback_data_view, :class => ManageIQ::Consumption::ShowbackDataView do
     showback_envelope
-    showback_data_rollup
+    data_rollup
     cost 0
     data_snapshot { { } }
     context_snapshot { { } }

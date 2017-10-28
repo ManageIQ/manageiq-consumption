@@ -12,17 +12,17 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
   # Called with an event
   # Returns the total accumulated costs for all rates that apply
   ###################################################################
-  def calculate_total_cost(event, cycle_duration = nil)
+  def calculate_total_cost(data_rollup, cycle_duration = nil)
     total = 0
-    calculate_list_of_costs(event, cycle_duration).each do |x|
+    calculate_list_of_costs(data_rollup, cycle_duration).each do |x|
       total += x[0]
     end
     total
   end
 
-  def calculate_list_of_costs(event, cycle_duration = nil)
-    cycle_duration ||= event.month_duration
-    resource_type = event.resource&.type || event.resource_type
+  def calculate_list_of_costs(data_rollup, cycle_duration = nil)
+    cycle_duration ||= data_rollup.month_duration
+    resource_type = data_rollup.resource&.type || data_rollup.resource_type
     # Accumulator
     tc = []
     # For each group type in ShowbackUsageType, I need to find the rates applying to the different fields
@@ -31,8 +31,8 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
       usage.fields.each do |dim|
         rates = showback_rates.where(:entity => usage.entity, :group => usage.group, :field => dim)
         rates.each do |r|
-          next unless ManageIQ::Consumption::UtilsHelper.included_in?(event.context, r.screener)
-          tc << [r.rate(event, cycle_duration), r]
+          next unless ManageIQ::Consumption::UtilsHelper.included_in?(data_rollup.context, r.screener)
+          tc << [r.rate(data_rollup, cycle_duration), r]
         end
       end
     end
@@ -46,13 +46,13 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
                                     start_time: nil,
                                     end_time: nil,
                                     cycle_duration: nil)
-    event = ManageIQ::Consumption::ShowbackDataRollup.new
-    event.resource_type = resource_type
-    event.data = data
-    event.context = context || {}
-    event.start_time = start_time || Time.current.beginning_of_month
-    event.end_time = end_time || Time.current.end_of_month
-    calculate_list_of_costs(event, cycle_duration)
+    data_rollup = ManageIQ::Consumption::DataRollup.new
+    data_rollup.resource_type = resource_type
+    data_rollup.data = data
+    data_rollup.context = context || {}
+    data_rollup.start_time = start_time || Time.current.beginning_of_month
+    data_rollup.end_time = end_time || Time.current.end_of_month
+    calculate_list_of_costs(data_rollup, cycle_duration)
   end
 
   #

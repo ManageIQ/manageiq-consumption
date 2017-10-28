@@ -1,6 +1,6 @@
-describe ManageIQ::Consumption::ShowbackDataRollup::MEM do
-  let(:event) { FactoryGirl.build(:showback_data_rollup) }
-  let(:con_event) { FactoryGirl.build(:showback_data_rollup) }
+describe ManageIQ::Consumption::DataRollup::MEM do
+  let(:data_rollup) { FactoryGirl.build(:data_rollup) }
+  let(:con_data_rollup) { FactoryGirl.build(:data_rollup) }
   context "memory in vm" do
     before(:each) do
       @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
@@ -24,28 +24,28 @@ describe ManageIQ::Consumption::ShowbackDataRollup::MEM do
           :sys_uptime_absolute_latest => v
         )
       end
-      event.resource   = @vm_metrics
-      event.start_time = "2010-04-13T00:00:00Z"
-      event.end_time   = "2010-04-14T00:00:00Z"
-      group            = FactoryGirl.build(:input_measure)
+      data_rollup.resource   = @vm_metrics
+      data_rollup.start_time = "2010-04-13T00:00:00Z"
+      data_rollup.end_time   = "2010-04-14T00:00:00Z"
+      group                  = FactoryGirl.build(:input_measure)
       group.save
-      event.generate_data
+      data_rollup.generate_data
     end
 
     it "Calculate MEM_total_mem" do
-      expect(event.MEM_max_mem(1024)).to eq(4096)
-      expect(event.MEM_max_mem(4096)).to eq(4096)
+      expect(data_rollup.MEM_max_mem(1024)).to eq(4096)
+      expect(data_rollup.MEM_max_mem(4096)).to eq(4096)
     end
   end
 
   context "memory in container" do
     before(:each) do
-      @con_metrics        = FactoryGirl.create(:container)
-      event.resource      = @con_metrics
-      event.resource.type = "Container"
-      event.start_time    = "2010-04-13T00:00:00Z"
-      event.end_time      = "2010-04-14T00:00:00Z"
-      Range.new(event.start_time, event.end_time, true).step_value(1.hour).each do |t|
+      @con_metrics              = FactoryGirl.create(:container)
+      data_rollup.resource      = @con_metrics
+      data_rollup.resource.type = "Container"
+      data_rollup.start_time    = "2010-04-13T00:00:00Z"
+      data_rollup.end_time      = "2010-04-14T00:00:00Z"
+      Range.new(data_rollup.start_time, data_rollup.end_time, true).step_value(1.hour).each do |t|
         @con_metrics.vim_performance_states << FactoryGirl.create(:vim_performance_state,
                                                                   :timestamp       => t,
                                                                   :image_tag_names => "environment/prod",
@@ -53,12 +53,12 @@ describe ManageIQ::Consumption::ShowbackDataRollup::MEM do
       end
       group = FactoryGirl.build(:input_measure)
       group.save
-      event.generate_data
+      data_rollup.generate_data
     end
 
     it "Calculate MEM_total_mem" do
-      expect(event.MEM_max_mem(1024)).to eq(1024)
-      expect(event.MEM_max_mem(0)).to eq(1024)
+      expect(data_rollup.MEM_max_mem(1024)).to eq(1024)
+      expect(data_rollup.MEM_max_mem(0)).to eq(1024)
     end
   end
 end

@@ -11,7 +11,7 @@ class ManageIQ::Consumption::ShowbackEnvelope < ApplicationRecord
   has_many :showback_data_views,
            :dependent  => :destroy,
            :inverse_of => :showback_envelope
-  has_many :showback_data_rollups,
+  has_many :data_rollups,
            :through    => :showback_data_views,
            :inverse_of => :showback_envelopes
 
@@ -41,31 +41,31 @@ class ManageIQ::Consumption::ShowbackEnvelope < ApplicationRecord
     end
   end
 
-  def add_event(data_rollup)
-    if data_rollup.kind_of?(ManageIQ::Consumption::ShowbackDataRollup)
+  def add_data_rollup(data_rollup)
+    if data_rollup.kind_of?(ManageIQ::Consumption::DataRollup)
       # verify that the event is not already there
-      if showback_data_rollups.include?(data_rollup)
-        errors.add(:showback_data_rollups, 'duplicate')
+      if data_rollups.include?(data_rollup)
+        errors.add(:data_rollups, 'duplicate')
       else
-        charge = ManageIQ::Consumption::ShowbackDataView.new(:showback_data_rollup => data_rollup, :showback_envelope => self)
+        charge = ManageIQ::Consumption::ShowbackDataView.new(:data_rollup => data_rollup, :showback_envelope => self)
         charge.save
       end
     else
-      errors.add(:showback_data_rollups, "Error Type #{data_rollup.type} is not ManageIQ::Consumption::ShowbackEvent")
+      errors.add(:data_rollups, "Error Type #{data_rollup.type} is not ManageIQ::Consumption::DataRollup")
     end
   end
 
   # Remove events from a pool, no error is thrown
 
-  def remove_event(event)
-    if event.kind_of?(ManageIQ::Consumption::ShowbackDataRollup)
-      if showback_data_rollups.include?(event)
-        showback_data_rollups.delete(event)
+  def remove_data_rollup(data_rollup)
+    if data_rollup.kind_of?(ManageIQ::Consumption::DataRollup)
+      if data_rollups.include?(data_rollup)
+        data_rollups.delete(data_rollup)
       else
-        errors.add(:showback_data_rollups, "not found")
+        errors.add(:data_rollups, "not found")
       end
     else
-      errors.add(:showback_data_rollups, "Error Type #{event.type} is not ManageIQ::Consumption::ShowbackEvent")
+      errors.add(:data_rollups, "Error Type #{data_rollup.type} is not ManageIQ::Consumption::DataRollup")
     end
   end
 
@@ -91,9 +91,9 @@ class ManageIQ::Consumption::ShowbackEnvelope < ApplicationRecord
     # updates an existing charge
     if ch
       ch.cost = Money.new(cost)
-    elsif input.class == ManageIQ::Consumption::ShowbackDataRollup # Or create a new one
-      ch = showback_data_views.new(:showback_data_rollup => input,
-                                   :cost                 => cost)
+    elsif input.class == ManageIQ::Consumption::DataRollup # Or create a new one
+      ch = showback_data_views.new(:data_rollup => input,
+                                   :cost        => cost)
     else
       errors.add(:input, 'bad class')
       return
@@ -154,8 +154,8 @@ class ManageIQ::Consumption::ShowbackEnvelope < ApplicationRecord
   end
 
   def find_charge(input)
-    if input.kind_of?(ManageIQ::Consumption::ShowbackDataRollup)
-      showback_data_views.find_by(:showback_data_rollup => input, :showback_envelope => self)
+    if input.kind_of?(ManageIQ::Consumption::DataRollup)
+      showback_data_views.find_by(:data_rollup => input, :showback_envelope => self)
     elsif input.kind_of?(ManageIQ::Consumption::ShowbackDataView) && (input.showback_envelope == self)
       input
     end
@@ -171,13 +171,13 @@ class ManageIQ::Consumption::ShowbackEnvelope < ApplicationRecord
                                                           :end_time    => e_time,
                                                           :state       => 'OPEN')
     showback_data_views.each do |charge|
-      ManageIQ::Consumption::ShowbackDataView.create(:stored_data  => {
-                                                       charge.stored_data_last_key => charge.stored_data_last
-                                                     },
-                                                     :showback_data_rollup => charge.showback_event,
-                                                     :showback_envelope    => pool,
-                                                     :cost_subunits        => charge.cost_subunits,
-                                                     :cost_currency        => charge.cost_currency)
+      ManageIQ::Consumption::ShowbackDataView.create(
+        :stored_data       => { charge.stored_data_last_key => charge.stored_data_last },
+        :data_rollup       => charge.showback_event,
+        :showback_envelope => pool,
+        :cost_subunits     => charge.cost_subunits,
+        :cost_currency     => charge.cost_currency
+      )
     end
   end
 end

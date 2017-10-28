@@ -1,4 +1,4 @@
-module ManageIQ::Consumption::ShowbackDataRollup::STORAGE
+module ManageIQ::Consumption::DataRollup::STORAGE
   # for old chargeback integration
   def storage_derived_vm_used_disk_storage
   end

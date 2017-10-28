@@ -7,8 +7,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
   end
   let(:resource)        { FactoryGirl.create(:vm) }
   let(:pool)            { FactoryGirl.build(:showback_envelope) }
-  let(:event)           { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month, :resource => resource) }
-  let(:event2)          { FactoryGirl.build(:showback_data_rollup, :with_vm_data, :full_month, :resource => resource) }
+  let(:data_rollup)           { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
+  let(:data_rollup2)          { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
   let(:enterprise_plan) { FactoryGirl.create(:showback_price_plan) }
 
   context '#basic lifecycle' do
@@ -48,14 +48,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
       expect(pool.showback_data_views.count).to be(0)
     end
 
-    it 'deletes costs associated when deleting the event' do
+    it 'deletes costs associated when deleting the data_rollup' do
       2.times do
         FactoryGirl.create(:showback_data_view, :showback_envelope => pool)
       end
       expect(pool.showback_data_views.count).to be(2)
-      event = pool.showback_data_views.first.showback_data_rollup
-      expect { event.destroy }.to change(ManageIQ::Consumption::ShowbackDataView, :count).from(2).to(1)
-      expect(pool.showback_data_rollups).not_to include(event)
+      d_rollup = pool.showback_data_views.first.data_rollup
+      expect { d_rollup.destroy }.to change(ManageIQ::Consumption::ShowbackDataView, :count).from(2).to(1)
+      expect(pool.data_rollups).not_to include(data_rollup)
     end
 
     it 'it only can be in approved states' do
@@ -125,41 +125,41 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
     pending 'it can not exists 2 pools opened from one resource'
   end
 
-  describe 'methods for events' do
-    it 'can add an event to a pool' do
-      expect { pool.add_event(event) }.to change(pool.showback_data_rollups, :count).by(1)
-      expect(pool.showback_data_rollups).to include(event)
+  describe 'methods for data_rollups' do
+    it 'can add an data_rollup to a pool' do
+      expect { pool.add_data_rollup(data_rollup) }.to change(pool.data_rollups, :count).by(1)
+      expect(pool.data_rollups).to include(data_rollup)
     end
 
-    it 'throws an error for duplicate events when using Add event to a Pool' do
-      pool.add_event(event)
-      pool.add_event(event)
-      expect(pool.errors.details[:showback_data_rollups]). to include(:error => "duplicate")
+    it 'throws an error for duplicate data_rollups when using Add data_rollup to a Pool' do
+      pool.add_data_rollup(data_rollup)
+      pool.add_data_rollup(data_rollup)
+      expect(pool.errors.details[:data_rollups]). to include(:error => "duplicate")
     end
 
-    it 'Throw error in add event if it is not of a proper type' do
+    it 'Throw error in add data_rollup if it is not of a proper type' do
       obj = FactoryGirl.create(:vm)
-      pool.add_event(obj)
-      expect(pool.errors.details[:showback_data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::ShowbackEvent")
+      pool.add_data_rollup(obj)
+      expect(pool.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::DataRollup")
     end
 
-    it 'Remove event from a Pool' do
-      pool.add_event(event)
-      expect { pool.remove_event(event) }.to change(pool.showback_data_rollups, :count).by(-1)
-      expect(pool.showback_data_rollups).not_to include(event)
+    it 'Remove data_rollup from a Pool' do
+      pool.add_data_rollup(data_rollup)
+      expect { pool.remove_data_rollup(data_rollup) }.to change(pool.data_rollups, :count).by(-1)
+      expect(pool.data_rollups).not_to include(data_rollup)
     end
 
-    it 'Throw error in Remove event from a Pool if the event can not be found' do
-      pool.add_event(event)
-      pool.remove_event(event)
-      pool.remove_event(event)
-      expect(pool.errors.details[:showback_data_rollups]). to include(:error => "not found")
+    it 'Throw error in Remove data_rollup from a Pool if the data_rollup can not be found' do
+      pool.add_data_rollup(data_rollup)
+      pool.remove_data_rollup(data_rollup)
+      pool.remove_data_rollup(data_rollup)
+      expect(pool.errors.details[:data_rollups]). to include(:error => "not found")
     end
 
-    it 'Throw error in Remove event if the type is not correct' do
+    it 'Throw error in Remove data_rollup if the type is not correct' do
       obj = FactoryGirl.create(:vm)
-      pool.remove_event(obj)
-      expect(pool.errors.details[:showback_data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::ShowbackEvent")
+      pool.remove_data_rollup(obj)
+      expect(pool.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::DataRollup")
     end
   end
 
@@ -178,10 +178,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
       expect(charge.showback_envelope).not_to eq(pool)
     end
 
-    it 'add charge from an event' do
-      event  = FactoryGirl.create(:showback_data_rollup)
-      charge = FactoryGirl.create(:showback_data_view, :showback_data_rollup => event, :showback_envelope => pool)
-      expect(event.showback_data_views).to include(charge)
+    it 'add charge from an data_rollup' do
+      data_rollup = FactoryGirl.create(:data_rollup)
+      charge = FactoryGirl.create(:showback_data_view, :data_rollup => data_rollup, :showback_envelope => pool)
+      expect(data_rollup.showback_data_views).to include(charge)
       expect(pool.showback_data_views).to include(charge)
     end
 
@@ -190,10 +190,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
       expect(pool.get_charge(charge)).to eq(Money.new(10))
     end
 
-    it 'get_charge from an event' do
+    it 'get_charge from an data_rollup' do
       charge = FactoryGirl.create(:showback_data_view, :showback_envelope => pool, :cost => Money.new(10))
-      event = charge.showback_data_rollup
-      expect(pool.get_charge(event)).to eq(Money.new(10))
+      data_rollup = charge.data_rollup
+      expect(pool.get_charge(data_rollup)).to eq(Money.new(10))
     end
 
     it 'get_charge from nil get 0' do
@@ -234,19 +234,19 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
       st.variable_rate = Money.new(12)
       st.variable_rate_per_unit = 'percent'
       st.save
-      pool.add_event(event2)
-      event2.reload
+      pool.add_data_rollup(data_rollup2)
+      data_rollup2.reload
       pool.showback_data_views.reload
-      charge = pool.showback_data_views.find_by(:showback_data_rollup => event2)
+      charge = pool.showback_data_views.find_by(:data_rollup => data_rollup2)
       charge.cost = Money.new(0)
       charge.save
       expect { pool.calculate_charge(charge) }.to change(charge, :cost)
-        .from(Money.new(0)).to(Money.new((event2.reload.get_group_value('CPU', 'average') * 12) + 67))
+        .from(Money.new(0)).to(Money.new((data_rollup2.reload.get_group_value('CPU', 'average') * 12) + 67))
     end
 
-    it '#Add an event' do
-      event = FactoryGirl.create(:showback_data_rollup)
-      expect { pool.add_charge(event, 5) }.to change(pool.showback_data_views, :count).by(1)
+    it '#Add an data_rollup' do
+      data_rollup = FactoryGirl.create(:data_rollup)
+      expect { pool.add_charge(data_rollup, 5) }.to change(pool.showback_data_views, :count).by(1)
     end
 
     it 'update a charge in the pool with add_charge' do
@@ -265,16 +265,16 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
     end
 
     it '#clear_charge' do
-      pool.add_event(event)
+      pool.add_data_rollup(data_rollup)
       pool.showback_data_views.reload
-      charge = pool.showback_data_views.find_by(:showback_data_rollup => event)
+      charge = pool.showback_data_views.find_by(:data_rollup => data_rollup)
       charge.cost = Money.new(5)
       expect { pool.clear_charge(charge) }.to change(charge, :cost).from(Money.new(5)).to(Money.new(0))
     end
 
     it '#clear all charges' do
-      pool.add_charge(event, Money.new(57))
-      pool.add_charge(event2, Money.new(123))
+      pool.add_charge(data_rollup, Money.new(57))
+      pool.add_charge(data_rollup2, Money.new(123))
       pool.clean_all_charges
       pool.showback_data_views.each do |x|
         expect(x.cost).to eq(Money.new(0))
@@ -282,8 +282,8 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
     end
 
     it '#sum_of_charges' do
-      pool.add_charge(event, Money.new(57))
-      pool.add_charge(event2, Money.new(123))
+      pool.add_charge(data_rollup, Money.new(57))
+      pool.add_charge(data_rollup2, Money.new(123))
       expect(pool.sum_of_charges).to eq(Money.new(180))
     end
 
@@ -297,10 +297,10 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
       tier.fixed_rate    = Money.new(67)
       tier.variable_rate = Money.new(12)
       tier.save
-      ev  = FactoryGirl.create(:showback_data_rollup, :with_vm_data, :full_month, :resource => vm)
-      ev2 = FactoryGirl.create(:showback_data_rollup, :with_vm_data, :full_month, :resource => vm)
-      pool.add_event(ev)
-      pool.add_event(ev2)
+      ev  = FactoryGirl.create(:data_rollup, :with_vm_data, :full_month, :resource => vm)
+      ev2 = FactoryGirl.create(:data_rollup, :with_vm_data, :full_month, :resource => vm)
+      pool.add_data_rollup(ev)
+      pool.add_data_rollup(ev2)
       pool.showback_data_views.reload
       pool.showback_data_views.each do |x|
         expect(x.cost).to eq(Money.new(0))
@@ -314,20 +314,20 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
   end
 
   describe '#state:open' do
-    it 'new events can be associated to the pool' do
+    it 'new data_rollups can be associated to the pool' do
       pool.save
-      # event.save
-      event
-      expect { pool.showback_data_rollups << event }.to change(pool.showback_data_rollups, :count).by(1)
-      expect(pool.showback_data_rollups.last).to eq(event)
+      # data_rollup.save
+      data_rollup
+      expect { pool.data_rollups << data_rollup }.to change(pool.data_rollups, :count).by(1)
+      expect(pool.data_rollups.last).to eq(data_rollup)
     end
-    it 'events can be associated to costs' do
+    it 'data_rollups can be associated to costs' do
       pool.save
-      # event.save
-      event
-      expect { pool.showback_data_rollups << event }.to change(pool.showback_data_views, :count).by(1)
+      # data_rollup.save
+      data_rollup
+      expect { pool.data_rollups << data_rollup }.to change(pool.showback_data_views, :count).by(1)
       charge = pool.showback_data_views.last
-      expect(charge.showback_data_rollup).to eq(event)
+      expect(charge.data_rollup).to eq(data_rollup)
       expect { charge.cost = Money.new(3) }.to change(charge, :cost).from(0).to(Money.new(3))
     end
 
@@ -335,39 +335,39 @@ RSpec.describe ManageIQ::Consumption::ShowbackEnvelope, :type => :model do
       expect(ManageIQ::Consumption::ShowbackDataView).to monetize(:cost)
     end
 
-    pending 'charges can be updated for an event'
-    pending 'charges can be updated for all events in the pool'
-    pending 'charges can be deleted for an event'
-    pending 'charges can be deleted for all events in the pool'
-    pending 'is possible to return charges for an event'
-    pending 'is possible to return charges for all events'
+    pending 'charges can be updated for an data_rollup'
+    pending 'charges can be updated for all data_rollups in the pool'
+    pending 'charges can be deleted for an data_rollup'
+    pending 'charges can be deleted for all data_rollups in the pool'
+    pending 'is possible to return charges for an data_rollup'
+    pending 'is possible to return charges for all data_rollups'
     pending 'sum of charges can be calculated for the pool'
-    pending 'sum of charges can be calculated for an event type'
+    pending 'sum of charges can be calculated for an data_rollup type'
   end
 
   describe '#state:processing' do
-    pending 'new events are associated to a new or open pool'
-    pending 'new events can not be associated to the pool'
-    pending 'charges can be deleted for an event'
-    pending 'charges can be deleted for all events in the pool'
-    pending 'charges can be updated for an event'
-    pending 'charges can be updated for all events in the pool'
-    pending 'is possible to return charges for an event'
-    pending 'is possible to return charges for all events'
+    pending 'new data_rollups are associated to a new or open pool'
+    pending 'new data_rollups can not be associated to the pool'
+    pending 'charges can be deleted for an data_rollup'
+    pending 'charges can be deleted for all data_rollups in the pool'
+    pending 'charges can be updated for an data_rollup'
+    pending 'charges can be updated for all data_rollups in the pool'
+    pending 'is possible to return charges for an data_rollup'
+    pending 'is possible to return charges for all data_rollups'
     pending 'sum of charges can be calculated for the pool'
-    pending 'sum of charges can be calculated for an event type'
+    pending 'sum of charges can be calculated for an data_rollup type'
   end
 
   describe '#state:closed' do
-    pending 'new events can not be associated to the pool'
-    pending 'new events are associated to a new or existing open pool'
-    pending 'charges can not be deleted for an event'
-    pending 'charges can not be deleted for all events in the pool'
-    pending 'charges can not be updated for an event'
-    pending 'charges can not be updated for all events in the pool'
-    pending 'is possible to return charges for an event'
-    pending 'is possible to return charges for all events'
+    pending 'new data_rollups can not be associated to the pool'
+    pending 'new data_rollups are associated to a new or existing open pool'
+    pending 'charges can not be deleted for an data_rollup'
+    pending 'charges can not be deleted for all data_rollups in the pool'
+    pending 'charges can not be updated for an data_rollup'
+    pending 'charges can not be updated for all data_rollups in the pool'
+    pending 'is possible to return charges for an data_rollup'
+    pending 'is possible to return charges for all data_rollups'
     pending 'sum of charges can be calculated for the pool'
-    pending 'sum of charges can be calculated for an event type'
+    pending 'sum of charges can be calculated for an data_rollup type'
   end
 end
