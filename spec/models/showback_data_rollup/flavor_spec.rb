@@ -2,7 +2,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup::FLAVOR do
   let(:event) { FactoryGirl.build(:showback_data_rollup) }
   context "FLAVOR in vm" do
     before(:each) do
-      ManageIQ::Consumption::ShowbackInputMeasure.seed
+      ManageIQ::Consumption::InputMeasure.seed
       @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
       cases = [
         "2010-04-13T20:52:30Z", 100.0,
@@ -24,7 +24,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup::FLAVOR do
       event.resource     = @vm_metrics
       event.start_time   = "2010-04-13T00:00:00Z"
       event.end_time     = "2010-04-14T00:00:00Z"
-      group = FactoryGirl.build(:showback_input_measure)
+      group = FactoryGirl.build(:input_measure)
       group.save
       event.generate_data
     end
@@ -77,7 +77,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup::FLAVOR do
 
   context "FLAVOR in container" do
     before(:each) do
-      ManageIQ::Consumption::ShowbackInputMeasure.seed
+      ManageIQ::Consumption::InputMeasure.seed
       @con_metrics        = FactoryGirl.create(:container)
       event.resource      = @con_metrics
       event.resource.type = "Container"
@@ -89,7 +89,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup::FLAVOR do
                                                                   :image_tag_names => "environment/prod",
                                                                   :state_data      => {:numvcpus => 2, :total_mem => 4096})
       end
-      group = FactoryGirl.build(:showback_input_measure)
+      group = FactoryGirl.build(:input_measure)
       group.save
       event.generate_data
     end

@@ -4,7 +4,7 @@ require 'money-rails/test_helpers'
 RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
   # We need to ShowbackInputgroup list to know what groups we should be looking for
   before(:each) do
-    ManageIQ::Consumption::ShowbackInputMeasure.seed
+    ManageIQ::Consumption::InputMeasure.seed
   end
 
   context 'basic tests' do

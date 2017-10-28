@@ -58,7 +58,7 @@ class ManageIQ::Consumption::ConsumptionManager
   end
 
   def self.seed
-    ManageIQ::Consumption::ShowbackInputMeasure.seed
+    ManageIQ::Consumption::InputMeasure.seed
     ManageIQ::Consumption::ShowbackPricePlan.seed
   end
 
@@ -67,7 +67,7 @@ class ManageIQ::Consumption::ConsumptionManager
   end
 
   def self.seed_file_name
-    @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("app/models/manageiq/consumption", "showback_column_units.yml")
+    @seed_file_name ||= Pathname.new(Gem.loaded_specs['manageiq-consumption'].full_gem_path).join("app/models/manageiq/consumption", "column_units.yml")
   end
   private_class_method :seed_file_name
 end

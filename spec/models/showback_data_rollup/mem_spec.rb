@@ -27,7 +27,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup::MEM do
       event.resource   = @vm_metrics
       event.start_time = "2010-04-13T00:00:00Z"
       event.end_time   = "2010-04-14T00:00:00Z"
-      group            = FactoryGirl.build(:showback_input_measure)
+      group            = FactoryGirl.build(:input_measure)
       group.save
       event.generate_data
     end
@@ -51,7 +51,7 @@ describe ManageIQ::Consumption::ShowbackDataRollup::MEM do
                                                                   :image_tag_names => "environment/prod",
                                                                   :state_data      => {:total_mem => 1024})
       end
-      group = FactoryGirl.build(:showback_input_measure)
+      group = FactoryGirl.build(:input_measure)
       group.save
       event.generate_data
     end

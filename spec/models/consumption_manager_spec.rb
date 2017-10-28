@@ -106,15 +106,15 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
 
   it "Make the seed of ShowbackInputgroup and ShowbackPricePlan" do
     expect(ManageIQ::Consumption::ShowbackPricePlan).to receive(:seed)
-    expect(ManageIQ::Consumption::ShowbackInputMeasure).to receive(:seed)
+    expect(ManageIQ::Consumption::InputMeasure).to receive(:seed)
     described_class.seed
   end
 
   context 'Units' do
     it "Should be the unit defined in YAML" do
-      ManageIQ::Consumption::ShowbackInputMeasure.seed
+      ManageIQ::Consumption::InputMeasure.seed
       data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
-      ManageIQ::Consumption::ShowbackInputMeasure.all.each do |usage|
+      ManageIQ::Consumption::InputMeasure.all.each do |usage|
         usage.fields.each do |dim|
           expect(data_units).to include(dim.to_sym)
         end

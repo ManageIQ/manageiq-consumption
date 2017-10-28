@@ -27,7 +27,7 @@ class ManageIQ::Consumption::ShowbackPricePlan < ApplicationRecord
     tc = []
     # For each group type in ShowbackUsageType, I need to find the rates applying to the different fields
     # If there is a rate associated to it, we call it with a group (that can be 0)
-    ManageIQ::Consumption::ShowbackInputMeasure.where(:entity => resource_type).each do |usage|
+    ManageIQ::Consumption::InputMeasure.where(:entity => resource_type).each do |usage|
       usage.fields.each do |dim|
         rates = showback_rates.where(:entity => usage.entity, :group => usage.group, :field => dim)
         rates.each do |r|

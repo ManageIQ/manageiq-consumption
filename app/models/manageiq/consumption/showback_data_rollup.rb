@@ -44,7 +44,7 @@ class ManageIQ::Consumption::ShowbackDataRollup < ApplicationRecord
 
   def generate_data(data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units)
     clean_data
-    ManageIQ::Consumption::ShowbackInputMeasure.all.each do |group_type|
+    ManageIQ::Consumption::InputMeasure.all.each do |group_type|
       next unless resource_type.include?(group_type.entity)
       data[group_type.group] = {}
       group_type.fields.each do |dim|
