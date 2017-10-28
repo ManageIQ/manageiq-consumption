@@ -331,13 +331,13 @@ describe ManageIQ::Consumption::DataRollup do
     context 'assign data_rollup to envelope' do
       it "Return nil if not envelope" do
         vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-        FactoryGirl.create(:showback_envelope, :resource => FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096)))
+        FactoryGirl.create(:envelope, :resource => FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096)))
         expect(data_rollup.find_envelope(vm)).to be_nil
       end
 
       it "Return the correct envelope" do
         vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-        envelope = FactoryGirl.create(:showback_envelope, :resource => vm)
+        envelope = FactoryGirl.create(:envelope, :resource => vm)
         expect(data_rollup.find_envelope(vm)).to eq(envelope)
       end
 
@@ -353,7 +353,7 @@ describe ManageIQ::Consumption::DataRollup do
 
       it "Assign resource to envelope" do
         vm = FactoryGirl.create(:vm)
-        envelope = FactoryGirl.create(:showback_envelope, :resource => vm)
+        envelope = FactoryGirl.create(:envelope, :resource => vm)
         data_rollup = FactoryGirl.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
@@ -368,7 +368,7 @@ describe ManageIQ::Consumption::DataRollup do
       it "Assign container resource to envelope" do
         con = FactoryGirl.create(:container)
         con.type = "Container"
-        envelope = FactoryGirl.create(:showback_envelope, :resource => con)
+        envelope = FactoryGirl.create(:envelope, :resource => con)
         data_rollup = FactoryGirl.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
@@ -383,8 +383,8 @@ describe ManageIQ::Consumption::DataRollup do
       it "Assign resource to all relational envelope" do
         host = FactoryGirl.create(:host)
         vm = FactoryGirl.create(:vm, :host => host)
-        envelope_vm = FactoryGirl.create(:showback_envelope, :resource => vm)
-        envelope_host = FactoryGirl.create(:showback_envelope, :resource => host)
+        envelope_vm = FactoryGirl.create(:envelope, :resource => vm)
+        envelope_host = FactoryGirl.create(:envelope, :resource => host)
         data_rollup = FactoryGirl.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
@@ -404,8 +404,8 @@ describe ManageIQ::Consumption::DataRollup do
         entity = FactoryGirl.create(:classification, :name => 'environment', :description => 'Environment')
         entry = FactoryGirl.create(:classification_tag, :parent => entity, :name => 'test', :description => 'Test')
         entry.assign_entry_to(vm)
-        envelope_cat = FactoryGirl.create(:showback_envelope, :resource => entity.tag)
-        envelope_ent = FactoryGirl.create(:showback_envelope, :resource => entry.tag)
+        envelope_cat = FactoryGirl.create(:envelope, :resource => entity.tag)
+        envelope_ent = FactoryGirl.create(:envelope, :resource => entry.tag)
         ci = ClassificationImport.upload(@file)
         ci.apply
         vm.reload
@@ -429,15 +429,15 @@ describe ManageIQ::Consumption::DataRollup do
       end
     end
   end
-  context 'update charges' do
-    let(:data_rollup_to_charge) { FactoryGirl.create(:data_rollup) }
+  context 'update data_views' do
+    let(:data_rollup_data) { FactoryGirl.create(:data_rollup) }
     let(:envelope_of_data_rollup) do
-      FactoryGirl.create(:showback_envelope,
-                         :resource => data_rollup_to_charge.resource)
+      FactoryGirl.create(:envelope,
+                         :resource => data_rollup_data.resource)
     end
 
-    it "Call update charges" do
-      data_rollup_to_charge.data = {
+    it "Call update data_views" do
+      data_rollup_data.data = {
         "CPU"    => {
           "average"           => [29.8571428571429, "percent"],
           "number"            => [2.0, "cores"],
@@ -448,13 +448,13 @@ describe ManageIQ::Consumption::DataRollup do
         },
         "FLAVOR" => {}
       }
-      data_rollup_to_charge.save
-      charge1 = FactoryGirl.create(:showback_data_view,
-                                   :showback_envelope => envelope_of_data_rollup,
-                                   :data_rollup       => data_rollup_to_charge,
-                                   :data_snapshot     => {Time.now.utc - 5.hours => data_rollup_to_charge.data})
-      data1 = charge1.data_snapshot_last
-      data_rollup_to_charge.data = {
+      data_rollup_data.save
+      data_view1 = FactoryGirl.create(:data_view,
+                                      :envelope      => envelope_of_data_rollup,
+                                      :data_rollup   => data_rollup_data,
+                                      :data_snapshot => {Time.now.utc - 5.hours => data_rollup_data.data})
+      data1 = data_view1.data_snapshot_last
+      data_rollup_data.data = {
         "CPU"    => {
           "average"           => [49.8571428571429, "percent"],
           "number"            => [4.0, "cores"],
@@ -465,10 +465,10 @@ describe ManageIQ::Consumption::DataRollup do
         },
         "FLAVOR" => {}
       }
-      data_rollup_to_charge.save
-      data_rollup_to_charge.update_data_views
-      charge1.reload
-      expect(charge1.data_snapshot_last).not_to eq(data1)
+      data_rollup_data.save
+      data_rollup_data.update_data_views
+      data_view1.reload
+      expect(data_view1.data_snapshot_last).not_to eq(data1)
     end
   end
 end
