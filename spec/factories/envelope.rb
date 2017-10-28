@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :showback_envelope, :class => ManageIQ::Consumption::ShowbackEnvelope do
+  factory :envelope, :class => ManageIQ::Consumption::Envelope do
     sequence(:name)           { |n| "factory_pool_#{seq_padded_for_sorting(n)}" }
     sequence(:description)    { |n| "pool_description_#{seq_padded_for_sorting(n)}" }
     start_time                4.hours.ago
