@@ -59,7 +59,7 @@ class ManageIQ::Consumption::ConsumptionManager
 
   def self.seed
     ManageIQ::Consumption::InputMeasure.seed
-    ManageIQ::Consumption::ShowbackPricePlan.seed
+    ManageIQ::Consumption::PricePlan.seed
   end
 
   def self.load_column_units

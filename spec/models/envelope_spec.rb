@@ -9,7 +9,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
   let(:envelope)        { FactoryGirl.build(:envelope) }
   let(:data_rollup)     { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
   let(:data_rollup2)    { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
-  let(:enterprise_plan) { FactoryGirl.create(:showback_price_plan) }
+  let(:enterprise_plan) { FactoryGirl.create(:price_plan) }
 
   context '#basic lifecycle' do
     it 'has a valid factory' do
@@ -209,15 +209,15 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
 
     it 'calculate_data_view fails with no data_view' do
       enterprise_plan
-      expect(envelope.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
+      expect(envelope.find_price_plan).to eq(ManageIQ::Consumption::PricePlan.first)
       envelope.calculate_data_view(nil)
       expect(envelope.errors.details[:data_view]). to include(:error => "not found")
       expect(envelope.calculate_data_view(nil)). to eq(0)
     end
 
     it 'find a price plan' do
-      ManageIQ::Consumption::ShowbackPricePlan.seed
-      expect(envelope.find_price_plan).to eq(ManageIQ::Consumption::ShowbackPricePlan.first)
+      ManageIQ::Consumption::PricePlan.seed
+      expect(envelope.find_price_plan).to eq(ManageIQ::Consumption::PricePlan.first)
     end
 
     pending 'find a price plan associated to the resource'
@@ -226,10 +226,10 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
 
     it '#calculate data_view' do
       enterprise_plan
-      sh = FactoryGirl.create(:showback_rate,
+      sh = FactoryGirl.create(:rate,
                               :CPU_average,
-                              :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
-      st = sh.showback_tiers.first
+                              :price_plan => ManageIQ::Consumption::PricePlan.first)
+      st = sh.tiers.first
       st.fixed_rate = Money.new(67)
       st.variable_rate = Money.new(12)
       st.variable_rate_per_unit = 'percent'
@@ -290,10 +290,10 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
     it 'calculate_all_data_views' do
       enterprise_plan
       vm = FactoryGirl.create(:vm)
-      sh = FactoryGirl.create(:showback_rate,
+      sh = FactoryGirl.create(:rate,
                               :CPU_average,
-                              :showback_price_plan => ManageIQ::Consumption::ShowbackPricePlan.first)
-      tier = sh.showback_tiers.first
+                              :price_plan => ManageIQ::Consumption::PricePlan.first)
+      tier = sh.tiers.first
       tier.fixed_rate    = Money.new(67)
       tier.variable_rate = Money.new(12)
       tier.save

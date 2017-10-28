@@ -99,12 +99,12 @@ class ManageIQ::Consumption::DataView < ApplicationRecord
   def calculate_cost(price_plan = nil)
     # Find the price plan, there should always be one as it is seeded(Enterprise)
     price_plan ||= envelope.find_price_plan
-    if price_plan.class == ManageIQ::Consumption::ShowbackPricePlan
+    if price_plan.class == ManageIQ::Consumption::PricePlan
       cost = price_plan.calculate_total_cost(data_rollup)
       save
       cost
     else
-      errors.add(:showback_price_plan, _('not found'))
+      errors.add(:price_plan, _('not found'))
       Money.new(0)
     end
   end

@@ -66,7 +66,7 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
       event.save
       event.reload
       data_view.save
-      expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(0)
+      expect(ManageIQ::Consumption::PricePlan.count).to eq(0)
       expect(data_view.calculate_cost).to eq(Money.new(0))
     end
 
@@ -147,24 +147,24 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
   context '#calculate_cost' do
     let(:cost)           { Money.new(32) }
     let(:envelope)       { FactoryGirl.create(:envelope) }
-    let!(:plan) { FactoryGirl.create(:showback_price_plan) } # By default is :enterprise
-    let(:plan2)          { FactoryGirl.create(:showback_price_plan) }
+    let!(:plan) { FactoryGirl.create(:price_plan) } # By default is :enterprise
+    let(:plan2)          { FactoryGirl.create(:price_plan) }
     let(:fixed_rate1)    { Money.new(3) }
     let(:fixed_rate2)    { Money.new(5) }
     let(:variable_rate1) { Money.new(7) }
     let(:variable_rate2) { Money.new(7) }
     let(:rate1) do
-      FactoryGirl.create(:showback_rate,
+      FactoryGirl.create(:rate,
                          :CPU_average,
-                         :showback_price_plan => plan)
+                         :price_plan => plan)
     end
-    let(:showback_tier1) { rate1.showback_tiers.first }
+    let(:tier1) { rate1.tiers.first }
     let(:rate2) do
-      FactoryGirl.create(:showback_rate,
+      FactoryGirl.create(:rate,
                          :CPU_average,
-                         :showback_price_plan => plan2)
+                         :price_plan => plan2)
     end
-    let(:showback_tier2) { rate2.showback_tiers.first }
+    let(:tier2) { rate2.tiers.first }
     let(:event) do
       FactoryGirl.create(:data_rollup,
                          :with_vm_data,
@@ -183,13 +183,13 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
         rate1
         event.reload
         data_view.save
-        showback_tier1
-        showback_tier1.fixed_rate = fixed_rate1
-        showback_tier1.variable_rate = variable_rate1
-        showback_tier1.variable_rate_per_unit = "percent"
-        showback_tier1.save
+        tier1
+        tier1.fixed_rate = fixed_rate1
+        tier1.variable_rate = variable_rate1
+        tier1.variable_rate_per_unit = "percent"
+        tier1.save
         expect(event.data).not_to be_nil # making sure that the default is not empty
-        expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(1)
+        expect(ManageIQ::Consumption::PricePlan.count).to eq(1)
         expect(data_view.data_rollup).to eq(event)
         expect(data_view.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'].first)
       end
@@ -200,19 +200,19 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
         rate2.reload
         event.reload
         data_view.save
-        showback_tier1
-        showback_tier1.fixed_rate = fixed_rate1
-        showback_tier1.variable_rate = variable_rate1
-        showback_tier1.variable_rate_per_unit = "percent"
-        showback_tier1.save
-        showback_tier2
-        showback_tier2.fixed_rate = fixed_rate2
-        showback_tier2.variable_rate = variable_rate2
-        showback_tier2.variable_rate_per_unit = "percent"
-        showback_tier2.save
+        tier1
+        tier1.fixed_rate = fixed_rate1
+        tier1.variable_rate = variable_rate1
+        tier1.variable_rate_per_unit = "percent"
+        tier1.save
+        tier2
+        tier2.fixed_rate = fixed_rate2
+        tier2.variable_rate = variable_rate2
+        tier2.variable_rate_per_unit = "percent"
+        tier2.save
         expect(event.data).not_to be_nil
         plan2.reload
-        expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
+        expect(ManageIQ::Consumption::PricePlan.count).to eq(2)
         expect(data_view.data_rollup).to eq(event)
         # Test that it works without a plan
         expect(data_view.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_group_value('CPU', 'average'))
@@ -225,24 +225,24 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
         rate2
         event.reload
         data_view.save
-        showback_tier1
-        showback_tier1.fixed_rate = fixed_rate1
-        showback_tier1.variable_rate = variable_rate1
-        showback_tier1.variable_rate_per_unit = "percent"
-        showback_tier1.save
-        showback_tier2
-        showback_tier2.fixed_rate = fixed_rate2
-        showback_tier2.variable_rate = variable_rate2
-        showback_tier2.variable_rate_per_unit = "percent"
-        showback_tier2.save
+        tier1
+        tier1.fixed_rate = fixed_rate1
+        tier1.variable_rate = variable_rate1
+        tier1.variable_rate_per_unit = "percent"
+        tier1.save
+        tier2
+        tier2.fixed_rate = fixed_rate2
+        tier2.variable_rate = variable_rate2
+        tier2.variable_rate_per_unit = "percent"
+        tier2.save
         expect(event.data).not_to be_nil
-        expect(ManageIQ::Consumption::ShowbackPricePlan.count).to eq(2)
+        expect(ManageIQ::Consumption::PricePlan.count).to eq(2)
         expect(data_view.data_rollup).to eq(event)
         # Test that it works without a plan
         expect(data_view.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_group_value('CPU', 'average'))
         # Test that it changes if you provide a plan
         expect(data_view.calculate_cost('ERROR')).to eq(Money.new(0))
-        expect(data_view.errors.details[:showback_price_plan]).to include(:error => 'not found')
+        expect(data_view.errors.details[:price_plan]).to include(:error => 'not found')
       end
     end
   end

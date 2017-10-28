@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :showback_tier, :class => ManageIQ::Consumption::ShowbackTier do
+  factory :tier, :class => ManageIQ::Consumption::Tier do
     tier_start_value       0
     tier_end_value         Float::INFINITY
     fixed_rate             { Money.new(rand(5..200), 'USD') }
@@ -7,7 +7,7 @@ FactoryGirl.define do
     variable_rate          { Money.new(rand(5..200), 'USD') }
     variable_rate_per_unit 'cores'
     variable_rate_per_time { 'monthly' }
-    showback_rate
+    rate
 
     trait :daily do
       fixed_rate_per_time { 'daily' }

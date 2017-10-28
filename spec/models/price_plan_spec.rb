@@ -1,14 +1,14 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
+RSpec.describe ManageIQ::Consumption::PricePlan, :type => :model do
   # We need to ShowbackInputgroup list to know what groups we should be looking for
   before(:each) do
     ManageIQ::Consumption::InputMeasure.seed
   end
 
   context 'basic tests' do
-    let(:plan) { FactoryGirl.create(:showback_price_plan) }
+    let(:plan) { FactoryGirl.create(:price_plan) }
 
     it 'has a valid factory' do
       plan.valid?
@@ -35,14 +35,14 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
 
     it 'is possible to add new rates to the price plan' do
       plan.save
-      expect { FactoryGirl.create(:showback_rate, :showback_price_plan => plan) }.to change(plan.showback_rates, :count).from(0).to(1)
+      expect { FactoryGirl.create(:rate, :price_plan => plan) }.to change(plan.rates, :count).from(0).to(1)
     end
 
     it 'rates are deleted when deleting the plan' do
-      FactoryGirl.create(:showback_rate, :showback_price_plan => plan)
-      FactoryGirl.create(:showback_rate, :showback_price_plan => plan)
-      expect(plan.showback_rates.count).to be(2)
-      expect { plan.destroy }.to change(ManageIQ::Consumption::ShowbackRate, :count).from(2).to(0)
+      FactoryGirl.create(:rate, :price_plan => plan)
+      FactoryGirl.create(:rate, :price_plan => plan)
+      expect(plan.rates.count).to be(2)
+      expect { plan.destroy }.to change(ManageIQ::Consumption::Rate, :count).from(2).to(0)
     end
 
     context 'rating with no context' do
@@ -52,15 +52,15 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
       let(:variable_rate2) { Money.new(13) }
-      let(:plan)  { FactoryGirl.create(:showback_price_plan) }
+      let(:plan)  { FactoryGirl.create(:price_plan) }
       let(:rate)  do
-        FactoryGirl.create(:showback_rate,
+        FactoryGirl.create(:rate,
                            :CPU_average,
-                           :calculation         => 'occurrence',
-                           :showback_price_plan => plan)
+                           :calculation => 'occurrence',
+                           :price_plan  => plan)
       end
-      let(:showback_tier) do
-        tier = rate.showback_tiers.first
+      let(:tier) do
+        tier = rate.tiers.first
         tier.fixed_rate = fixed_rate
         tier.variable_rate = variable_rate
         tier.variable_rate_per_unit = "percent"
@@ -68,13 +68,13 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
         tier
       end
       let(:rate2) do
-        FactoryGirl.create(:showback_rate,
+        FactoryGirl.create(:rate,
                            :CPU_max_number_of_cpu,
-                           :calculation         => 'duration',
-                           :showback_price_plan => plan)
+                           :calculation => 'duration',
+                           :price_plan  => plan)
       end
-      let(:showback_tier2) do
-        tier = rate2.showback_tiers.first
+      let(:tier2) do
+        tier = rate2.tiers.first
         tier.fixed_rate = fixed_rate2
         tier.variable_rate = variable_rate2
         tier.variable_rate_per_unit = "cores"
@@ -125,7 +125,7 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       end
 
       it 'calculates costs with one rate2' do
-        showback_tier
+        tier
         event.save
         event.reload
         rate.save
@@ -148,19 +148,19 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
       let(:event)         { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:plan)  { FactoryGirl.create(:showback_price_plan) }
+      let(:plan)  { FactoryGirl.create(:price_plan) }
       let(:rate)  do
-        FactoryGirl.build(:showback_rate,
+        FactoryGirl.build(:rate,
                           :CPU_average,
-                          :showback_price_plan => plan)
+                          :price_plan => plan)
       end
-      let(:showback_tier1) { rate.showback_tiers.first }
+      let(:tier1) { rate.tiers.first }
       let(:rate2) do
-        FactoryGirl.build(:showback_rate,
+        FactoryGirl.build(:rate,
                           :CPU_max_number_of_cpu,
-                          :showback_price_plan => plan)
+                          :price_plan => plan)
       end
-      let(:showback_tier2) { rate2.showback_tiers.first }
+      let(:tier2) { rate2.tiers.first }
 
       it 'test that data is right' do
         event.save
@@ -226,18 +226,18 @@ RSpec.describe ManageIQ::Consumption::ShowbackPricePlan, :type => :model do
   end
 
   context '.seed' do
-    let(:expected_showback_price_plan_count) { 1 }
+    let(:expected_price_plan_count) { 1 }
     let!(:resource) { FactoryGirl.create(:miq_enterprise, :name => 'Enterprise') }
 
     it 'empty table' do
       described_class.seed
-      expect(described_class.count).to eq(expected_showback_price_plan_count)
+      expect(described_class.count).to eq(expected_price_plan_count)
     end
 
     it 'run twice' do
       described_class.seed
       described_class.seed
-      expect(described_class.count).to eq(expected_showback_price_plan_count)
+      expect(described_class.count).to eq(expected_price_plan_count)
     end
   end
 end

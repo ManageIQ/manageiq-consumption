@@ -148,11 +148,11 @@ class ManageIQ::Consumption::Envelope < ApplicationRecord
     # For the demo: return one price plan, we will create the logic later
     # parent = resource
     # do
-    # result = ManageIQ::Providers::Consumption::ConsumptionManager::ShowbackPricePlan.where(resource: parent)
+    # result = ManageIQ::Providers::Consumption::ConsumptionManager::PricePlan.where(resource: parent)
     # parent = parent.parent if !result
     # while !result || !parent
-    # result || ManageIQ::Providers::Consumption::ConsumptionManager::ShowbackPricePlan.where(resource = MiqEnterprise)
-    ManageIQ::Consumption::ShowbackPricePlan.first
+    # result || ManageIQ::Providers::Consumption::ConsumptionManager::PricePlan.where(resource = MiqEnterprise)
+    ManageIQ::Consumption::PricePlan.first
   end
 
   def find_data_view(input)
@@ -177,7 +177,7 @@ class ManageIQ::Consumption::Envelope < ApplicationRecord
         :stored_data   => {
           data_view.stored_data_last_key => data_view.stored_data_last
         },
-        :data_rollup   => data_view.showback_event,
+        :data_rollup   => data_view.data_rollup,
         :envelope      => envelope,
         :cost_subunits => data_view.cost_subunits,
         :cost_currency => data_view.cost_currency
