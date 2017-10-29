@@ -109,14 +109,14 @@ module ManageIQ::Consumption
       let(:data_rollup_fm) { FactoryGirl.create(:data_rollup, :full_month, :with_vm_data) }
 
       context 'empty #context, default rate per_time and per_unit' do
-        it 'should charge an data_rollup by occurrence when data_rollup exists' do
+        it 'should data_view an data_rollup by occurrence when data_rollup exists' do
           showback_tier
           data_rollup_fm.reload
           showback_rate.calculation = 'occurrence'
           expect(showback_rate.rate(data_rollup_fm)).to eq(fixed_rate + variable_rate)
         end
 
-        it 'should charge an data_rollup by occurrence only the fixed rate when value is nil' do
+        it 'should data_view an data_rollup by occurrence only the fixed rate when value is nil' do
           showback_tier
           data_rollup_fm.reload
           showback_rate.calculation = 'occurrence'
@@ -124,14 +124,14 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_fm)).to eq(fixed_rate)
         end
 
-        it 'should charge an data_rollup by duration' do
+        it 'should data_view an data_rollup by duration' do
           showback_tier
           data_rollup_fm.reload
           showback_rate.calculation = 'duration'
           expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + 7 * 2))
         end
 
-        it 'should charge an data_rollup by quantity' do
+        it 'should data_view an data_rollup by quantity' do
           showback_tier
           data_rollup_fm.reload
           showback_rate.calculation = 'quantity'
@@ -234,7 +234,7 @@ module ManageIQ::Consumption
       end
 
       context 'empty #context, modified per_time' do
-        it 'should charge an data_rollup by occurrence' do
+        it 'should data_view an data_rollup by occurrence' do
           data_rollup_fm.reload
           showback_rate.calculation = 'occurrence'
           showback_tier.fixed_rate_per_time    = 'daily'
@@ -244,7 +244,7 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(days_in_month * (11 + 7)))
         end
 
-        it 'should charge an data_rollup by duration' do
+        it 'should data_view an data_rollup by duration' do
           showback_tier
           data_rollup_fm.reload
           showback_rate.calculation = 'duration'
@@ -255,7 +255,7 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(days_in_month * (11 + 7 * 2)))
         end
 
-        it 'should charge an data_rollup by quantity' do
+        it 'should data_view an data_rollup by quantity' do
           data_rollup_fm.reload
           showback_rate.calculation = 'quantity'
           showback_tier.fixed_rate_per_time    = 'daily'
@@ -268,7 +268,7 @@ module ManageIQ::Consumption
       end
 
       context 'empty context, modified per unit' do
-        it 'should charge an data_rollup by duration' do
+        it 'should data_view an data_rollup by duration' do
           data_rollup_fm.reload
           showback_rate.calculation = 'duration'
           showback_rate.field = 'max_mem'
@@ -281,19 +281,19 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_fm)).to eq(Money.new(11 + (2048 * 1024 * 7)))
         end
 
-        pending 'should charge an data_rollup by quantity'
+        pending 'should data_view an data_rollup by quantity'
       end
 
       context 'tiered on input value' do
-        pending 'it should charge an data_rollup by occurrence'
-        pending 'it should charge an data_rollup by duration'
-        pending 'it should charge an data_rollup by quantity'
+        pending 'it should data_view an data_rollup by occurrence'
+        pending 'it should data_view an data_rollup by duration'
+        pending 'it should data_view an data_rollup by quantity'
       end
 
       context 'tiered on non-input value in #context' do
-        pending 'it should charge an data_rollup by occurrence'
-        pending 'it should charge an data_rollup by duration'
-        pending 'it should charge an data_rollup by quantity'
+        pending 'it should data_view an data_rollup by occurrence'
+        pending 'it should data_view an data_rollup by duration'
+        pending 'it should data_view an data_rollup by quantity'
       end
     end
 
@@ -325,7 +325,7 @@ module ManageIQ::Consumption
                            :variable_rate_per_unit => "cores")
       end
       context 'use only a single tier' do
-        it 'should charge an data_rollup by quantity with 1 tier with tiers_use_full_value' do
+        it 'should data_view an data_rollup by quantity with 1 tier with tiers_use_full_value' do
           data_rollup_hm.reload
           showback_tier
           showback_tier_second
@@ -333,7 +333,7 @@ module ManageIQ::Consumption
           data_rollup_hm.data['CPU']['number'][0] = 4.0
           expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(15 + 10 * 4))
         end
-        it 'should charge an data_rollup by quantity with 1 tier with not tiers_use_full_value' do
+        it 'should data_view an data_rollup by quantity with 1 tier with not tiers_use_full_value' do
           data_rollup_hm.reload
           showback_tier
           showback_tier_second
@@ -346,7 +346,7 @@ module ManageIQ::Consumption
       end
 
       context 'with all tiers' do
-        it 'should charge an data_rollup by quantity with 2 tiers with tiers_use_full_value' do
+        it 'should data_view an data_rollup by quantity with 2 tiers with tiers_use_full_value' do
           data_rollup_hm.reload
           showback_tier
           showback_tier_second
@@ -355,7 +355,7 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * 4) + Money.new(15 + 10 * 4))
         end
 
-        it 'should charge an data_rollup by quantity with 2 tiers with not tiers_use_full_value' do
+        it 'should data_view an data_rollup by quantity with 2 tiers with not tiers_use_full_value' do
           data_rollup_hm.reload
           showback_tier
           showback_tier_second
@@ -383,20 +383,20 @@ module ManageIQ::Consumption
       end
 
       context 'empty #context' do
-        it 'should charge an data_rollup by occurrence' do
+        it 'should data_view an data_rollup by occurrence' do
           showback_tier
           showback_rate.calculation = 'occurrence'
           expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11) + Money.new(7))
         end
 
-        it 'should charge an data_rollup by duration' do
+        it 'should data_view an data_rollup by duration' do
           showback_tier
           data_rollup_hm.reload
           showback_rate.calculation = 'duration'
           expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(11 + 7 * 2) * proration)
         end
 
-        it 'should charge an data_rollup by quantity' do
+        it 'should data_view an data_rollup by quantity' do
           data_rollup_hm.reload
           showback_tier
           showback_rate.calculation = 'quantity'
@@ -406,7 +406,7 @@ module ManageIQ::Consumption
       end
 
       context 'empty #context, modified per_time' do
-        it 'should charge an data_rollup by occurrence' do
+        it 'should data_view an data_rollup by occurrence' do
           data_rollup_hm.reload
           showback_rate.calculation = 'occurrence'
           showback_tier.fixed_rate_per_time = 'daily'
@@ -416,7 +416,7 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(days_in_month * (11 + 7)))
         end
 
-        it 'should charge an data_rollup by duration' do
+        it 'should data_view an data_rollup by duration' do
           data_rollup_hm.reload
           showback_rate.calculation = 'duration'
           showback_tier.fixed_rate_per_time    = 'daily'
@@ -426,7 +426,7 @@ module ManageIQ::Consumption
           expect(showback_rate.rate(data_rollup_hm)).to eq(Money.new(days_in_month * proration * (11 + 7 * 2)))
         end
 
-        it 'should charge an data_rollup by quantity' do
+        it 'should data_view an data_rollup by quantity' do
           data_rollup_hm.reload
           showback_rate.calculation = 'quantity'
           showback_tier.fixed_rate_per_time    = 'daily'
@@ -439,28 +439,28 @@ module ManageIQ::Consumption
       end
 
       context 'tiered on input value' do
-        pending 'it should charge an data_rollup by occurrence'
-        pending 'it should charge an data_rollup by duration'
-        pending 'it should charge an data_rollup by quantity'
+        pending 'it should data_view an data_rollup by occurrence'
+        pending 'it should data_view an data_rollup by duration'
+        pending 'it should data_view an data_rollup by quantity'
       end
 
       context 'tiered on non-input value in #context' do
-        pending 'it should charge an data_rollup by occurrence'
-        pending 'it should charge an data_rollup by duration'
-        pending 'it should charge an data_rollup by quantity'
+        pending 'it should data_view an data_rollup by occurrence'
+        pending 'it should data_view an data_rollup by duration'
+        pending 'it should data_view an data_rollup by quantity'
       end
     end
 
     describe 'data_rollup lasts 1 day for a weekly rate' do
-      pending 'should charge an data_rollup by occurrence'
-      pending 'should charge an data_rollup by duration'
-      pending 'should charge an data_rollup by quantity'
+      pending 'should data_view an data_rollup by occurrence'
+      pending 'should data_view an data_rollup by duration'
+      pending 'should data_view an data_rollup by quantity'
     end
 
     describe 'data_rollup lasts 1 week for a daily rate' do
-      pending 'should charge an data_rollup by occurrence'
-      pending 'should charge an data_rollup by duration'
-      pending 'should charge an data_rollup by quantity'
+      pending 'should data_view an data_rollup by occurrence'
+      pending 'should data_view an data_rollup by duration'
+      pending 'should data_view an data_rollup by quantity'
     end
   end
 end

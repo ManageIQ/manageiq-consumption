@@ -1,15 +1,15 @@
-class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
+class ManageIQ::Consumption::DataView < ApplicationRecord
   self.table_name = 'showback_data_views'
 
   monetize(:cost_subunits)
 
   default_value_for :cost, 0
 
-  belongs_to :data_rollup,       :inverse_of => :showback_data_views, :foreign_key => :showback_data_rollup_id
-  belongs_to :showback_envelope, :inverse_of => :showback_data_views, :foreign_key => :showback_envelope_id
+  belongs_to :data_rollup, :inverse_of => :data_views, :foreign_key => :showback_data_rollup_id
+  belongs_to :envelope,    :inverse_of => :data_views, :foreign_key => :showback_envelope_id
 
-  validates :showback_envelope,  :presence => true, :allow_nil => false
-  validates :data_rollup,        :presence => true, :allow_nil => false
+  validates :envelope,    :presence => true, :allow_nil => false
+  validates :data_rollup, :presence => true, :allow_nil => false
 
   serialize :cost, JSON # Implement cost column as a JSON
   serialize :data_snapshot, JSON # Implement data_snapshot column as a JSON
@@ -26,16 +26,16 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
     save
   end
 
-  # Check if the pool is in a Open State
+  # Check if the envelope is in a Open State
   #
   # == Returns:
   # A boolean value with true if it's open
   #
   def open?
-    showback_envelope.state == "OPEN"
+    envelope.state == "OPEN"
   end
 
-  # A stored data is created when you create a charge with a snapshoot of the event
+  # A stored data is created when you create a dataview with a snapshoot of the event
   # Save the actual data of the event
   #
   # == Parameters:
@@ -48,7 +48,7 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
     self.context_snapshot = data_rollup.context
   end
 
-  # This returns the data information at the start of the pool
+  # This returns the data information at the start of the envelope
   #
   # == Returns:
   # A json data of the snapshot at start
@@ -90,15 +90,15 @@ class ManageIQ::Consumption::ShowbackDataView < ApplicationRecord
     get_data_group(data_snapshot_last, entity, field)
   end
 
-  # This return the entity|field group at the start and end of the pool
-  def get_pool_group(entity, field)
+  # This return the entity|field group at the start and end of the envelope
+  def get_envelope_group(entity, field)
     [get_data_group(data_snapshot_start, entity, field),
      get_data_group(data_snapshot_last, entity, field)]
   end
 
   def calculate_cost(price_plan = nil)
     # Find the price plan, there should always be one as it is seeded(Enterprise)
-    price_plan ||= showback_envelope.find_price_plan
+    price_plan ||= envelope.find_price_plan
     if price_plan.class == ManageIQ::Consumption::ShowbackPricePlan
       cost = price_plan.calculate_total_cost(data_rollup)
       save

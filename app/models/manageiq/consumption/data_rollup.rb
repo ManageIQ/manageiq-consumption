@@ -1,13 +1,14 @@
 class ManageIQ::Consumption::DataRollup < ApplicationRecord
   belongs_to :resource, :polymorphic => true
 
-  has_many :showback_data_views,
+  has_many :data_views,
            :dependent   => :destroy,
            :inverse_of  => :data_rollup,
            :foreign_key => :showback_data_rollup_id
-  has_many :showback_envelopes,
-           :through    => :showback_data_views,
-           :inverse_of => :data_rollups
+  has_many :envelopes,
+           :through     => :data_views,
+           :inverse_of  => :data_rollups,
+           :foreign_key => :showback_data_rollup_id
 
   validates :start_time, :end_time, :resource, :presence => true
   validate :start_time_before_end_time
@@ -148,7 +149,7 @@ class ManageIQ::Consumption::DataRollup < ApplicationRecord
 
   # Find a envelope
   def find_envelope(res)
-    ManageIQ::Consumption::ShowbackEnvelope.find_by(
+    ManageIQ::Consumption::Envelope.find_by(
       :resource => res,
       :state    => "OPEN"
     )
@@ -156,7 +157,7 @@ class ManageIQ::Consumption::DataRollup < ApplicationRecord
 
   def assign_resource
     one_resource = resource
-    # While I have resource loop looking for the parent find the pool asssociate and add the event
+    # While I have resource loop looking for the parent find the envelope asssociate and add the event
     until one_resource.nil?
       find_envelope(one_resource)&.add_data_rollup(self)
       one_resource = ManageIQ::Consumption::UtilsHelper.get_parent(one_resource)
@@ -176,7 +177,7 @@ class ManageIQ::Consumption::DataRollup < ApplicationRecord
   end
 
   def update_data_views
-    ManageIQ::Consumption::ShowbackDataView.where(:data_rollup => self).each do |data_view|
+    ManageIQ::Consumption::DataView.where(:data_rollup => self).each do |data_view|
       if data_view.open?
         data_view.update_data_snapshot
       end
