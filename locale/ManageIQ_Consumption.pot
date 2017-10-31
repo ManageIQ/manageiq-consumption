@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the ManageIQ_Consumption package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ManageIQ_Consumption 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-10-31 18:24+0100\n"
+"PO-Revision-Date: 2017-10-31 18:24+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: ../app/models/manageiq/consumption/showback_tier.rb:60
+msgid "Interval or subinterval is in a tier with Infinity at the end"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_tier.rb:62
+msgid "Interval or subinterval is in another tier"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_envelope.rb:34
+msgid "Pool can't change state to CLOSED from OPEN"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_envelope.rb:39
+msgid "Pool can't change state to OPEN from PROCESSING"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_envelope.rb:40
+msgid "Pool can't change state when it's CLOSED"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_tier.rb:55
+msgid "Start value of interval is greater than end value"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_data_view.rb:107
+msgid "not found"
+msgstr ""
+
+#: ../app/models/manageiq/consumption/showback_envelope.rb:28
+msgid "should happen after start_time"
+msgstr ""
