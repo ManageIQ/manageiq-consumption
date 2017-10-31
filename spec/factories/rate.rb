@@ -1,12 +1,12 @@
 FactoryGirl.define do
-  factory :showback_rate, :class => ManageIQ::Consumption::ShowbackRate do
+  factory :rate, :class => ManageIQ::Consumption::Rate do
     entity                 'Vm'
     field                  'max_number_of_cpu'
     group                  'CPU'
     sequence(:concept)     { |n| "Concept #{n}" }
     screener               { {} }
     calculation            'duration'
-    showback_price_plan
+    price_plan
 
     trait :occurrence do
       calculation 'occurrence'

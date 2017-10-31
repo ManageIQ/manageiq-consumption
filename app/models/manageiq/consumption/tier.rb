@@ -1,7 +1,7 @@
 module ManageIQ::Consumption
-  class ShowbackTier < ApplicationRecord
+  class Tier < ApplicationRecord
     self.table_name = 'showback_tiers'
-    belongs_to :showback_rate, :inverse_of => :showback_tiers
+    belongs_to :rate, :inverse_of => :tiers, :foreign_key => :showback_rate_id
 
     # Fixed rate costs
     # (defaults to `0`)
@@ -45,7 +45,7 @@ module ManageIQ::Consumption
     #
     # @return [String] the definition of the object
     def name
-      "#{showback_rate.entity}:#{showback_rate.group}:#{showback_rate.field}:Tier:#{tier_start_value}-#{tier_end_value}"
+      "#{rate.entity}:#{rate.group}:#{rate.field}:Tier:#{tier_start_value}-#{tier_end_value}"
     end
 
     # Validate the interval bvefore save
@@ -53,7 +53,7 @@ module ManageIQ::Consumption
     # @return Nothing or Error if the interval is in another tier in the same rate
     def validate_interval
       raise _("Start value of interval is greater than end value") unless tier_start_value < tier_end_value
-      ManageIQ::Consumption::ShowbackTier.where(:showback_rate => showback_rate).each do |tier|
+      ManageIQ::Consumption::Tier.where(:rate => rate).each do |tier|
         # Returns true == overlap, false == no overlap
         next unless self != tier
         if tier.tier_end_value == Float::INFINITY && (tier_start_value > tier.tier_start_value || tier_end_value > tier.tier_start_value)

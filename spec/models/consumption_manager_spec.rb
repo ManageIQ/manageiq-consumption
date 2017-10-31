@@ -104,8 +104,8 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
     expect(event_metric.end_time).to eq(@vm_metrics.metrics.last.timestamp)
   end
 
-  it "Make the seed of ShowbackInputgroup and ShowbackPricePlan" do
-    expect(ManageIQ::Consumption::ShowbackPricePlan).to receive(:seed)
+  it "Make the seed of ShowbackInputgroup and PricePlan" do
+    expect(ManageIQ::Consumption::PricePlan).to receive(:seed)
     expect(ManageIQ::Consumption::InputMeasure).to receive(:seed)
     described_class.seed
   end
