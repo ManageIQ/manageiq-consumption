@@ -1,4 +1,4 @@
-describe ManageIQ::Consumption::DataRollup::CPU do
+describe ManageIQ::Showback::DataRollup::CPU do
   let(:data_rollup) { FactoryGirl.build(:data_rollup) }
   let(:con_data_rollup) { FactoryGirl.build(:data_rollup) }
   context "CPU in vm" do

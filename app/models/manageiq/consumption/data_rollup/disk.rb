@@ -1,5 +1,4 @@
-module ManageIQ::Consumption::DataRollup::DISK
-  # for old chargeback integration
-  def disk_io_disk_usage_rate_average
+module ManageIQ::Consumption::DataRollup
+  class DISK < ManageIQ::Showback::DataRollup::DISK
   end
 end

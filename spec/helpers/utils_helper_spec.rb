@@ -10,7 +10,7 @@ require 'spec_helper'
 #   end
 # end
 
-RSpec.describe ManageIQ::Consumption::UtilsHelper, :type => :helper do
+RSpec.describe ManageIQ::Showback::UtilsHelper, :type => :helper do
   let(:json_1) { JSON.parse '{ "tag": { "uno": 1, "dos": 2, "tres": 3, "cuatro": { "cinco": 5, "seis": 6} } }' }
   let(:json_2) { JSON.parse '{ "tag": { "cuatro": { "cinco": 5, "seis": 6 } } }' }
   let(:json_3) { JSON.parse '{ "cuatro": { "cinco": 5, "seis": 6, "siete": 7 } }' }

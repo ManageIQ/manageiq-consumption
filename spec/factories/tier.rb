@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :tier, :class => ManageIQ::Consumption::Tier do
+  factory :tier, :class => ManageIQ::Showback::Tier do
     tier_start_value       0
     tier_end_value         Float::INFINITY
     fixed_rate             { Money.new(rand(5..200), 'USD') }

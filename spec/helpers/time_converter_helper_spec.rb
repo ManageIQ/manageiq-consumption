@@ -10,7 +10,7 @@ require 'spec_helper'
 #   end
 # end
 
-RSpec.describe ManageIQ::Consumption::TimeConverterHelper, :type => :helper do
+RSpec.describe ManageIQ::Showback::TimeConverterHelper, :type => :helper do
   let(:constants) do
     [described_class::VALID_INTERVAL_UNITS]
   end

@@ -3,4 +3,4 @@ if ENV['CI']
   SimpleCov.start
 end
 
-FactoryGirl.definition_file_paths << ManageIQ::Consumption::Engine.root.join('spec', 'factories')
+FactoryGirl.definition_file_paths << ManageIQ::Showback::Engine.root.join('spec', 'factories')

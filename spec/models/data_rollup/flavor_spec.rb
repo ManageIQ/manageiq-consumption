@@ -1,8 +1,8 @@
-describe ManageIQ::Consumption::DataRollup::FLAVOR do
+describe ManageIQ::Showback::DataRollup::FLAVOR do
   let(:data_rollup) { FactoryGirl.build(:data_rollup) }
   context "FLAVOR in vm" do
     before(:each) do
-      ManageIQ::Consumption::InputMeasure.seed
+      ManageIQ::Showback::InputMeasure.seed
       @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
       cases = [
         "2010-04-13T20:52:30Z", 100.0,
@@ -77,7 +77,7 @@ describe ManageIQ::Consumption::DataRollup::FLAVOR do
 
   context "FLAVOR in container" do
     before(:each) do
-      ManageIQ::Consumption::InputMeasure.seed
+      ManageIQ::Showback::InputMeasure.seed
       @con_metrics              = FactoryGirl.create(:container)
       data_rollup.resource      = @con_metrics
       data_rollup.resource.type = "Container"

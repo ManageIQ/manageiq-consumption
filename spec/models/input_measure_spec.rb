@@ -1,9 +1,9 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-describe ManageIQ::Consumption::InputMeasure do
+describe ManageIQ::Showback::InputMeasure do
   before(:each) do
-    ManageIQ::Consumption::InputMeasure.delete_all
+    ManageIQ::Showback::InputMeasure.delete_all
   end
 
   context "validations" do
