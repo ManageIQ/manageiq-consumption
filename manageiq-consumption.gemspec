@@ -3,11 +3,11 @@
 $:.push File.expand_path("../lib", __FILE__)
 
 # Maintain your gem's version:
-require 'manageiq/consumption/version'
+require 'manageiq/showback/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "manageiq-consumption"
-  spec.version       = ManageIQ::Consumption::VERSION
+  spec.version       = ManageIQ::Showback::VERSION
   spec.authors       = ["ManageIQ Developers"]
 
   spec.summary       = "ManageIQ Consumption"
