@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :rate, :class => ManageIQ::Consumption::Rate do
+  factory :rate, :class => ManageIQ::Showback::Rate do
     entity                 'Vm'
     field                  'max_number_of_cpu'
     group                  'CPU'

@@ -1,9 +1,9 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
+RSpec.describe ManageIQ::Showback::Manager, :type => :model do
   it ".name" do
-    expect(described_class.name).to eq('Consumption')
+    expect(described_class.name).to eq('Showback')
   end
 
   it ".ems_type" do
@@ -11,7 +11,7 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
   end
 
   it ".description" do
-    expect(described_class.description).to eq('Consumption Manager')
+    expect(described_class.description).to eq('Showback Manager')
   end
 
   it "generate new month for actual events" do
@@ -20,24 +20,24 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
                        :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                        :end_time   => DateTime.now.utc.end_of_month - 1.month,
                        :resource   => vm)
-    expect(ManageIQ::Consumption::DataRollup.where(:resource =>vm).count).to eq(1)
+    expect(ManageIQ::Showback::DataRollup.where(:resource =>vm).count).to eq(1)
     described_class.generate_new_month
-    expect(ManageIQ::Consumption::DataRollup.where(:resource =>vm).count).to eq(2)
+    expect(ManageIQ::Showback::DataRollup.where(:resource =>vm).count).to eq(2)
   end
 
   it "should generate events for new resources" do
     FactoryGirl.create(:vm)
-    expect(ManageIQ::Consumption::DataRollup.all.count).to eq(0)
+    expect(ManageIQ::Showback::DataRollup.all.count).to eq(0)
     described_class.generate_data_rollups
-    expect(ManageIQ::Consumption::DataRollup.all.count).to eq(1)
-    expect(ManageIQ::Consumption::DataRollup.first.start_time.month).to eq(ManageIQ::Consumption::DataRollup.first.end_time.month)
+    expect(ManageIQ::Showback::DataRollup.all.count).to eq(1)
+    expect(ManageIQ::Showback::DataRollup.first.start_time.month).to eq(ManageIQ::Showback::DataRollup.first.end_time.month)
   end
 
   it "should not generate the same ShowbackEvent 2 times of the same resource" do
     FactoryGirl.create(:vm)
     described_class.generate_data_rollups
     described_class.generate_data_rollups
-    expect(ManageIQ::Consumption::DataRollup.all.count).to eq(1)
+    expect(ManageIQ::Showback::DataRollup.all.count).to eq(1)
   end
 
   it "should generate new Showbackevent of resource if not has an event for actual month" do
@@ -46,16 +46,16 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
                        :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                        :end_time   => DateTime.now.utc.end_of_month - 1.month,
                        :resource   => vm)
-    count = ManageIQ::Consumption::DataRollup.all.count
+    count = ManageIQ::Showback::DataRollup.all.count
     described_class.generate_data_rollups
-    expect(ManageIQ::Consumption::DataRollup.all.count).to eq(count + 1)
+    expect(ManageIQ::Showback::DataRollup.all.count).to eq(count + 1)
   end
 
   it "should generate a showbackevent of service" do
     serv = FactoryGirl.create(:service)
     described_class.generate_data_rollups
-    expect(ManageIQ::Consumption::DataRollup.first.resource).to eq(serv)
-    expect(ManageIQ::Consumption::DataRollup.first.context).not_to be_nil
+    expect(ManageIQ::Showback::DataRollup.first.resource).to eq(serv)
+    expect(ManageIQ::Showback::DataRollup.first.context).not_to be_nil
   end
 
   it "should update the events" do
@@ -105,16 +105,16 @@ RSpec.describe ManageIQ::Consumption::ConsumptionManager, :type => :model do
   end
 
   it "Make the seed of ShowbackInputgroup and PricePlan" do
-    expect(ManageIQ::Consumption::PricePlan).to receive(:seed)
-    expect(ManageIQ::Consumption::InputMeasure).to receive(:seed)
+    expect(ManageIQ::Showback::PricePlan).to receive(:seed)
+    expect(ManageIQ::Showback::InputMeasure).to receive(:seed)
     described_class.seed
   end
 
   context 'Units' do
     it "Should be the unit defined in YAML" do
-      ManageIQ::Consumption::InputMeasure.seed
-      data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
-      ManageIQ::Consumption::InputMeasure.all.each do |usage|
+      ManageIQ::Showback::InputMeasure.seed
+      data_units = ManageIQ::Showback::Manager.load_column_units
+      ManageIQ::Showback::InputMeasure.all.each do |usage|
         usage.fields.each do |dim|
           expect(data_units).to include(dim.to_sym)
         end

@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-RSpec.describe ManageIQ::Consumption::Tier, :type => :model do
+RSpec.describe ManageIQ::Showback::Tier, :type => :model do
   describe 'model validations' do
     let(:rate) { FactoryGirl.create(:rate) }
     let(:tier) { rate.tiers.first }
@@ -42,7 +42,7 @@ RSpec.describe ManageIQ::Consumption::Tier, :type => :model do
     end
 
     it '#fixed_rate_per_time included in VALID_INTERVAL_UNITS is valid' do
-      ManageIQ::Consumption::TimeConverterHelper::VALID_INTERVAL_UNITS.each do |interval|
+      ManageIQ::Showback::TimeConverterHelper::VALID_INTERVAL_UNITS.each do |interval|
         tier.fixed_rate_per_time = interval
         tier.valid?
         expect(tier).to be_valid
@@ -56,7 +56,7 @@ RSpec.describe ManageIQ::Consumption::Tier, :type => :model do
     end
 
     it '#variable_rate_per_time included in VALID_INTERVAL_UNITS is valid' do
-      ManageIQ::Consumption::TimeConverterHelper::VALID_INTERVAL_UNITS.each do |interval|
+      ManageIQ::Showback::TimeConverterHelper::VALID_INTERVAL_UNITS.each do |interval|
         tier.variable_rate_per_time = interval
         tier.valid?
         expect(tier).to be_valid
@@ -164,11 +164,11 @@ RSpec.describe ManageIQ::Consumption::Tier, :type => :model do
         expect(described_class.to_float(tier.tier_end_value)).to eq(Float::INFINITY)
       end
       it 'divide tier method' do
-        expect(ManageIQ::Consumption::Tier.where(:rate => tier.rate).count).to eq(1)
+        expect(ManageIQ::Showback::Tier.where(:rate => tier.rate).count).to eq(1)
         tier.divide_tier(5)
         tier.reload
-        expect(ManageIQ::Consumption::Tier.to_float(tier.tier_end_value)).to eq(5)
-        expect(ManageIQ::Consumption::Tier.where(:rate => tier.rate).count).to eq(2)
+        expect(ManageIQ::Showback::Tier.to_float(tier.tier_end_value)).to eq(5)
+        expect(ManageIQ::Showback::Tier.where(:rate => tier.rate).count).to eq(2)
       end
     end
   end

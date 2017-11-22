@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-describe ManageIQ::Consumption::DataRollup do
+describe ManageIQ::Showback::DataRollup do
   let(:data_rollup) { FactoryGirl.build(:data_rollup) }
   context "validations" do
     it "has a valid factory" do
@@ -48,9 +48,9 @@ describe ManageIQ::Consumption::DataRollup do
       data_rollup.data = {}
       data_rollup.resource = FactoryGirl.create(:vm)
       hash = {}
-      ManageIQ::Consumption::InputMeasure.seed
-      data_units = ManageIQ::Consumption::ConsumptionManager.load_column_units
-      ManageIQ::Consumption::InputMeasure.all.each do |group_type|
+      ManageIQ::Showback::InputMeasure.seed
+      data_units = ManageIQ::Showback::Manager.load_column_units
+      ManageIQ::Showback::InputMeasure.all.each do |group_type|
         next unless data_rollup.resource.type.ends_with?(group_type.entity)
         hash[group_type.group] = {}
         group_type.fields.each do |dim|

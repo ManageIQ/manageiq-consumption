@@ -10,7 +10,7 @@ require 'spec_helper'
 #   end
 # end
 
-RSpec.describe ManageIQ::Consumption::UnitsConverterHelper, :type => :helper do
+RSpec.describe ManageIQ::Showback::UnitsConverterHelper, :type => :helper do
   let(:constants) do
     [described_class::SYMBOLS,
      described_class::SI_PREFIX,

@@ -1,4 +1,4 @@
-describe ManageIQ::Consumption::DataRollup::MEM do
+describe ManageIQ::Showback::DataRollup::MEM do
   let(:data_rollup) { FactoryGirl.build(:data_rollup) }
   let(:con_data_rollup) { FactoryGirl.build(:data_rollup) }
   context "memory in vm" do

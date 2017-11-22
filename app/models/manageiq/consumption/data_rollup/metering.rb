@@ -1,5 +1,4 @@
-module ManageIQ::Consumption::DataRollup::METERING
-  # for old chargeback integration
-  def metering_metering_used_hours
+module ManageIQ::Consumption::DataRollup
+  class METERING < ManageIQ::Showback::DataRollup::METERING
   end
 end

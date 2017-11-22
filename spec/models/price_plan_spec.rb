@@ -1,10 +1,10 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-RSpec.describe ManageIQ::Consumption::PricePlan, :type => :model do
+RSpec.describe ManageIQ::Showback::PricePlan, :type => :model do
   # We need to ShowbackInputgroup list to know what groups we should be looking for
   before(:each) do
-    ManageIQ::Consumption::InputMeasure.seed
+    ManageIQ::Showback::InputMeasure.seed
   end
 
   context 'basic tests' do
@@ -42,7 +42,7 @@ RSpec.describe ManageIQ::Consumption::PricePlan, :type => :model do
       FactoryGirl.create(:rate, :price_plan => plan)
       FactoryGirl.create(:rate, :price_plan => plan)
       expect(plan.rates.count).to be(2)
-      expect { plan.destroy }.to change(ManageIQ::Consumption::Rate, :count).from(2).to(0)
+      expect { plan.destroy }.to change(ManageIQ::Showback::Rate, :count).from(2).to(0)
     end
 
     context 'rating with no context' do

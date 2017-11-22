@@ -1,9 +1,9 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
+RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
   before(:each) do
-    ManageIQ::Consumption::InputMeasure.seed
+    ManageIQ::Showback::InputMeasure.seed
   end
   let(:resource)        { FactoryGirl.create(:vm) }
   let(:envelope)        { FactoryGirl.build(:envelope) }
@@ -36,7 +36,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
     end
 
     it 'monetizes accumulated cost' do
-      expect(ManageIQ::Consumption::Envelope).to monetize(:accumulated_cost)
+      expect(ManageIQ::Showback::Envelope).to monetize(:accumulated_cost)
     end
 
     it 'deletes costs associated when deleting the envelope' do
@@ -44,7 +44,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
         FactoryGirl.create(:data_view, :envelope => envelope)
       end
       expect(envelope.data_views.count).to be(2)
-      expect { envelope.destroy }.to change(ManageIQ::Consumption::DataView, :count).from(2).to(0)
+      expect { envelope.destroy }.to change(ManageIQ::Showback::DataView, :count).from(2).to(0)
       expect(envelope.data_views.count).to be(0)
     end
 
@@ -54,7 +54,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
       end
       expect(envelope.data_views.count).to be(2)
       d_rollup = envelope.data_views.first.data_rollup
-      expect { d_rollup.destroy }.to change(ManageIQ::Consumption::DataView, :count).from(2).to(1)
+      expect { d_rollup.destroy }.to change(ManageIQ::Showback::DataView, :count).from(2).to(1)
       expect(envelope.data_rollups).not_to include(data_rollup)
     end
 
@@ -140,7 +140,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
     it 'Throw error in add data_rollup if it is not of a proper type' do
       obj = FactoryGirl.create(:vm)
       envelope.add_data_rollup(obj)
-      expect(envelope.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::DataRollup")
+      expect(envelope.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Showback::DataRollup")
     end
 
     it 'Remove data_rollup from a Envelope' do
@@ -159,7 +159,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
     it 'Throw error in Remove data_rollup if the type is not correct' do
       obj = FactoryGirl.create(:vm)
       envelope.remove_data_rollup(obj)
-      expect(envelope.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Consumption::DataRollup")
+      expect(envelope.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Showback::DataRollup")
     end
   end
 
@@ -209,15 +209,15 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
 
     it 'calculate_data_view fails with no data_view' do
       enterprise_plan
-      expect(envelope.find_price_plan).to eq(ManageIQ::Consumption::PricePlan.first)
+      expect(envelope.find_price_plan).to eq(ManageIQ::Showback::PricePlan.first)
       envelope.calculate_data_view(nil)
       expect(envelope.errors.details[:data_view]). to include(:error => "not found")
       expect(envelope.calculate_data_view(nil)). to eq(0)
     end
 
     it 'find a price plan' do
-      ManageIQ::Consumption::PricePlan.seed
-      expect(envelope.find_price_plan).to eq(ManageIQ::Consumption::PricePlan.first)
+      ManageIQ::Showback::PricePlan.seed
+      expect(envelope.find_price_plan).to eq(ManageIQ::Showback::PricePlan.first)
     end
 
     pending 'find a price plan associated to the resource'
@@ -228,7 +228,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
       enterprise_plan
       sh = FactoryGirl.create(:rate,
                               :CPU_average,
-                              :price_plan => ManageIQ::Consumption::PricePlan.first)
+                              :price_plan => ManageIQ::Showback::PricePlan.first)
       st = sh.tiers.first
       st.fixed_rate = Money.new(67)
       st.variable_rate = Money.new(12)
@@ -292,7 +292,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
       vm = FactoryGirl.create(:vm)
       sh = FactoryGirl.create(:rate,
                               :CPU_average,
-                              :price_plan => ManageIQ::Consumption::PricePlan.first)
+                              :price_plan => ManageIQ::Showback::PricePlan.first)
       tier = sh.tiers.first
       tier.fixed_rate    = Money.new(67)
       tier.variable_rate = Money.new(12)
@@ -332,7 +332,7 @@ RSpec.describe ManageIQ::Consumption::Envelope, :type => :model do
     end
 
     it 'monetized cost' do
-      expect(ManageIQ::Consumption::DataView).to monetize(:cost)
+      expect(ManageIQ::Showback::DataView).to monetize(:cost)
     end
 
     pending 'data_views can be updated for an data_rollup'

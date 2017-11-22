@@ -1,9 +1,9 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
 
-RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
+RSpec.describe ManageIQ::Showback::DataView, :type => :model do
   before(:each) do
-    ManageIQ::Consumption::InputMeasure.seed
+    ManageIQ::Showback::InputMeasure.seed
   end
 
   context 'basic life cycle' do
@@ -66,7 +66,7 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
       event.save
       event.reload
       data_view.save
-      expect(ManageIQ::Consumption::PricePlan.count).to eq(0)
+      expect(ManageIQ::Showback::PricePlan.count).to eq(0)
       expect(data_view.calculate_cost).to eq(Money.new(0))
     end
 
@@ -189,7 +189,7 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
         tier1.variable_rate_per_unit = "percent"
         tier1.save
         expect(event.data).not_to be_nil # making sure that the default is not empty
-        expect(ManageIQ::Consumption::PricePlan.count).to eq(1)
+        expect(ManageIQ::Showback::PricePlan.count).to eq(1)
         expect(data_view.data_rollup).to eq(event)
         expect(data_view.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.data['CPU']['average'].first)
       end
@@ -212,7 +212,7 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
         tier2.save
         expect(event.data).not_to be_nil
         plan2.reload
-        expect(ManageIQ::Consumption::PricePlan.count).to eq(2)
+        expect(ManageIQ::Showback::PricePlan.count).to eq(2)
         expect(data_view.data_rollup).to eq(event)
         # Test that it works without a plan
         expect(data_view.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_group_value('CPU', 'average'))
@@ -236,7 +236,7 @@ RSpec.describe ManageIQ::Consumption::DataView, :type => :model do
         tier2.variable_rate_per_unit = "percent"
         tier2.save
         expect(event.data).not_to be_nil
-        expect(ManageIQ::Consumption::PricePlan.count).to eq(2)
+        expect(ManageIQ::Showback::PricePlan.count).to eq(2)
         expect(data_view.data_rollup).to eq(event)
         # Test that it works without a plan
         expect(data_view.calculate_cost).to eq(fixed_rate1 + variable_rate1 * event.get_group_value('CPU', 'average'))

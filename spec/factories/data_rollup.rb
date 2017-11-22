@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :data_rollup, :class => ManageIQ::Consumption::DataRollup do
+  factory :data_rollup, :class => ManageIQ::Showback::DataRollup do
     association :resource, :factory => :vm
     start_time                4.hours.ago
     end_time                  1.hour.ago

@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'money-rails/test_helpers'
-module ManageIQ::Consumption
+module ManageIQ::Showback
   describe Rate do
     before(:each) do
       InputMeasure.seed
@@ -32,7 +32,7 @@ module ManageIQ::Consumption
 
       it 'calculation is valid when included in VALID_RATE_CALCULATIONS' do
         calculations = %w(occurrence duration quantity)
-        expect(ManageIQ::Consumption::Rate::VALID_RATE_CALCULATIONS).to eq(calculations)
+        expect(ManageIQ::Showback::Rate::VALID_RATE_CALCULATIONS).to eq(calculations)
         calculations.each do |calc|
           rate.calculation = calc
           expect(rate).to be_valid
