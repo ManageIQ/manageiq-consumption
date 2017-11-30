@@ -1,51 +1,48 @@
-# Laurence Ganseman <laurence.ganseman@stoquart.com>, 2017. #zanata
-# Nathalie Stoquart <nateltrad@gmail.com>, 2017. #zanata
+# renata <translator01_redhat@roundtableinc.net>, 2017. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: ManageIQ_Consumption 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-10-31 18:24+0100\n"
-"PO-Revision-Date: 2017-11-14 05:35-0500\n"
-"Last-Translator: Nathalie Stoquart <nateltrad@gmail.com>\n"
-"Language-Team: French\n"
+"PO-Revision-Date: 2017-11-08 01:41-0500\n"
+"Last-Translator: renata <translator01_redhat@roundtableinc.net>\n"
+"Language-Team: Portuguese (Brazil)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"Language: pt-BR\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "X-Generator: Zanata 3.9.6\n"
 
 #: ../app/models/manageiq/consumption/showback_tier.rb:60
 msgid "Interval or subinterval is in a tier with Infinity at the end"
 msgstr ""
-"L'intervalle ou le sous-intervalle font partie d'un niveau qui se termine "
-"par Infinity"
+"O intervalo ou subintervalo está em uma camada com o infinito no final"
 
 #: ../app/models/manageiq/consumption/showback_tier.rb:62
 msgid "Interval or subinterval is in another tier"
-msgstr "L'intervalle ou le sous-intervalle font partie d'un autre niveau."
+msgstr "O intervalo ou subintervalo está em outra camada"
 
 #: ../app/models/manageiq/consumption/showback_envelope.rb:34
 msgid "Pool can't change state to CLOSED from OPEN"
-msgstr "Le pool ne parvient pas à passer de l'état FERMÉ à OUVERT"
+msgstr "O pool não pode alterar o estado de ABERTO para FECHADO"
 
 #: ../app/models/manageiq/consumption/showback_envelope.rb:39
 msgid "Pool can't change state to OPEN from PROCESSING"
-msgstr ""
-"Le pool ne parvient pas à passer de l'état EN COURS DE TRAITEMENT à OUVERT"
+msgstr "O pool não pode alterar o estado de PROCESSANDO para ABERTO"
 
 #: ../app/models/manageiq/consumption/showback_envelope.rb:40
 msgid "Pool can't change state when it's CLOSED"
-msgstr "Le pool ne parvient pas à modifier l'état lorsqu'il est FERMÉ"
+msgstr "O pool não pode alterar o estado quando está FECHADO"
 
 #: ../app/models/manageiq/consumption/showback_tier.rb:55
 msgid "Start value of interval is greater than end value"
-msgstr "La valeur de début de l'intervalle est supérieure à la valeur de fin"
+msgstr "O valor inicial do intervalo é maior que o valor final"
 
 #: ../app/models/manageiq/consumption/showback_data_view.rb:107
 msgid "not found"
-msgstr "non trouvé"
+msgstr "não encontrado"
 
 #: ../app/models/manageiq/consumption/showback_envelope.rb:28
 msgid "should happen after start_time"
-msgstr "doit se produire après heure_début"
+msgstr "deve ocorrer após o start_time"
