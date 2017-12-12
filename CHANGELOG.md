@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
+## Gaprindashvili RC
+
+### Added
+- Add translations [(#129)](https://github.com/ManageIQ/manageiq-consumption/pull/129)
+
 ## Gaprindashvili Beta1
 
 ### Added
