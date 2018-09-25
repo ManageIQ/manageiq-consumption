@@ -1,13 +1,13 @@
 # ManageIQ-consumption
 [![Gem Version](https://badge.fury.io/rb/manageiq-consumption.svg)](https://badge.fury.io/rb/manageiq-consumption)
-[![Build Status](https://travis-ci.org/ManageIQ/manageiq-consumption.svg)](https://travis-ci.org/ManageIQ/manageiq-consumption)
-[![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=master)
+[![Build Status](https://travis-ci.org/ManageIQ/manageiq-consumption.svg?branch=hammer)](https://travis-ci.org/ManageIQ/manageiq-consumption)
+[![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=hammer)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=hammer)
 [![Dependency Status](https://gemnasium.com/badges/github.com/ManageIQ/manageiq-consumption.svg)](https://gemnasium.com/github.com/ManageIQ/manageiq-consumption)
 
 [![Gitter](https://badges.gitter.im/ManageIQ/manageiq/chargeback.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 
-[![Build history for master branch](https://buildstats.info/travisci/chart/ManageIQ/manageiq-consumption?branch=master&buildCount=50)](https://travis-ci.org/ManageIQ/manageiq-consumption/branches)
+[![Build history for master branch](https://buildstats.info/travisci/chart/ManageIQ/manageiq-consumption?branch=hammer&buildCount=50)](https://travis-ci.org/ManageIQ/manageiq-consumption/branches)
 
 ManageIQ Gem plugin for the Consumption.
 
