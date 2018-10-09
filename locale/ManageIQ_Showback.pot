@@ -1,0 +1,51 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the ManageIQ_Showback package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ManageIQ_Showback 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-10-02 16:56+0200\n"
+"PO-Revision-Date: 2018-10-02 16:56+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: ../app/models/manageiq/showback/envelope.rb:37
+msgid "Envelope can't change state to CLOSED from OPEN"
+msgstr ""
+
+#: ../app/models/manageiq/showback/envelope.rb:42
+msgid "Envelope can't change state to OPEN from PROCESSING"
+msgstr ""
+
+#: ../app/models/manageiq/showback/envelope.rb:43
+msgid "Envelope can't change state when it's CLOSED"
+msgstr ""
+
+#: ../app/models/manageiq/showback/tier.rb:60
+msgid "Interval or subinterval is in a tier with Infinity at the end"
+msgstr ""
+
+#: ../app/models/manageiq/showback/tier.rb:62
+msgid "Interval or subinterval is in another tier"
+msgstr ""
+
+#: ../app/models/manageiq/showback/tier.rb:55
+msgid "Start value of interval is greater than end value"
+msgstr ""
+
+#: ../app/models/manageiq/showback/data_view.rb:108
+msgid "not found"
+msgstr ""
+
+#: ../app/models/manageiq/showback/envelope.rb:31
+msgid "should happen after start_time"
+msgstr ""
