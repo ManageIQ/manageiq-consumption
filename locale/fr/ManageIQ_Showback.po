@@ -1,42 +1,53 @@
-# French translations for ManageIQ_Showback package.
-# Copyright (C) 2018 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the ManageIQ_Showback package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
-#
+# Laurence Ganseman <laurence.ganseman@stoquart.com>, 2018. #zanata
+# Marie Robert <marie.robert@stoquart.com>, 2018. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: ManageIQ_Showback 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2018-10-02 16:56+0200\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2018-10-02 16:56+0200\n"
+"PO-Revision-Date: 2018-10-23 12:43+0000\n"
+"Last-Translator: Laurence Ganseman <laurence.ganseman@stoquart.com>\n"
 "Language-Team: French\n"
-"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n>1;\n"
-"\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"X-Generator: Zanata 4.6.2\n"
 
+#: ../app/models/manageiq/showback/envelope.rb:37
 msgid "Envelope can't change state to CLOSED from OPEN"
-msgstr ""
+msgstr "L'enveloppe ne parvient pas à passer de l'état OUVERT à FERMÉ"
 
+#: ../app/models/manageiq/showback/envelope.rb:42
 msgid "Envelope can't change state to OPEN from PROCESSING"
 msgstr ""
+"L'enveloppe ne parvient pas à passer de l'état EN COURS DE TRAITEMENT à "
+"OUVERT"
 
+#: ../app/models/manageiq/showback/envelope.rb:43
 msgid "Envelope can't change state when it's CLOSED"
 msgstr ""
+"L'enveloppe ne parvient pas à modifier l'état lorsque celui-ci est FERMÉ"
 
+#: ../app/models/manageiq/showback/tier.rb:60
 msgid "Interval or subinterval is in a tier with Infinity at the end"
 msgstr ""
+"L'intervalle ou le sous-intervalle fait partie d'un niveau qui se termine "
+"par Infinity"
 
+#: ../app/models/manageiq/showback/tier.rb:62
 msgid "Interval or subinterval is in another tier"
-msgstr ""
+msgstr "L'intervalle ou le sous-intervalle fait partie d'un autre niveau"
 
+#: ../app/models/manageiq/showback/tier.rb:55
 msgid "Start value of interval is greater than end value"
-msgstr ""
+msgstr "La valeur de début de l'intervalle est supérieure à la valeur de fin"
 
+#: ../app/models/manageiq/showback/data_view.rb:108
 msgid "not found"
-msgstr ""
+msgstr "introuvable"
 
+#: ../app/models/manageiq/showback/envelope.rb:31
 msgid "should happen after start_time"
-msgstr ""
+msgstr "doit se produire après heure_début"
