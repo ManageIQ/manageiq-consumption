@@ -1,42 +1,47 @@
-# Japanese translations for ManageIQ_Showback package.
-# Copyright (C) 2018 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the ManageIQ_Showback package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
-#
+# kmoriguc <kmoriguc@redhat.com>, 2018. #zanata
 msgid ""
 msgstr ""
 "Project-Id-Version: ManageIQ_Showback 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2018-10-02 16:56+0200\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"POT-Creation-Date: 2018-10-02 16:56+0200\n"
+"PO-Revision-Date: 2018-10-25 10:31+0000\n"
+"Last-Translator: kmoriguc <kmoriguc@redhat.com>\n"
 "Language-Team: Japanese\n"
-"Language: ja\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"X-Generator: Zanata 4.6.2\n"
 
+#: ../app/models/manageiq/showback/envelope.rb:37
 msgid "Envelope can't change state to CLOSED from OPEN"
-msgstr ""
+msgstr "エンベロープの状態を「OPEN」から「CLOSED」に変更できません"
 
+#: ../app/models/manageiq/showback/envelope.rb:42
 msgid "Envelope can't change state to OPEN from PROCESSING"
-msgstr ""
+msgstr "エンベロープの状態を「PROCESSING」から「OPEN」に変更できません"
 
+#: ../app/models/manageiq/showback/envelope.rb:43
 msgid "Envelope can't change state when it's CLOSED"
-msgstr ""
+msgstr "「CLOSED」の場合にはエンベロープの状態を変更できません"
 
+#: ../app/models/manageiq/showback/tier.rb:60
 msgid "Interval or subinterval is in a tier with Infinity at the end"
-msgstr ""
+msgstr "区分または部分区分は「無限 (Infinity)」が末尾にある階層にあります"
 
+#: ../app/models/manageiq/showback/tier.rb:62
 msgid "Interval or subinterval is in another tier"
-msgstr ""
+msgstr "区分または部分区分は別の階層にあります"
 
+#: ../app/models/manageiq/showback/tier.rb:55
 msgid "Start value of interval is greater than end value"
-msgstr ""
+msgstr "区分の開始値は終了値よりも大きくなっています"
 
+#: ../app/models/manageiq/showback/data_view.rb:108
 msgid "not found"
-msgstr ""
+msgstr "見つかりません"
 
+#: ../app/models/manageiq/showback/envelope.rb:31
 msgid "should happen after start_time"
-msgstr ""
+msgstr "start_time 後に発生します"
