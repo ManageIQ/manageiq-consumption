@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :rate, :class => ManageIQ::Showback::Rate do
     entity                 'Vm'
     field                  'max_number_of_cpu'

@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :data_view, :class => ManageIQ::Showback::DataView do
     envelope
     data_rollup

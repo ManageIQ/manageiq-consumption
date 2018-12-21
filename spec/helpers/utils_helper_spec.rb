@@ -50,18 +50,18 @@ RSpec.describe ManageIQ::Showback::UtilsHelper, :type => :helper do
 
   context "#get_parent" do
     it "Return parent of vm resource" do
-      host = FactoryGirl.create(:host)
-      vm = FactoryGirl.create(:vm, :host => host)
+      host = FactoryBot.create(:host)
+      vm = FactoryBot.create(:vm, :host => host)
       expect(described_class.get_parent(vm)).to eq(host)
     end
 
     it "Should return nil if not parent vm" do
-      vm = FactoryGirl.create(:vm)
+      vm = FactoryBot.create(:vm)
       expect(described_class.get_parent(vm)).to be_nil
     end
 
     it "Should return nil if not parent container" do
-      cont = FactoryGirl.create(:container)
+      cont = FactoryBot.create(:container)
       expect(described_class.get_parent(cont)).to be_nil
     end
   end

@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :envelope, :class => ManageIQ::Showback::Envelope do
     sequence(:name)           { |n| "factory_pool_#{seq_padded_for_sorting(n)}" }
     sequence(:description)    { |n| "pool_description_#{seq_padded_for_sorting(n)}" }

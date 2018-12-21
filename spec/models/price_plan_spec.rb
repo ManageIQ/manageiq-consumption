@@ -8,7 +8,7 @@ RSpec.describe ManageIQ::Showback::PricePlan, :type => :model do
   end
 
   context 'basic tests' do
-    let(:plan) { FactoryGirl.create(:price_plan) }
+    let(:plan) { FactoryBot.create(:price_plan) }
 
     it 'has a valid factory' do
       plan.valid?
@@ -35,26 +35,26 @@ RSpec.describe ManageIQ::Showback::PricePlan, :type => :model do
 
     it 'is possible to add new rates to the price plan' do
       plan.save
-      expect { FactoryGirl.create(:rate, :price_plan => plan) }.to change(plan.rates, :count).from(0).to(1)
+      expect { FactoryBot.create(:rate, :price_plan => plan) }.to change(plan.rates, :count).from(0).to(1)
     end
 
     it 'rates are deleted when deleting the plan' do
-      FactoryGirl.create(:rate, :price_plan => plan)
-      FactoryGirl.create(:rate, :price_plan => plan)
+      FactoryBot.create(:rate, :price_plan => plan)
+      FactoryBot.create(:rate, :price_plan => plan)
       expect(plan.rates.count).to be(2)
       expect { plan.destroy }.to change(ManageIQ::Showback::Rate, :count).from(2).to(0)
     end
 
     context 'rating with no context' do
-      let(:resource)       { FactoryGirl.create(:vm) }
-      let(:event)          { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
+      let(:resource)       { FactoryBot.create(:vm) }
+      let(:event)          { FactoryBot.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
       let(:fixed_rate)     { Money.new(11) }
       let(:variable_rate)  { Money.new(7) }
       let(:fixed_rate2)    { Money.new(5) }
       let(:variable_rate2) { Money.new(13) }
-      let(:plan)  { FactoryGirl.create(:price_plan) }
+      let(:plan)  { FactoryBot.create(:price_plan) }
       let(:rate)  do
-        FactoryGirl.create(:rate,
+        FactoryBot.create(:rate,
                            :CPU_average,
                            :calculation => 'occurrence',
                            :price_plan  => plan)
@@ -68,7 +68,7 @@ RSpec.describe ManageIQ::Showback::PricePlan, :type => :model do
         tier
       end
       let(:rate2) do
-        FactoryGirl.create(:rate,
+        FactoryBot.create(:rate,
                            :CPU_max_number_of_cpu,
                            :calculation => 'duration',
                            :price_plan  => plan)
@@ -144,19 +144,19 @@ RSpec.describe ManageIQ::Showback::PricePlan, :type => :model do
     end
 
     context 'rating with context' do
-      let(:resource)      { FactoryGirl.create(:vm) }
-      let(:event)         { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
+      let(:resource)      { FactoryBot.create(:vm) }
+      let(:event)         { FactoryBot.build(:data_rollup, :with_vm_data, :full_month, :with_tags_in_context, :resource => resource) }
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:plan)  { FactoryGirl.create(:price_plan) }
+      let(:plan)  { FactoryBot.create(:price_plan) }
       let(:rate)  do
-        FactoryGirl.build(:rate,
+        FactoryBot.build(:rate,
                           :CPU_average,
                           :price_plan => plan)
       end
       let(:tier1) { rate.tiers.first }
       let(:rate2) do
-        FactoryGirl.build(:rate,
+        FactoryBot.build(:rate,
                           :CPU_max_number_of_cpu,
                           :price_plan => plan)
       end
@@ -227,7 +227,7 @@ RSpec.describe ManageIQ::Showback::PricePlan, :type => :model do
 
   context '.seed' do
     let(:expected_price_plan_count) { 1 }
-    let!(:resource) { FactoryGirl.create(:miq_enterprise, :name => 'Enterprise') }
+    let!(:resource) { FactoryBot.create(:miq_enterprise, :name => 'Enterprise') }
 
     it 'empty table' do
       described_class.seed

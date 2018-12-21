@@ -1,9 +1,9 @@
 describe ManageIQ::Showback::DataRollup::CPU do
-  let(:data_rollup) { FactoryGirl.build(:data_rollup) }
-  let(:con_data_rollup) { FactoryGirl.build(:data_rollup) }
+  let(:data_rollup) { FactoryBot.build(:data_rollup) }
+  let(:con_data_rollup) { FactoryBot.build(:data_rollup) }
   context "CPU in vm" do
     before(:each) do
-      @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
+      @vm_metrics = FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096))
       cases = [
         "2010-04-13T20:52:30Z", 100.0,
         "2010-04-13T21:51:10Z", 1.0,
@@ -14,7 +14,7 @@ describe ManageIQ::Showback::DataRollup::CPU do
         "2010-04-15T23:52:30Z", 100.0,
       ]
       cases.each_slice(2) do |t, v|
-        @vm_metrics.metrics << FactoryGirl.create(:metric_vm_rt,
+        @vm_metrics.metrics << FactoryBot.create(:metric_vm_rt,
                                                   :timestamp                  => t,
                                                   :cpu_usage_rate_average     => v,
                                                   # Multiply by a factor of 1000 to make it more realistic and enable testing virtual col v_pct_cpu_ready_delta_summation
@@ -24,7 +24,7 @@ describe ManageIQ::Showback::DataRollup::CPU do
       data_rollup.resource     = @vm_metrics
       data_rollup.start_time   = "2010-04-13T00:00:00Z"
       data_rollup.end_time     = "2010-04-14T00:00:00Z"
-      group = FactoryGirl.build(:input_measure)
+      group = FactoryBot.build(:input_measure)
       group.save
       data_rollup.generate_data
     end
@@ -50,18 +50,18 @@ describe ManageIQ::Showback::DataRollup::CPU do
 
   context "CPU in container" do
     before(:each) do
-      @con_metrics              = FactoryGirl.create(:container)
+      @con_metrics              = FactoryBot.create(:container)
       data_rollup.resource      = @con_metrics
       data_rollup.resource.type = "Container"
       data_rollup.start_time    = "2010-04-13T00:00:00Z"
       data_rollup.end_time      = "2010-04-14T00:00:00Z"
       Range.new(data_rollup.start_time, data_rollup.end_time, true).step_value(1.hour).each do |t|
-        @con_metrics.vim_performance_states << FactoryGirl.create(:vim_performance_state,
+        @con_metrics.vim_performance_states << FactoryBot.create(:vim_performance_state,
                                                                   :timestamp       => t,
                                                                   :image_tag_names => "environment/prod",
                                                                   :state_data      => {:numvcpus => 2})
       end
-      group = FactoryGirl.build(:input_measure)
+      group = FactoryBot.build(:input_measure)
       group.save
       data_rollup.generate_data
     end
