@@ -7,8 +7,8 @@ describe ManageIQ::Showback::InputMeasure do
   end
 
   context "validations" do
-    let(:input_measure) { FactoryGirl.build(:input_measure) }
-    let(:data_rollup) { FactoryGirl.build(:data_rollup) }
+    let(:input_measure) { FactoryBot.build(:input_measure) }
+    let(:data_rollup) { FactoryBot.build(:data_rollup) }
 
     it "has a valid factory" do
       expect(input_measure).to be_valid

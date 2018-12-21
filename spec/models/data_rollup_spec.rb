@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 
 describe ManageIQ::Showback::DataRollup do
-  let(:data_rollup) { FactoryGirl.build(:data_rollup) }
+  let(:data_rollup) { FactoryBot.build(:data_rollup) }
   context "validations" do
     it "has a valid factory" do
       expect(data_rollup).to be_valid
@@ -39,14 +39,14 @@ describe ManageIQ::Showback::DataRollup do
     end
 
     it "should ensure resource exists" do
-      vm = FactoryGirl.create(:vm)
+      vm = FactoryBot.create(:vm)
       data_rollup.resource = vm
       expect(data_rollup).to be_valid
     end
 
     it 'should generate data' do
       data_rollup.data = {}
-      data_rollup.resource = FactoryGirl.create(:vm)
+      data_rollup.resource = FactoryBot.create(:vm)
       hash = {}
       ManageIQ::Showback::InputMeasure.seed
       data_units = ManageIQ::Showback::Manager.load_column_units
@@ -90,33 +90,33 @@ describe ManageIQ::Showback::DataRollup do
 
   context '#validate_format' do
     it 'passes validation with correct JSON data' do
-      data_rollup = FactoryGirl.create(:data_rollup)
+      data_rollup = FactoryBot.create(:data_rollup)
       expect(data_rollup.validate_format).to be_nil
     end
 
     it 'fails validations with incorrect JSON data' do
-      data_rollup = FactoryGirl.build(:data_rollup, :data => ":-Invalid:\n-JSON")
+      data_rollup = FactoryBot.build(:data_rollup, :data => ":-Invalid:\n-JSON")
       expect(data_rollup.validate_format).to be_nil
     end
 
     it 'returns nil if ParserError' do
-      data_rollup = FactoryGirl.create(:data_rollup)
+      data_rollup = FactoryBot.create(:data_rollup)
       data_rollup.data = "abc"
       expect(data_rollup.validate_format).to be_nil
     end
   end
 
   context '#engine' do
-    let(:vm)               { FactoryGirl.create(:vm) }
-    let(:data_rollup)      { FactoryGirl.build(:data_rollup, :full_month) }
-    let(:vm_data_rollup)   { FactoryGirl.build(:data_rollup, :with_vm_data, :first_half_month) }
+    let(:vm)               { FactoryBot.create(:vm) }
+    let(:data_rollup)      { FactoryBot.build(:data_rollup, :full_month) }
+    let(:vm_data_rollup)   { FactoryBot.build(:data_rollup, :with_vm_data, :first_half_month) }
     describe 'Basic' do
       it 'should return the object' do
         data_rollup.resource = vm
         expect(data_rollup.resource).to eq(vm)
       end
       it 'trait #full_month should have a valid factory' do
-        mydata_rollup = FactoryGirl.build(:data_rollup, :full_month)
+        mydata_rollup = FactoryBot.build(:data_rollup, :full_month)
         mydata_rollup.valid?
         expect(mydata_rollup).to be_valid
         expect(mydata_rollup.start_time).to eq(mydata_rollup.start_time.beginning_of_month)
@@ -124,7 +124,7 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it 'trait #with_vm_data should have a valid factory' do
-        mydata_rollup = FactoryGirl.build(:data_rollup, :with_vm_data)
+        mydata_rollup = FactoryBot.build(:data_rollup, :with_vm_data)
         mydata_rollup.valid?
         expect(mydata_rollup.data).to eq(
           "CPU"    => {
@@ -141,7 +141,7 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it 'trait #first_half_month should have a valid factory' do
-        mydata_rollup = FactoryGirl.build(:data_rollup, :first_half_month)
+        mydata_rollup = FactoryBot.build(:data_rollup, :first_half_month)
         mydata_rollup.valid?
         expect(mydata_rollup).to be_valid
         expect(mydata_rollup.start_time).to eq(mydata_rollup.start_time.beginning_of_month)
@@ -149,7 +149,7 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it 'trait #with_vm_datra and full_month has a valid factory' do
-        mydata_rollup = FactoryGirl.build(:data_rollup, :with_vm_data, :full_month)
+        mydata_rollup = FactoryBot.build(:data_rollup, :with_vm_data, :full_month)
         mydata_rollup.valid?
         expect(mydata_rollup).to be_valid
         expect(mydata_rollup.start_time).to eq(mydata_rollup.start_time.beginning_of_month)
@@ -168,7 +168,7 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it 'trait #with_vm_datra and half_month has a valid factory' do
-        mydata_rollup = FactoryGirl.build(:data_rollup, :with_vm_data, :first_half_month)
+        mydata_rollup = FactoryBot.build(:data_rollup, :with_vm_data, :first_half_month)
         mydata_rollup.valid?
         expect(mydata_rollup).to be_valid
         expect(mydata_rollup.start_time).to eq(mydata_rollup.start_time.beginning_of_month)
@@ -189,7 +189,7 @@ describe ManageIQ::Showback::DataRollup do
 
     context 'update data_rollups' do
       before(:each) do
-        @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
+        @vm_metrics = FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096))
         cases = [
           "2010-04-13T20:52:30Z", 100.0,
           "2010-04-13T21:51:10Z", 1.0,
@@ -200,7 +200,7 @@ describe ManageIQ::Showback::DataRollup do
           "2010-04-15T23:52:30Z", 100.0,
         ]
         cases.each_slice(2) do |t, v|
-          @vm_metrics.metrics << FactoryGirl.create(
+          @vm_metrics.metrics << FactoryBot.create(
             :metric_vm_rt,
             :timestamp                  => t,
             :cpu_usage_rate_average     => v,
@@ -212,7 +212,7 @@ describe ManageIQ::Showback::DataRollup do
         data_rollup.resource     = @vm_metrics
         data_rollup.start_time   = "2010-04-13T00:00:00Z"
         data_rollup.end_time     = "2010-04-14T00:00:00Z"
-        group = FactoryGirl.build(:input_measure)
+        group = FactoryBot.build(:input_measure)
         group.save
       end
 
@@ -262,15 +262,15 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it 'should return data_rollups of past month' do
-        5.times { FactoryGirl.create(:data_rollup, :full_month) }
-        2.times { FactoryGirl.create(:data_rollup, :start_time => DateTime.now.utc.beginning_of_month - 1.month, :end_time => DateTime.now.utc.end_of_month - 1.month) }
+        5.times { FactoryBot.create(:data_rollup, :full_month) }
+        2.times { FactoryBot.create(:data_rollup, :start_time => DateTime.now.utc.beginning_of_month - 1.month, :end_time => DateTime.now.utc.end_of_month - 1.month) }
         expect(described_class.data_rollups_past_month.count).to eq(2)
       end
 
       it 'should return data_rollups of actual month' do
-        5.times { FactoryGirl.create(:data_rollup, :full_month) }
+        5.times { FactoryBot.create(:data_rollup, :full_month) }
         2.times do
-          FactoryGirl.create(:data_rollup,
+          FactoryBot.create(:data_rollup,
                              :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                              :end_time   => DateTime.now.utc.end_of_month - 1.month)
         end
@@ -279,12 +279,12 @@ describe ManageIQ::Showback::DataRollup do
 
       it 'should return data_rollups between months' do
         3.times do
-          FactoryGirl.create(:data_rollup,
+          FactoryBot.create(:data_rollup,
                              :start_time => DateTime.now.utc.beginning_of_month.change(:month =>2),
                              :end_time   => DateTime.now.utc.end_of_month.change(:month =>2))
         end
         2.times do
-          FactoryGirl.create(:data_rollup,
+          FactoryBot.create(:data_rollup,
                              :start_time => DateTime.now.utc.beginning_of_month.change(:month =>4),
                              :end_time   => DateTime.now.utc.end_of_month.change(:month =>4))
         end
@@ -330,14 +330,14 @@ describe ManageIQ::Showback::DataRollup do
 
     context 'assign data_rollup to envelope' do
       it "Return nil if not envelope" do
-        vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-        FactoryGirl.create(:envelope, :resource => FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096)))
+        vm = FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096))
+        FactoryBot.create(:envelope, :resource => FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096)))
         expect(data_rollup.find_envelope(vm)).to be_nil
       end
 
       it "Return the correct envelope" do
-        vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-        envelope = FactoryGirl.create(:envelope, :resource => vm)
+        vm = FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096))
+        envelope = FactoryBot.create(:envelope, :resource => vm)
         expect(data_rollup.find_envelope(vm)).to eq(envelope)
       end
 
@@ -352,9 +352,9 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it "Assign resource to envelope" do
-        vm = FactoryGirl.create(:vm)
-        envelope = FactoryGirl.create(:envelope, :resource => vm)
-        data_rollup = FactoryGirl.create(:data_rollup,
+        vm = FactoryBot.create(:vm)
+        envelope = FactoryBot.create(:envelope, :resource => vm)
+        data_rollup = FactoryBot.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                          :resource   => vm)
@@ -366,10 +366,10 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it "Assign container resource to envelope" do
-        con = FactoryGirl.create(:container)
+        con = FactoryBot.create(:container)
         con.type = "Container"
-        envelope = FactoryGirl.create(:envelope, :resource => con)
-        data_rollup = FactoryGirl.create(:data_rollup,
+        envelope = FactoryBot.create(:envelope, :resource => con)
+        data_rollup = FactoryBot.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                          :resource   => con)
@@ -381,11 +381,11 @@ describe ManageIQ::Showback::DataRollup do
       end
 
       it "Assign resource to all relational envelope" do
-        host = FactoryGirl.create(:host)
-        vm = FactoryGirl.create(:vm, :host => host)
-        envelope_vm = FactoryGirl.create(:envelope, :resource => vm)
-        envelope_host = FactoryGirl.create(:envelope, :resource => host)
-        data_rollup = FactoryGirl.create(:data_rollup,
+        host = FactoryBot.create(:host)
+        vm = FactoryBot.create(:vm, :host => host)
+        envelope_vm = FactoryBot.create(:envelope, :resource => vm)
+        envelope_host = FactoryBot.create(:envelope, :resource => host)
+        data_rollup = FactoryBot.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                          :resource   => vm)
@@ -396,16 +396,16 @@ describe ManageIQ::Showback::DataRollup do
 
       it "Assign a envelope tag" do
         @file = StringIO.new("name,entity,entry\nJD-C-T4.0.1.44,Environment,Test")
-        vm = FactoryGirl.create(:vm, :name => "JD-C-T4.0.1.44")
-        data_rollup = FactoryGirl.create(:data_rollup,
+        vm = FactoryBot.create(:vm, :name => "JD-C-T4.0.1.44")
+        data_rollup = FactoryBot.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                          :resource   => vm)
-        entity = FactoryGirl.create(:classification, :name => 'environment', :description => 'Environment')
-        entry = FactoryGirl.create(:classification_tag, :parent => entity, :name => 'test', :description => 'Test')
+        entity = FactoryBot.create(:classification, :name => 'environment', :description => 'Environment')
+        entry = FactoryBot.create(:classification_tag, :parent => entity, :name => 'test', :description => 'Test')
         entry.assign_entry_to(vm)
-        envelope_cat = FactoryGirl.create(:envelope, :resource => entity.tag)
-        envelope_ent = FactoryGirl.create(:envelope, :resource => entry.tag)
+        envelope_cat = FactoryBot.create(:envelope, :resource => entity.tag)
+        envelope_ent = FactoryBot.create(:envelope, :resource => entry.tag)
         ci = ClassificationImport.upload(@file)
         ci.apply
         vm.reload
@@ -419,8 +419,8 @@ describe ManageIQ::Showback::DataRollup do
 
     context 'collect tags' do
       it "Set an empty tags in context" do
-        vm = FactoryGirl.create(:vm)
-        data_rollup = FactoryGirl.create(:data_rollup,
+        vm = FactoryBot.create(:vm)
+        data_rollup = FactoryBot.create(:data_rollup,
                                          :start_time => DateTime.now.utc.beginning_of_month,
                                          :end_time   => DateTime.now.utc.beginning_of_month + 2.days,
                                          :resource   => vm)
@@ -430,9 +430,9 @@ describe ManageIQ::Showback::DataRollup do
     end
   end
   context 'update data_views' do
-    let(:data_rollup_data) { FactoryGirl.create(:data_rollup) }
+    let(:data_rollup_data) { FactoryBot.create(:data_rollup) }
     let(:envelope_of_data_rollup) do
-      FactoryGirl.create(:envelope,
+      FactoryBot.create(:envelope,
                          :resource => data_rollup_data.resource)
     end
 
@@ -449,7 +449,7 @@ describe ManageIQ::Showback::DataRollup do
         "FLAVOR" => {}
       }
       data_rollup_data.save
-      data_view1 = FactoryGirl.create(:data_view,
+      data_view1 = FactoryBot.create(:data_view,
                                       :envelope      => envelope_of_data_rollup,
                                       :data_rollup   => data_rollup_data,
                                       :data_snapshot => {Time.now.utc - 5.hours => data_rollup_data.data})

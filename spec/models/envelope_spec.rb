@@ -5,11 +5,11 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
   before(:each) do
     ManageIQ::Showback::InputMeasure.seed
   end
-  let(:resource)        { FactoryGirl.create(:vm) }
-  let(:envelope)        { FactoryGirl.build(:envelope) }
-  let(:data_rollup)     { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
-  let(:data_rollup2)    { FactoryGirl.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
-  let(:enterprise_plan) { FactoryGirl.create(:price_plan) }
+  let(:resource)        { FactoryBot.create(:vm) }
+  let(:envelope)        { FactoryBot.build(:envelope) }
+  let(:data_rollup)     { FactoryBot.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
+  let(:data_rollup2)    { FactoryBot.build(:data_rollup, :with_vm_data, :full_month, :resource => resource) }
+  let(:enterprise_plan) { FactoryBot.create(:price_plan) }
 
   context '#basic lifecycle' do
     it 'has a valid factory' do
@@ -41,7 +41,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
 
     it 'deletes costs associated when deleting the envelope' do
       2.times do
-        FactoryGirl.create(:data_view, :envelope => envelope)
+        FactoryBot.create(:data_view, :envelope => envelope)
       end
       expect(envelope.data_views.count).to be(2)
       expect { envelope.destroy }.to change(ManageIQ::Showback::DataView, :count).from(2).to(0)
@@ -50,7 +50,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
 
     it 'deletes costs associated when deleting the data_rollup' do
       2.times do
-        FactoryGirl.create(:data_view, :envelope => envelope)
+        FactoryBot.create(:data_view, :envelope => envelope)
       end
       expect(envelope.data_views.count).to be(2)
       d_rollup = envelope.data_views.first.data_rollup
@@ -80,7 +80,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
   end
 
   context '.control lifecycle state' do
-    let(:envelope_lifecycle) { FactoryGirl.create(:envelope) }
+    let(:envelope_lifecycle) { FactoryBot.create(:envelope) }
 
     it 'it can transition from open to processing' do
       envelope_lifecycle.state = 'PROCESSING'
@@ -102,22 +102,22 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
     end
 
     it 'it can not transition from processing to open' do
-      envelope_lifecycle = FactoryGirl.create(:envelope, :processing)
+      envelope_lifecycle = FactoryBot.create(:envelope, :processing)
       envelope_lifecycle.state = 'OPEN'
       expect { envelope_lifecycle.save }.to raise_error(RuntimeError, _("Envelope can't change state to OPEN from PROCESSING"))
     end
 
     it 'it can transition from processing to closed' do
-      envelope_lifecycle = FactoryGirl.create(:envelope, :processing)
+      envelope_lifecycle = FactoryBot.create(:envelope, :processing)
       envelope_lifecycle.state = 'CLOSED'
       expect { envelope_lifecycle.save }.not_to raise_error
     end
 
     it 'it can not transition from closed to open or processing' do
-      envelope_lifecycle = FactoryGirl.create(:envelope, :closed)
+      envelope_lifecycle = FactoryBot.create(:envelope, :closed)
       envelope_lifecycle.state = 'OPEN'
       expect { envelope_lifecycle.save }.to raise_error(RuntimeError, _("Envelope can't change state when it's CLOSED"))
-      envelope_lifecycle = FactoryGirl.create(:envelope, :closed)
+      envelope_lifecycle = FactoryBot.create(:envelope, :closed)
       envelope_lifecycle.state = 'PROCESSING'
       expect { envelope_lifecycle.save }.to raise_error(RuntimeError, _("Envelope can't change state when it's CLOSED"))
     end
@@ -138,7 +138,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
     end
 
     it 'Throw error in add data_rollup if it is not of a proper type' do
-      obj = FactoryGirl.create(:vm)
+      obj = FactoryBot.create(:vm)
       envelope.add_data_rollup(obj)
       expect(envelope.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Showback::DataRollup")
     end
@@ -157,7 +157,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
     end
 
     it 'Throw error in Remove data_rollup if the type is not correct' do
-      obj = FactoryGirl.create(:vm)
+      obj = FactoryBot.create(:vm)
       envelope.remove_data_rollup(obj)
       expect(envelope.errors.details[:data_rollups]). to include(:error => "Error Type #{obj.type} is not ManageIQ::Showback::DataRollup")
     end
@@ -165,13 +165,13 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
 
   describe 'methods with #data_view' do
     it 'add data_view directly' do
-      data_view = FactoryGirl.create(:data_view, :envelope => envelope)
+      data_view = FactoryBot.create(:data_view, :envelope => envelope)
       envelope.add_data_view(data_view, 2)
       expect(data_view.cost). to eq(Money.new(2))
     end
 
     it 'add data_view directly' do
-      data_view = FactoryGirl.create(:data_view, :cost => Money.new(7)) # different envelope
+      data_view = FactoryBot.create(:data_view, :cost => Money.new(7)) # different envelope
       envelope.add_data_view(data_view, 2)
       # data_view won't be updated as it does not belongs to the envelope
       expect(data_view.cost).not_to eq(Money.new(2))
@@ -179,19 +179,19 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
     end
 
     it 'add data_view from an data_rollup' do
-      data_rollup = FactoryGirl.create(:data_rollup)
-      data_view = FactoryGirl.create(:data_view, :data_rollup => data_rollup, :envelope => envelope)
+      data_rollup = FactoryBot.create(:data_rollup)
+      data_view = FactoryBot.create(:data_view, :data_rollup => data_rollup, :envelope => envelope)
       expect(data_rollup.data_views).to include(data_view)
       expect(envelope.data_views).to include(data_view)
     end
 
     it 'get_data_view from a data_view' do
-      data_view = FactoryGirl.create(:data_view, :envelope => envelope, :cost => Money.new(10))
+      data_view = FactoryBot.create(:data_view, :envelope => envelope, :cost => Money.new(10))
       expect(envelope.get_data_view(data_view)).to eq(Money.new(10))
     end
 
     it 'get_data_view from an data_rollup' do
-      data_view = FactoryGirl.create(:data_view, :envelope => envelope, :cost => Money.new(10))
+      data_view = FactoryBot.create(:data_view, :envelope => envelope, :cost => Money.new(10))
       data_rollup = data_view.data_rollup
       expect(envelope.get_data_view(data_rollup)).to eq(Money.new(10))
     end
@@ -201,7 +201,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
     end
 
     it 'calculate_data_view with an error' do
-      data_view = FactoryGirl.create(:data_view, :cost => Money.new(10))
+      data_view = FactoryBot.create(:data_view, :cost => Money.new(10))
       envelope.calculate_data_view(data_view)
       expect(data_view.errors.details[:data_view]). to include(:error => 'not found')
       expect(envelope.calculate_data_view(data_view)). to eq(Money.new(0))
@@ -226,7 +226,7 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
 
     it '#calculate data_view' do
       enterprise_plan
-      sh = FactoryGirl.create(:rate,
+      sh = FactoryBot.create(:rate,
                               :CPU_average,
                               :price_plan => ManageIQ::Showback::PricePlan.first)
       st = sh.tiers.first
@@ -245,22 +245,22 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
     end
 
     it '#Add an data_rollup' do
-      data_rollup = FactoryGirl.create(:data_rollup)
+      data_rollup = FactoryBot.create(:data_rollup)
       expect { envelope.add_data_view(data_rollup, 5) }.to change(envelope.data_views, :count).by(1)
     end
 
     it 'update a data_view in the envelope with add_data_view' do
-      data_view = FactoryGirl.create(:data_view, :envelope => envelope)
+      data_view = FactoryBot.create(:data_view, :envelope => envelope)
       expect { envelope.add_data_view(data_view, 5) }.to change(data_view, :cost).to(Money.new(5))
     end
 
     it 'update a data_view in the envelope with update_data_view' do
-      data_view = FactoryGirl.create(:data_view, :envelope => envelope)
+      data_view = FactoryBot.create(:data_view, :envelope => envelope)
       expect { envelope.update_data_view(data_view, 5) }.to change(data_view, :cost).to(Money.new(5))
     end
 
     it 'update a data_view in the envelope gets nil if the data_view is not there' do
-      data_view = FactoryGirl.create(:data_view) # not in the envelope
+      data_view = FactoryBot.create(:data_view) # not in the envelope
       expect(envelope.update_data_view(data_view, 5)).to be_nil
     end
 
@@ -289,16 +289,16 @@ RSpec.describe ManageIQ::Showback::Envelope, :type => :model do
 
     it 'calculate_all_data_views' do
       enterprise_plan
-      vm = FactoryGirl.create(:vm)
-      sh = FactoryGirl.create(:rate,
+      vm = FactoryBot.create(:vm)
+      sh = FactoryBot.create(:rate,
                               :CPU_average,
                               :price_plan => ManageIQ::Showback::PricePlan.first)
       tier = sh.tiers.first
       tier.fixed_rate    = Money.new(67)
       tier.variable_rate = Money.new(12)
       tier.save
-      ev  = FactoryGirl.create(:data_rollup, :with_vm_data, :full_month, :resource => vm)
-      ev2 = FactoryGirl.create(:data_rollup, :with_vm_data, :full_month, :resource => vm)
+      ev  = FactoryBot.create(:data_rollup, :with_vm_data, :full_month, :resource => vm)
+      ev2 = FactoryBot.create(:data_rollup, :with_vm_data, :full_month, :resource => vm)
       envelope.add_data_rollup(ev)
       envelope.add_data_rollup(ev2)
       envelope.data_views.reload

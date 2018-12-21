@@ -15,8 +15,8 @@ RSpec.describe ManageIQ::Showback::Manager, :type => :model do
   end
 
   it "generate new month for actual events" do
-    vm = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
-    FactoryGirl.create(:data_rollup,
+    vm = FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096))
+    FactoryBot.create(:data_rollup,
                        :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                        :end_time   => DateTime.now.utc.end_of_month - 1.month,
                        :resource   => vm)
@@ -26,7 +26,7 @@ RSpec.describe ManageIQ::Showback::Manager, :type => :model do
   end
 
   it "should generate events for new resources" do
-    FactoryGirl.create(:vm)
+    FactoryBot.create(:vm)
     expect(ManageIQ::Showback::DataRollup.all.count).to eq(0)
     described_class.generate_data_rollups
     expect(ManageIQ::Showback::DataRollup.all.count).to eq(1)
@@ -34,15 +34,15 @@ RSpec.describe ManageIQ::Showback::Manager, :type => :model do
   end
 
   it "should not generate the same ShowbackEvent 2 times of the same resource" do
-    FactoryGirl.create(:vm)
+    FactoryBot.create(:vm)
     described_class.generate_data_rollups
     described_class.generate_data_rollups
     expect(ManageIQ::Showback::DataRollup.all.count).to eq(1)
   end
 
   it "should generate new Showbackevent of resource if not has an event for actual month" do
-    vm = FactoryGirl.create(:vm)
-    FactoryGirl.create(:data_rollup,
+    vm = FactoryBot.create(:vm)
+    FactoryBot.create(:data_rollup,
                        :start_time => DateTime.now.utc.beginning_of_month - 1.month,
                        :end_time   => DateTime.now.utc.end_of_month - 1.month,
                        :resource   => vm)
@@ -52,14 +52,14 @@ RSpec.describe ManageIQ::Showback::Manager, :type => :model do
   end
 
   it "should generate a showbackevent of service" do
-    serv = FactoryGirl.create(:service)
+    serv = FactoryBot.create(:service)
     described_class.generate_data_rollups
     expect(ManageIQ::Showback::DataRollup.first.resource).to eq(serv)
     expect(ManageIQ::Showback::DataRollup.first.context).not_to be_nil
   end
 
   it "should update the events" do
-    event_metric = FactoryGirl.create(:data_rollup, :start_time => DateTime.now.utc.beginning_of_month, :end_time => DateTime.now.utc.beginning_of_month + 2.days)
+    event_metric = FactoryBot.create(:data_rollup, :start_time => DateTime.now.utc.beginning_of_month, :end_time => DateTime.now.utc.beginning_of_month + 2.days)
     event_metric.data = {
       "CPU" => {
         "average"           => [52.67, "percent"],
@@ -72,7 +72,7 @@ RSpec.describe ManageIQ::Showback::Manager, :type => :model do
         "max_number_of_cpu" => [4, "cores"]
       }
     }
-    @vm_metrics = FactoryGirl.create(:vm, :hardware => FactoryGirl.create(:hardware, :cpu1x2, :memory_mb => 4096))
+    @vm_metrics = FactoryBot.create(:vm, :hardware => FactoryBot.create(:hardware, :cpu1x2, :memory_mb => 4096))
     cases = [
       DateTime.now.utc.beginning_of_month, 100.0,
       DateTime.now.utc.beginning_of_month + 1.hour, 1.0,
@@ -83,7 +83,7 @@ RSpec.describe ManageIQ::Showback::Manager, :type => :model do
       DateTime.now.utc.beginning_of_month + 7.days, 100.0,
     ]
     cases.each_slice(2) do |t, v|
-      @vm_metrics.metrics << FactoryGirl.create(
+      @vm_metrics.metrics << FactoryBot.create(
         :metric_vm_rt,
         :timestamp                  => t,
         :cpu_usage_rate_average     => v,

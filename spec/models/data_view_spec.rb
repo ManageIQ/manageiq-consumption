@@ -7,7 +7,7 @@ RSpec.describe ManageIQ::Showback::DataView, :type => :model do
   end
 
   context 'basic life cycle' do
-    let(:data_view) { FactoryGirl.build(:data_view) }
+    let(:data_view) { FactoryBot.build(:data_view) }
     let(:cost) { Money.new(1) }
 
     it 'has a valid factory' do
@@ -52,13 +52,13 @@ RSpec.describe ManageIQ::Showback::DataView, :type => :model do
 
   context '#validate price_plan_missing and snapshot' do
     let(:event) do
-      FactoryGirl.build(:data_rollup,
+      FactoryBot.build(:data_rollup,
                         :with_vm_data,
                         :full_month)
     end
 
     let(:data_view) do
-      FactoryGirl.build(:data_view,
+      FactoryBot.build(:data_view,
                         :data_rollup => event)
     end
 
@@ -105,10 +105,10 @@ RSpec.describe ManageIQ::Showback::DataView, :type => :model do
   end
 
   context '#stored data' do
-    let(:data_view_data) { FactoryGirl.build(:data_view, :with_data_snapshot) }
-    let(:event_for_data_view) { FactoryGirl.create(:data_rollup) }
+    let(:data_view_data) { FactoryBot.build(:data_view, :with_data_snapshot) }
+    let(:event_for_data_view) { FactoryBot.create(:data_rollup) }
     let(:envelope_of_event) do
-      FactoryGirl.create(:envelope,
+      FactoryBot.create(:envelope,
                          :resource => event_for_data_view.resource)
     end
 
@@ -124,7 +124,7 @@ RSpec.describe ManageIQ::Showback::DataView, :type => :model do
         },
         "FLAVOR" => {}
       }
-      data_view1 = FactoryGirl.create(:data_view,
+      data_view1 = FactoryBot.create(:data_view,
                                       :envelope    => envelope_of_event,
                                       :data_rollup => event_for_data_view)
       expect(data_view1.data_snapshot_start).to eq(event_for_data_view.data)
@@ -146,33 +146,33 @@ RSpec.describe ManageIQ::Showback::DataView, :type => :model do
   end
   context '#calculate_cost' do
     let(:cost)           { Money.new(32) }
-    let(:envelope)       { FactoryGirl.create(:envelope) }
-    let!(:plan) { FactoryGirl.create(:price_plan) } # By default is :enterprise
-    let(:plan2)          { FactoryGirl.create(:price_plan) }
+    let(:envelope)       { FactoryBot.create(:envelope) }
+    let!(:plan) { FactoryBot.create(:price_plan) } # By default is :enterprise
+    let(:plan2)          { FactoryBot.create(:price_plan) }
     let(:fixed_rate1)    { Money.new(3) }
     let(:fixed_rate2)    { Money.new(5) }
     let(:variable_rate1) { Money.new(7) }
     let(:variable_rate2) { Money.new(7) }
     let(:rate1) do
-      FactoryGirl.create(:rate,
+      FactoryBot.create(:rate,
                          :CPU_average,
                          :price_plan => plan)
     end
     let(:tier1) { rate1.tiers.first }
     let(:rate2) do
-      FactoryGirl.create(:rate,
+      FactoryBot.create(:rate,
                          :CPU_average,
                          :price_plan => plan2)
     end
     let(:tier2) { rate2.tiers.first }
     let(:event) do
-      FactoryGirl.create(:data_rollup,
+      FactoryBot.create(:data_rollup,
                          :with_vm_data,
                          :full_month)
     end
 
     let(:data_view) do
-      FactoryGirl.create(:data_view,
+      FactoryBot.create(:data_view,
                          :envelope    => envelope,
                          :cost        => cost,
                          :data_rollup => event)

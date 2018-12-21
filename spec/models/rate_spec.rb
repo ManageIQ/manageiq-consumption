@@ -6,14 +6,14 @@ module ManageIQ::Showback
       InputMeasure.seed
     end
     describe 'model validations' do
-      let(:rate) { FactoryGirl.build(:rate) }
+      let(:rate) { FactoryBot.build(:rate) }
 
       it 'has a valid factory' do
         expect(rate).to be_valid
       end
 
       it 'has a tier after create' do
-        sr = FactoryGirl.create(:rate)
+        sr = FactoryBot.create(:rate)
         expect(sr.tiers.count).to eq(1)
       end
 
@@ -97,7 +97,7 @@ module ManageIQ::Showback
     describe 'when the data_rollup lasts for the full month and the rates too' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:rate) { FactoryGirl.create(:rate, :CPU_number) }
+      let(:rate) { FactoryBot.create(:rate, :CPU_number) }
       let(:tier) do
         tier = rate.tiers.first
         tier.fixed_rate    = fixed_rate
@@ -106,7 +106,7 @@ module ManageIQ::Showback
         tier.save
         tier
       end
-      let(:data_rollup_fm) { FactoryGirl.create(:data_rollup, :full_month, :with_vm_data) }
+      let(:data_rollup_fm) { FactoryBot.create(:data_rollup, :full_month, :with_vm_data) }
 
       context 'empty #context, default rate per_time and per_unit' do
         it 'should data_view an data_rollup by occurrence when data_rollup exists' do
@@ -142,7 +142,7 @@ module ManageIQ::Showback
       context 'minimum step' do
         let(:fixed_rate)    { Money.new(11) }
         let(:variable_rate) { Money.new(7) }
-        let(:rate) { FactoryGirl.create(:rate, :MEM_max_mem) }
+        let(:rate) { FactoryBot.create(:rate, :MEM_max_mem) }
         let(:tier) do
           tier = rate.tiers.first
           tier.fixed_rate    = fixed_rate
@@ -151,8 +151,8 @@ module ManageIQ::Showback
           tier.save
           tier
         end
-        let(:data_rollup_fm) { FactoryGirl.create(:data_rollup, :full_month, :with_vm_data) }
-        let(:data_rollup_hm) { FactoryGirl.create(:data_rollup, :first_half_month, :with_vm_data) }
+        let(:data_rollup_fm) { FactoryBot.create(:data_rollup, :full_month, :with_vm_data) }
+        let(:data_rollup_hm) { FactoryBot.create(:data_rollup, :first_half_month, :with_vm_data) }
 
         it 'nil step should behave like no step' do
           data_rollup_fm.reload
@@ -300,8 +300,8 @@ module ManageIQ::Showback
     describe 'more than 1  tier in the rate' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:rate) { FactoryGirl.create(:rate, :CPU_number, :calculation => 'quantity') }
-      let(:data_rollup_hm) { FactoryGirl.create(:data_rollup, :first_half_month, :with_vm_data) }
+      let(:rate) { FactoryBot.create(:rate, :CPU_number, :calculation => 'quantity') }
+      let(:data_rollup_hm) { FactoryBot.create(:data_rollup, :first_half_month, :with_vm_data) }
       let(:tier) do
         tier = rate.tiers.first
         tier.fixed_rate = fixed_rate
@@ -314,7 +314,7 @@ module ManageIQ::Showback
         tier
       end
       let(:tier_second) do
-        FactoryGirl.create(:tier,
+        FactoryBot.create(:tier,
                            :rate                   => rate,
                            :tier_start_value       => 3.0,
                            :tier_end_value         => Float::INFINITY,
@@ -370,8 +370,8 @@ module ManageIQ::Showback
     describe 'data_rollup lasts the first 15 days and the rate is monthly' do
       let(:fixed_rate)    { Money.new(11) }
       let(:variable_rate) { Money.new(7) }
-      let(:rate) { FactoryGirl.create(:rate, :CPU_number) }
-      let(:data_rollup_hm) { FactoryGirl.create(:data_rollup, :first_half_month, :with_vm_data) }
+      let(:rate) { FactoryBot.create(:rate, :CPU_number) }
+      let(:data_rollup_hm) { FactoryBot.create(:data_rollup, :first_half_month, :with_vm_data) }
       let(:proration) { data_rollup_hm.time_span.to_f / data_rollup_hm.month_duration }
       let(:tier) do
         tier = rate.tiers.first

@@ -3,7 +3,7 @@ require 'money-rails/test_helpers'
 
 RSpec.describe ManageIQ::Showback::Tier, :type => :model do
   describe 'model validations' do
-    let(:rate) { FactoryGirl.create(:rate) }
+    let(:rate) { FactoryBot.create(:rate) }
     let(:tier) { rate.tiers.first }
 
     it 'has a valid factory' do
@@ -94,25 +94,25 @@ RSpec.describe ManageIQ::Showback::Tier, :type => :model do
         expect { tier.valid? }.to raise_error(RuntimeError, _("Start value of interval is greater than end value"))
       end
       it '#there is a showbackTier just defined with Float::INFINITY you cant add another in this interval' do
-        st = FactoryGirl.build(:tier, :rate => tier.rate, :tier_start_value => 5, :tier_end_value => 10)
+        st = FactoryBot.build(:tier, :rate => tier.rate, :tier_start_value => 5, :tier_end_value => 10)
         expect { st.valid? }.to raise_error(RuntimeError, _("Interval or subinterval is in a tier with Infinity at the end"))
       end
       it '#there is a showbackTier with Infinity' do
-        st = FactoryGirl.build(:tier, :rate => tier.rate, :tier_start_value => 5, :tier_end_value => Float::INFINITY)
+        st = FactoryBot.build(:tier, :rate => tier.rate, :tier_start_value => 5, :tier_end_value => Float::INFINITY)
         expect { st.valid? }.to raise_error(RuntimeError, _("Interval or subinterval is in a tier with Infinity at the end"))
       end
       it '#there is a showbackTier just defined in this interval' do
         tier.tier_start_value = 2
         tier.tier_end_value = 7
         tier.save
-        st = FactoryGirl.build(:tier, :rate => tier.rate, :tier_start_value => 5, :tier_end_value => 10)
+        st = FactoryBot.build(:tier, :rate => tier.rate, :tier_start_value => 5, :tier_end_value => 10)
         expect { st.valid? }.to raise_error(RuntimeError, _("Interval or subinterval is in another tier"))
       end
     end
   end
 
   describe 'tier methods' do
-    let(:rate) { FactoryGirl.create(:rate) }
+    let(:rate) { FactoryBot.create(:rate) }
     let(:tier) { rate.tiers.first }
     context 'interval methods' do
       it '#range return the range of tier_start_value and tier_end_value' do
