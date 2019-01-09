@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 
 
-## Hammer Beta1 - Released 2018-10-12
+## Hammer-1
 
 ### Added
 - Update i18n catalog for hammer [(#141)](https://github.com/ManageIQ/manageiq-consumption/pull/141)
