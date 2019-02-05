@@ -11,6 +11,16 @@ require 'spec_helper'
 # end
 
 RSpec.describe ManageIQ::Showback::TimeConverterHelper, :type => :helper do
+  let(:time_current) { Time.parse('Mon, 05 Nov 2018 18:39:38 UTC +00:00').utc }
+
+  before do
+    Timecop.travel(time_current)
+  end
+
+  after do
+    Timecop.return
+  end
+
   let(:constants) do
     [described_class::VALID_INTERVAL_UNITS]
   end
