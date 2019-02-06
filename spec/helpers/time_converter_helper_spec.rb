@@ -91,7 +91,8 @@ RSpec.describe ManageIQ::Showback::TimeConverterHelper, :type => :helper do
 
     it 'weekly' do
       interval = 'weekly'
-      results = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 5]
+      results = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 5, 4]
+      time_values.push(28.days)
       expect(results.length).to eq(time_values.length)
       start_t = Time.current.beginning_of_month
       time_values.each_with_index do |x, y|
