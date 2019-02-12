@@ -11,6 +11,16 @@ require 'spec_helper'
 # end
 
 RSpec.describe ManageIQ::Showback::TimeConverterHelper, :type => :helper do
+  let(:time_current) { Time.parse('Mon, 05 Nov 2018 18:39:38 UTC +00:00').utc }
+
+  before do
+    Timecop.travel(time_current)
+  end
+
+  after do
+    Timecop.return
+  end
+
   let(:constants) do
     [described_class::VALID_INTERVAL_UNITS]
   end
@@ -81,7 +91,8 @@ RSpec.describe ManageIQ::Showback::TimeConverterHelper, :type => :helper do
 
     it 'weekly' do
       interval = 'weekly'
-      results = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 5]
+      results = [1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 5, 4]
+      time_values.push(28.days)
       expect(results.length).to eq(time_values.length)
       start_t = Time.current.beginning_of_month
       time_values.each_with_index do |x, y|
