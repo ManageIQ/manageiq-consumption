@@ -2,9 +2,21 @@ require 'spec_helper'
 require 'money-rails/test_helpers'
 module ManageIQ::Showback
   describe Rate do
+    let(:time_current) { Time.parse('Tue, 05 Feb 2019 18:53:19 UTC +00:00').utc }
+
+    before do
+      Timecop.travel(time_current)
+    end
+
     before(:each) do
+      Timecop.travel(time_current)
       InputMeasure.seed
     end
+
+    after do
+      Timecop.return
+    end
+
     describe 'model validations' do
       let(:rate) { FactoryGirl.build(:rate) }
 
