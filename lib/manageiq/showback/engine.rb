@@ -9,6 +9,10 @@ module ManageIQ
       def vmdb_plugin?
         true
       end
+
+      def self.plugin_name
+        _('Showback')
+      end
     end
   end
 end
