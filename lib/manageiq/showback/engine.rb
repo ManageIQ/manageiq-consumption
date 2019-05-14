@@ -6,8 +6,12 @@ module ManageIQ
     class Engine < ::Rails::Engine
       isolate_namespace(ManageIQ::Showback)
 
-      def vmdb_plugin?
+      def self.vmdb_plugin?
         true
+      end
+
+      def self.plugin_name
+        _('Showback')
       end
     end
   end
