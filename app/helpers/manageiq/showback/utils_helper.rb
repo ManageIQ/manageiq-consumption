@@ -6,7 +6,7 @@ module ManageIQ::Showback
       return false if test.nil? || context.nil?
       result = true
       test = {} if test.empty?
-      HashDiff.diff(context, test).each do |x|
+      Hashdiff.diff(context, test).each do |x|
         result = false if x[0] == '+' || x[0] == '~'
       end
       result
