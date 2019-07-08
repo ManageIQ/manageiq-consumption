@@ -9,25 +9,23 @@ exclude_paths:
 - "**.xml"
 - "**.yaml"
 - "**.yml"
-- "config/dictionary_strings.rb"
-- "config/model_attributes.rb"
-- "config/yaml_strings.rb"
-- "db/schema.rb"
-- "db/schema.yml"
-- "db/fixtures/**/*.yml"
-- "db/migrate/20130923182042_collapsed_initial_migration.rb"
-- "locale/"
-- "spec/"
-- "test/"
-- "tmp/"
-- "vendor/assets/"
-- "lib/manageiq/consumption/version.rb"
+- config/dictionary_strings.rb
+- config/model_attributes.rb
+- config/yaml_strings.rb
+- db/schema.rb
+- db/schema.yml
+- db/fixtures/**/*.yml
+- db/migrate/20130923182042_collapsed_initial_migration.rb
+- locale/
+- spec/
+- test/
+- tmp/
+- vendor/assets/
+- lib/manageiq/consumption/version.rb
 engines:
   brakeman:
-    # very slow :sad_panda:
     enabled: false
   bundler-audit:
-    # requires Gemfile.lock
     enabled: false
   csslint:
     enabled: false
@@ -40,19 +38,18 @@ engines:
   eslint:
     enabled: false
   fixme:
-    # let's enable later
     enabled: false
   markdownlint:
-    # let's enable later
     enabled: false
   rubocop:
     enabled: true
-    config: '.rubocop_cc.yml'
+    config: ".rubocop_cc.yml"
+    channel: rubocop-0-69
 prepare:
   fetch:
-  - url: "https://raw.githubusercontent.com/ManageIQ/guides/master/.rubocop_base.yml"
+  - url: https://raw.githubusercontent.com/ManageIQ/guides/master/.rubocop_base.yml
     path: ".rubocop_base.yml"
-  - url: "https://raw.githubusercontent.com/ManageIQ/guides/master/.rubocop_cc_base.yml"
+  - url: https://raw.githubusercontent.com/ManageIQ/guides/master/.rubocop_cc_base.yml
     path: ".rubocop_cc_base.yml"
 ratings:
   paths:
