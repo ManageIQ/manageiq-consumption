@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :data_rollup, :class => ManageIQ::Showback::DataRollup do
     association :resource, :factory => :vm
-    start_time                4.hours.ago
-    end_time                  1.hour.ago
+    start_time                { 4.hours.ago }
+    end_time                  { 1.hour.ago }
     context                   { { } }
     data                      { { } }
 
@@ -35,13 +35,13 @@ FactoryBot.define do
     end
 
     trait :full_month do
-      start_time  DateTime.now.utc.beginning_of_month
-      end_time    DateTime.now.utc.end_of_month
+      start_time  { DateTime.now.utc.beginning_of_month }
+      end_time    { DateTime.now.utc.end_of_month }
     end
 
     trait :first_half_month do
-      start_time     DateTime.now.utc.beginning_of_month
-      end_time       DateTime.now.utc.change(:day => 15).end_of_day
+      start_time     { DateTime.now.utc.beginning_of_month }
+      end_time       { DateTime.now.utc.change(:day => 15).end_of_day }
     end
   end
 end
