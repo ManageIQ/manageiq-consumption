@@ -168,7 +168,7 @@ module ManageIQ::Showback
     def assign_by_tag
       return unless context.key?("tag")
       context["tag"].each do |entity, array_children|
-        t = Tag.find_by_classification_name(entity)
+        t = Tag.lookup_by_classification_name(entity)
         find_envelope(t)&.add_data_rollup(self)
         array_children.each do |child_entity|
           tag_child = t.classification.children.detect { |c| c.name == child_entity }
