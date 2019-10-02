@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :data_view, :class => ManageIQ::Showback::DataView do
     envelope
     data_rollup
-    cost 0
+    cost { 0 }
     data_snapshot { { } }
     context_snapshot { { } }
 
