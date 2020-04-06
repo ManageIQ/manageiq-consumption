@@ -16,7 +16,6 @@ module ManageIQ::Showback
     validates :group, :presence => true
     default_value_for :group, ''
 
-    serialize :screener, JSON # Implement data column as a JSON
     default_value_for :screener, { }
 
     # Variable uses_single_tier to indicate if the rate only apply in the tier where the value is included
