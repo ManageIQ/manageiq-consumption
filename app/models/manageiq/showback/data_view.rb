@@ -12,9 +12,6 @@ module ManageIQ::Showback
     validates :envelope,    :presence => true, :allow_nil => false
     validates :data_rollup, :presence => true, :allow_nil => false
 
-    serialize :cost, JSON # Implement cost column as a JSON
-    serialize :data_snapshot, JSON # Implement data_snapshot column as a JSON
-    serialize :context_snapshot, JSON # Implement context_snapshot column as a JSON
     before_create :snapshot_data_rollup
     default_value_for :data_snapshot, {}
     default_value_for :context_snapshot, {}
