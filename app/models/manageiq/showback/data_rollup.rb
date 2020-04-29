@@ -15,10 +15,7 @@ module ManageIQ::Showback
     validate :start_time_before_end_time
     validates :resource, :presence => true
 
-    serialize :data, JSON # Implement data column as a JSON
     default_value_for :data, {}
-
-    serialize :context, JSON
     default_value_for :context, {}
 
     after_create :generate_data
