@@ -1,6 +1,6 @@
 # ManageIQ-consumption
 [![Gem Version](https://badge.fury.io/rb/manageiq-consumption.svg)](https://badge.fury.io/rb/manageiq-consumption)
-[![Build Status](https://travis-ci.org/ManageIQ/manageiq-consumption.svg?branch=master)](https://travis-ci.org/ManageIQ/manageiq-consumption)
+[![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=master)](https://travis-ci.com/ManageIQ/manageiq-consumption)
 [![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=master)
 [![Dependency Status](https://gemnasium.com/badges/github.com/ManageIQ/manageiq-consumption.svg)](https://gemnasium.com/github.com/ManageIQ/manageiq-consumption)
 
