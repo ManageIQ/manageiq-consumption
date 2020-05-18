@@ -1,6 +1,8 @@
 # ManageIQ-consumption
 [![Gem Version](https://badge.fury.io/rb/manageiq-consumption.svg)](https://badge.fury.io/rb/manageiq-consumption)
 [![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=master)](https://travis-ci.com/ManageIQ/manageiq-consumption)
+[![Maintainability](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/test_coverage)
 [![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=master)
 
 [![Gitter](https://badges.gitter.im/ManageIQ/manageiq/chargeback.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
