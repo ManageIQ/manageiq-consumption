@@ -1,16 +1,13 @@
-# ManageIQ-consumption
-[![Gem Version](https://badge.fury.io/rb/manageiq-consumption.svg)](https://badge.fury.io/rb/manageiq-consumption)
+# ManageIQ::Consumption
+
 [![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=master)](https://travis-ci.com/ManageIQ/manageiq-consumption)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/test_coverage)
-[![Coverage Status](https://coveralls.io/repos/github/ManageIQ/manageiq-consumption/badge.svg?branch=master)](https://coveralls.io/github/ManageIQ/manageiq-consumption?branch=master)
+[![Security](https://hakiri.io/github/ManageIQ/manageiq-consumption/master.svg)](https://hakiri.io/github/ManageIQ/manageiq-consumption/master)
 
-[![Gitter](https://badges.gitter.im/ManageIQ/manageiq/chargeback.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-
-[![Build history for master branch](https://buildstats.info/travisci/chart/ManageIQ/manageiq-consumption?branch=master&buildCount=50)](https://travis-ci.org/ManageIQ/manageiq-consumption/branches)
-
-ManageIQ Gem plugin for the Consumption.
+Consumption plugin for ManageIQ.
 
 ## Introduction
 Manageiq-consumption is a gem replacement for chargeback/showback on manageiq.
@@ -37,6 +34,13 @@ Pivotal tracker:
 Github issues:
 [https://github.com/ManageIQ/manageiq-consumption/issues](https://github.com/ManageIQ/manageiq-consumption/issues)
 
+#### Development Phases
+
+Development has been divided in phases:
+
+- Phase 1 (current): We use the old reporting data that is fed into the new chargeback. Old chargeback rating can be deleted. Price plans are migrated into the new chargeback. It should have functional parity with the old chargeback.
+- Phase 2: Reporting is changed into the new showback_event mechanism, to increase the flexibility and speed of the system
+- Phase 3: Extend it into a financial management system
 
 ## Demo documentation
 
@@ -46,34 +50,17 @@ Go to [demo section](/docs/demo/README.md)
 
 ## Development
 
-See the section on pluggable providers in the [ManageIQ Developer Setup](http://manageiq.org/docs/guides/developer_setup)
+See the section on plugins in the [ManageIQ Developer Setup](http://manageiq.org/docs/guides/developer_setup/plugins)
 
-Manageiq-consumption is not a provider, so we have adapted the development to create a gem that can be installed.
-
-Development has been divided in phases:
-
-- Phase 1 (current): We use the old reporting data that is fed into the new chargeback. Old chargeback rating can be deleted. Price plans are migrated into the new chargeback. It should have functional parity with the old chargeback.
-- Phase 2: Reporting is changed into the new showback_event mechanism, to increase the flexibility and speed of the system
-- Phase 3: Extend it into a financial management system
-
-# Configuration
-
-1. `cd manageiq`
-1. `mkdir plugins`
-1. `git clone git@github.com:ManageIQ/manageiq-consumption.git plugins/manageiq-consumption`
-1. `echo "gem 'manageiq-consumption', :path => File.expand_path('../plugins/manageiq-consumption', __dir__)
-" >> bundler.d/manageiq-consumption.rb`
-1. `bin/update`
-
+For quick local setup run `bin/setup`, which will clone the core ManageIQ repository under the *spec* directory and setup necessary config files. If you have already cloned it, you can run `bin/update` to bring the core ManageIQ code up to date.
 
 ## License
 
 The gem is available as open source under the terms of the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
 ## Contributing
-**Contributions are welcomed and appreciated**
 
-1. Fork the repo. Make sure that you can run the tests (`bundle exec rspec`)
+1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)

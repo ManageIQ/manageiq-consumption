@@ -2,30 +2,16 @@
 /.yardoc
 /Gemfile.lock
 /_yardoc/
+/coverage/
 /doc/
 /pkg/
-/spec/reports
-/spec/manageiq
-
-
-# Ignore all logfiles and tempfiles.
-/log/*
+/spec/reports/
 /tmp/
-!/log/.keep
-!/tmp/.keep
 
-# rspec failure tracking
-.rspec_status
-
-# Ignore Byebug command history file.
-.byebug_history
-
-# Ignore coverage files
-coverage/
-
-# Ignore other configuration for IDE
-/.vscode/
-/.idea/
-/.rubocop-https---raw-githubusercontent-com-ManageIQ-guides-master--rubocop-base-yml
-/bundler.d/
-.ruby-version
+.rubocop-*
+/bundler.d/*
+!/bundler.d/.keep
+/config/settings.local.yml
+/config/settings/*.local.yml
+/config/environments/*.local.yml
+/spec/manageiq
