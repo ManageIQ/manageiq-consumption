@@ -1,18 +1,12 @@
-source 'https://rubygems.org'
-
+# Declare your gem's dependencies in manageiq-consumption.gemspec.
+# Bundler will treat runtime dependencies like base dependencies, and
+# development dependencies will be added by default to the :development group.
 gemspec
 
-# Load Gemfile with dependencies from manageiq
-manageiq_gemfile = File.expand_path("spec/manageiq/Gemfile", __dir__)
-if File.exist?(manageiq_gemfile)
-  eval_gemfile(manageiq_gemfile)
-else
-  puts "ERROR: The ManageIQ application must be present in spec/manageiq."
-  puts "  Clone it from GitHub or symlink it from local source."
-  exit 1
-end
+# Declare any dependencies that are still in development here instead of in
+# your gemspec. These might include edge Rails or gems from your path or
+# Git. Remember to move these dependencies to your gemspec before releasing
+# your gem to rubygems.org.
 
-group :development, :test do
-  # Load other additional Gemfiles
-  Dir.glob(File.join(__dir__, 'bundler.d/*.rb')).each { |f| eval_gemfile(File.expand_path(f, __dir__)) }
-end
+# Load Gemfile with dependencies from manageiq
+eval_gemfile(File.expand_path("spec/manageiq/Gemfile", __dir__))

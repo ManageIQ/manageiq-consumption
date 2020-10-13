@@ -3,4 +3,7 @@ if ENV['CI']
   SimpleCov.start
 end
 
-FactoryBot.definition_file_paths << ManageIQ::Showback::Engine.root.join('spec', 'factories')
+Dir[Rails.root.join("spec/shared/**/*.rb")].each { |f| require f }
+Dir[File.join(__dir__, "support/**/*.rb")].each { |f| require f }
+
+require "manageiq-consumption"
