@@ -33,7 +33,7 @@ MoneyRails.configure do |config|
                             null: false,             # other options will be treated as column options
                             default: 0
                           }
-  
+
   config.currency_column = { prefix: '',
                              postfix: '_currency',
                              column_name: nil,
@@ -88,7 +88,7 @@ MoneyRails.configure do |config|
   #
   # set to BigDecimal::ROUND_HALF_EVEN by default
   #
-  # config.rounding_mode = BigDecimal::ROUND_HALF_UP
+  config.rounding_mode = BigDecimal::ROUND_HALF_EVEN
 
   # Set default money format globally.
   # Default value is nil meaning "ignore this option".
