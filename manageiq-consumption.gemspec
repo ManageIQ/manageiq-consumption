@@ -21,5 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "money-rails", "~> 1.9"
   spec.add_dependency "hashdiff", "~> 1.0"
 
+  spec.add_development_dependency "manageiq-style"
   spec.add_development_dependency "simplecov"
 end
