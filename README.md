@@ -1,9 +1,9 @@
 # ManageIQ::Consumption
 
-[![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=lasker)](https://travis-ci.com/ManageIQ/manageiq-consumption)
+[![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=morphy)](https://travis-ci.com/ManageIQ/manageiq-consumption)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/test_coverage)
-[![Security](https://hakiri.io/github/ManageIQ/manageiq-consumption/lasker.svg)](https://hakiri.io/github/ManageIQ/manageiq-consumption/lasker)
+[![Security](https://hakiri.io/github/ManageIQ/manageiq-consumption/morphy.svg)](https://hakiri.io/github/ManageIQ/manageiq-consumption/morphy)
 
 [![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
