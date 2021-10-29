@@ -1,6 +1,6 @@
 # ManageIQ::Consumption
 
-[![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=master)](https://travis-ci.com/ManageIQ/manageiq-consumption)
+[![Build Status](https://travis-ci.com/ManageIQ/manageiq-consumption.svg?branch=master)](https://travis-ci.com/github/ManageIQ/manageiq-consumption)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/test_coverage)
 [![Security](https://hakiri.io/github/ManageIQ/manageiq-consumption/master.svg)](https://hakiri.io/github/ManageIQ/manageiq-consumption/master)
