@@ -31,7 +31,7 @@ describe ManageIQ::Showback::DataRollup::CPU do
 
     it "Calculate CPU average" do
       data_rollup.instance_variable_set(:@metrics, data_rollup.resource.metrics)
-      expect(data_rollup.CPU_average(50)).to eq(41.42857142857145)
+      expect(data_rollup.CPU_average(50)).to be_within(0.0001).of(41.4286)
     end
 
     it "Calculate CPU average with no metrics" do
