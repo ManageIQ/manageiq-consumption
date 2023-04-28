@@ -22,7 +22,7 @@ module ManageIQ::Showback
 
     extend ActiveSupport::Concern
 
-    Dir.glob(Pathname.new(File.dirname(__dir__)).join("showback/data_rollup/*")).each { |lib| include_concern lib.split("showback/data_rollup/")[1].split(".rb")[0].upcase }
+    Dir.glob(Pathname.new(File.dirname(__dir__)).join("showback/data_rollup/*")).each { |lib| include_concern lib.split("showback/data_rollup/")[1].split(".rb")[0].capitalize }
 
     self.table_name = 'showback_data_rollups'
 
