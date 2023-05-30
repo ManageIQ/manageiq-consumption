@@ -1,4 +1,4 @@
-describe ManageIQ::Showback::DataRollup::FLAVOR do
+describe ManageIQ::Showback::DataRollup::Flavor do
   let(:data_rollup) { FactoryBot.build(:data_rollup) }
   context "FLAVOR in vm" do
     before(:each) do

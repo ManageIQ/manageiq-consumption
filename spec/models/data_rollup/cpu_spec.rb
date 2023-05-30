@@ -1,4 +1,4 @@
-describe ManageIQ::Showback::DataRollup::CPU do
+describe ManageIQ::Showback::DataRollup::Cpu do
   let(:data_rollup) { FactoryBot.build(:data_rollup) }
   let(:con_data_rollup) { FactoryBot.build(:data_rollup) }
   context "CPU in vm" do

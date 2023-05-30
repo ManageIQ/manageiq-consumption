@@ -1,4 +1,4 @@
-describe ManageIQ::Showback::DataRollup::MEM do
+describe ManageIQ::Showback::DataRollup::Mem do
   let(:data_rollup) { FactoryBot.build(:data_rollup) }
   let(:con_data_rollup) { FactoryBot.build(:data_rollup) }
   context "memory in vm" do

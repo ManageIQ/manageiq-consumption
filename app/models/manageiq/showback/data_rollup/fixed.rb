@@ -1,4 +1,4 @@
-module ManageIQ::Showback::DataRollup::FIXED
+module ManageIQ::Showback::DataRollup::Fixed
   def fixed_fixed_compute_1
   end
 
