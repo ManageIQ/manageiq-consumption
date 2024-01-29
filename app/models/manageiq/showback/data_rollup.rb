@@ -21,8 +21,14 @@ module ManageIQ::Showback
     after_create :generate_data
 
     extend ActiveSupport::Concern
-
-    Dir.glob(Pathname.new(File.dirname(__dir__)).join("showback/data_rollup/*")).each { |lib| include_concern lib.split("showback/data_rollup/")[1].split(".rb")[0].capitalize }
+    include Cpu
+    include Disk
+    include Fixed
+    include Flavor
+    include Mem
+    include Metering
+    include Net
+    include Storage
 
     self.table_name = 'showback_data_rollups'
 
