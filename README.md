@@ -1,12 +1,12 @@
 # ManageIQ::Consumption
 
-[![CI](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml/badge.svg)](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml)
+[![CI](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml/badge.svg?branch=radjabov)](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/test_coverage)
 
 [![Chat](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ManageIQ/manageiq/chargeback?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-[![Build history for master branch](https://buildstats.info/github/chart/ManageIQ/manageiq-consumption?branch=master&buildCount=50&includeBuildsFromPullRequest=false&showstats=false)](https://github.com/ManageIQ/manageiq-consumption/actions?query=branch%3Amaster)
+[![Build history for radjabov branch](https://buildstats.info/github/chart/ManageIQ/manageiq-consumption?branch=radjabov&buildCount=50&includeBuildsFromPullRequest=false&showstats=false)](https://github.com/ManageIQ/manageiq-consumption/actions?query=branch%3Amaster)
 
 Consumption plugin for ManageIQ.
 
