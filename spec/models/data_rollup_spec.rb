@@ -223,7 +223,7 @@ describe ManageIQ::Showback::DataRollup do
           }
         }
         expect(data_rollup.start_time.month).to eq(data_rollup.end_time.month)
-        expect(data_rollup.get_group('CPU', 'average')).to eq([data_rollup.resource.metrics.for_time_range(data_rollup.start_time, data_rollup.end_time).average(:cpu_usage_rate_average).to_s, "percent"])
+        expect(data_rollup.get_group('CPU', 'average')).to eq([data_rollup.resource.metrics.for_time_range(data_rollup.start_time, data_rollup.end_time).average(:cpu_usage_rate_average), "percent"])
       end
 
       it 'return nil if field is not found' do
