@@ -2,7 +2,7 @@ module ManageIQ::Showback
   class InputMeasure < ApplicationRecord
     validates :description, :entity, :group, :fields, :presence => true
 
-    serialize :fields, Array
+    serialize :fields, :type => Array
 
     self.table_name = "showback_input_measures"
 
