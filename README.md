@@ -1,6 +1,6 @@
 # ManageIQ::Consumption
 
-[![CI](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml/badge.svg)](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml)
+[![CI](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/ManageIQ/manageiq-consumption/actions/workflows/ci.yaml)
 [![Maintainability](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/maintainability)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/7ddcfc7e53574d375f43/test_coverage)](https://codeclimate.com/github/ManageIQ/manageiq-consumption/test_coverage)
 
