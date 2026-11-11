@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "money-rails", "~> 1.9"
+  spec.add_dependency "money-rails", "~> 3.0"
   spec.add_dependency "hashdiff", "~> 1.0"
 
   spec.add_development_dependency "manageiq-style"
